@@ -1,0 +1,34 @@
+{
+  "id": "/detskie-trenazhery/",
+  "name": "Наши тренажёры",
+  "short_name": "Тренажёры",
+  "description": "Математика с кубиками и деталями конструктора, русский язык для детей.",
+  "lang": "ru",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#faf8f2",
+  "theme_color": "#367d71",
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "./icons/trainers-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/trainers-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/trainers-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

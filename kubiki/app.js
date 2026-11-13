@@ -92,7 +92,7 @@ async function download(){
  button.disabled=true;
  try{
   const files=await Promise.all(['style.css','course.js','engine.js','voice-manifest.js','recorded-voice.js','app.js'].map(f=>fetch(f,{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('fetch');return r.text();})));
-  const head=document.head.innerHTML.replace(/<link rel="stylesheet" href="style\.css(?:\?[^"]*)?">/,()=>`<style>${files[0]}</style>`);
+  const head=document.head.innerHTML.replace(/<(?:link|meta)\b(?=[^>]*\bdata-pwa\b)[^>]*>/gi,'').replace(/<link rel="stylesheet" href="style\.css(?:\?[^"]*)?">/,()=>`<style>${files[0]}</style>`);
   const scripts='<script>window.VOICE_BASE_URL='+JSON.stringify(new URL('./',location.href).href)+';</script>'+files.slice(1).map(s=>'<script>'+s.replace(/<\/script/gi,'<\\/script')+'</script>').join('');
   const html='<!doctype html><html lang="ru"><head>'+head+'</head><body><div id="app"></div><div id="live" class="sr-only" aria-live="polite"></div><div id="overlay"></div>'+scripts+'</body></html>';
   const blob=new Blob([html],{type:'text/html;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='matematika-v-kubikah.html';a.click();setTimeout(()=>URL.revokeObjectURL(url),5000);button.textContent='Скачано — задания офлайн, озвучка через интернет';
