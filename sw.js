@@ -4,7 +4,7 @@
  */
 'use strict';
 
-const VERSION = 'v1';
+const VERSION = 'v2';
 const ROOT = new URL('./', self.location.href);
 const CACHE_PREFIX = 'trainers:' + ROOT.pathname + ':core:';
 const CACHE_NAME = CACHE_PREFIX + VERSION;
@@ -12,8 +12,7 @@ const CORE = [
   './',
   'index.html',
   'manifest.webmanifest',
-  'pwa.css?v=pwa1',
-  'pwa.js?v=pwa1',
+  'pwa.js?v=pwa2',
   'icons/trainers-180.png',
   'icons/trainers-192.png',
   'icons/trainers-512.png',
