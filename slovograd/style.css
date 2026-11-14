@@ -98,3 +98,13 @@
  .course-end .action-row{align-items:stretch}
  .course-end .action-row>.btn{width:100%}
 }
+
+/* Return to the shared game catalog without covering the lesson. */
+.topbar-location{display:flex;align-items:center;gap:16px;min-width:0;flex:1}
+.hub-link{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px;padding:9px 12px;border:1px solid #d7e4d8;border-radius:11px;background:#f2f7ee;color:#3c6d58;font-size:12px;font-weight:750;line-height:1.4;text-decoration:none;white-space:nowrap;flex-shrink:0}
+.hub-link svg{width:18px;height:18px;flex-shrink:0}
+.hub-link:hover{background:#e8f2e4;border-color:#b8d1bb;color:#2d5f49}
+.hub-link:focus-visible{outline:3px solid #75a58c;outline-offset:3px}
+.topbar-location>.breadcrumb{min-width:0;flex-wrap:wrap;gap:4px 8px}
+@media(max-width:760px){.topbar{padding-top:9px;padding-bottom:9px}.topbar-location{flex-direction:column;align-items:flex-start;gap:4px}.topbar-location>.breadcrumb{font-size:10px;line-height:1.5}.topbar-location>.breadcrumb strong{max-width:145px}.hub-link{padding-left:10px;padding-right:10px}}
+@media(max-width:420px){.topbar-location>.breadcrumb{font-size:9px;gap:2px 4px}.topbar-location>.breadcrumb strong{max-width:110px}.hub-link{font-size:11px;gap:5px;padding-left:8px;padding-right:8px}}

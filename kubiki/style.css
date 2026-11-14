@@ -23,3 +23,14 @@
 .modal-backdrop,.confetti{top:0;right:0;bottom:0;left:0}
 .modal{width:540px;max-width:100%}
 @media(max-width:900px){.sidebar{top:0;right:auto;bottom:auto;left:0}}
+
+/* Return to the game catalog within the header, without covering the lesson. */
+.topbar{height:auto;min-height:87px;padding-top:13px;padding-bottom:13px;gap:12px;flex-wrap:wrap}
+.topbar-context{display:flex;align-items:center;flex-wrap:wrap;gap:6px 16px;min-width:0;flex:1 1 230px}
+.hub-link{display:inline-flex;align-items:center;justify-content:center;gap:5px;min-height:44px;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--teal);text-decoration:none;white-space:nowrap;font-size:12px;font-weight:750;flex-shrink:0;touch-action:manipulation}
+.hub-link:hover{background:var(--teal-soft);border-color:#bdd3c5}
+.hub-link svg{width:17px;height:17px;flex-shrink:0}
+.topbar-context .breadcrumb{min-width:0;flex-wrap:wrap;gap:6px 10px}
+.topbar .top-actions{margin-left:auto;flex-shrink:0}
+@media(max-width:900px){.topbar{min-height:66px}}
+@media(max-width:600px){.topbar{min-height:59px;padding-top:10px;padding-bottom:10px;gap:8px}.topbar-context{flex:1 1 125px;gap:3px 10px}.hub-link{padding:8px 10px;font-size:11px}.topbar-context .breadcrumb{gap:3px 6px;font-size:9px}}
