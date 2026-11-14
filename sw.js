@@ -4,7 +4,7 @@
  */
 'use strict';
 
-const VERSION = 'v4';
+const VERSION = 'v5';
 const ROOT = new URL('./', self.location.href);
 const CACHE_PREFIX = 'trainers:' + ROOT.pathname + ':core:';
 const CACHE_NAME = CACHE_PREFIX + VERSION;
@@ -20,12 +20,12 @@ const CORE = [
   'kubiki/',
   'kubiki/index.html',
   'kubiki/manifest.webmanifest',
-  'kubiki/style.css?v=resume1',
+  'kubiki/style.css?v=modes1',
   'kubiki/course.js?v=pwa1',
   'kubiki/engine.js?v=pwa1',
   'kubiki/voice-manifest.js?v=pwa1',
   'kubiki/recorded-voice.js?v=pwa1',
-  'kubiki/app.js?v=resume1',
+  'kubiki/app.js?v=modes1',
   'icons/kubiki-180.png',
   'icons/kubiki-192.png',
   'icons/kubiki-512.png',
@@ -33,13 +33,13 @@ const CORE = [
   'bricks/',
   'bricks/index.html',
   'bricks/manifest.webmanifest',
-  'bricks/style.css?v=resume1',
+  'bricks/style.css?v=modes1',
   'bricks/bricks.css?v=pwa1',
   'bricks/course.js?v=pwa1',
   'bricks/engine.js?v=pwa1',
   'bricks/voice-manifest.js?v=pwa1',
   'bricks/recorded-voice.js?v=pwa1',
-  'bricks/app.js?v=resume1',
+  'bricks/app.js?v=modes1',
   'icons/bricks-180.png',
   'icons/bricks-192.png',
   'icons/bricks-512.png',
