@@ -4,7 +4,7 @@
  */
 'use strict';
 
-const VERSION = 'v3';
+const VERSION = 'v4';
 const ROOT = new URL('./', self.location.href);
 const CACHE_PREFIX = 'trainers:' + ROOT.pathname + ':core:';
 const CACHE_NAME = CACHE_PREFIX + VERSION;
@@ -20,12 +20,12 @@ const CORE = [
   'kubiki/',
   'kubiki/index.html',
   'kubiki/manifest.webmanifest',
-  'kubiki/style.css?v=nav1',
+  'kubiki/style.css?v=resume1',
   'kubiki/course.js?v=pwa1',
   'kubiki/engine.js?v=pwa1',
   'kubiki/voice-manifest.js?v=pwa1',
   'kubiki/recorded-voice.js?v=pwa1',
-  'kubiki/app.js?v=nav1',
+  'kubiki/app.js?v=resume1',
   'icons/kubiki-180.png',
   'icons/kubiki-192.png',
   'icons/kubiki-512.png',
@@ -33,13 +33,13 @@ const CORE = [
   'bricks/',
   'bricks/index.html',
   'bricks/manifest.webmanifest',
-  'bricks/style.css?v=nav1',
+  'bricks/style.css?v=resume1',
   'bricks/bricks.css?v=pwa1',
   'bricks/course.js?v=pwa1',
   'bricks/engine.js?v=pwa1',
   'bricks/voice-manifest.js?v=pwa1',
   'bricks/recorded-voice.js?v=pwa1',
-  'bricks/app.js?v=nav1',
+  'bricks/app.js?v=resume1',
   'icons/bricks-180.png',
   'icons/bricks-192.png',
   'icons/bricks-512.png',
@@ -47,7 +47,7 @@ const CORE = [
   'slovograd/',
   'slovograd/index.html',
   'slovograd/manifest.webmanifest',
-  'slovograd/style.css?v=nav1',
+  'slovograd/style.css?v=resume1',
   'slovograd/lessons.css?v=pwa1',
   'slovograd/words.js?v=pwa1',
   'slovograd/sentences.js?v=pwa1',
@@ -58,7 +58,7 @@ const CORE = [
   'slovograd/recorded-voice.js?v=pwa1',
   'slovograd/voice.js?v=pwa1',
   'slovograd/lessons.js?v=pwa1',
-  'slovograd/app.js?v=nav1',
+  'slovograd/app.js?v=resume1',
   'icons/slovograd-180.png',
   'icons/slovograd-192.png',
   'icons/slovograd-512.png',
