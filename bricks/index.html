@@ -1,18 +1,34 @@
 <!doctype html>
-<html lang="ru">
-<head>
+<html lang="ru"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#287ac8"><meta name="description" content="Считаем точки на деталях конструктора: соединяй детали, собирай десятки и разбирай числа. 36 уроков и 648 заданий для 2 класса.">
 <title>Детальки — математика с конструктором</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='5' y='20' width='54' height='34' rx='8' fill='%23ef705c'/%3E%3Cellipse cx='20' cy='20' rx='8' ry='5' fill='%23faad9b' stroke='%23d95447' stroke-width='2'/%3E%3Cellipse cx='44' cy='20' rx='8' ry='5' fill='%23faad9b' stroke='%23d95447' stroke-width='2'/%3E%3C/svg%3E">
-<link rel="stylesheet" href="style.css?v=modes1">
-<link rel="stylesheet" href="bricks.css?v=pwa1">
+
+
 <link data-pwa rel="manifest" href="manifest.webmanifest">
 <link data-pwa rel="apple-touch-icon" sizes="180x180" href="../icons/bricks-180.png">
 <meta data-pwa name="mobile-web-app-capable" content="yes">
 <meta data-pwa name="apple-mobile-web-app-capable" content="yes">
 <meta data-pwa name="apple-mobile-web-app-title" content="Детальки">
 <meta data-pwa name="apple-mobile-web-app-status-bar-style" content="default">
-</head><body><div id="app"></div><div id="live" class="sr-only" aria-live="polite"></div><div id="overlay"></div>
-<script src="course.js?v=pwa1"></script><script src="engine.js?v=pwa1"></script><script src="voice-manifest.js?v=pwa1"></script><script src="recorded-voice.js?v=pwa1"></script><script src="app.js?v=modes1"></script>
-<script data-pwa src="../pwa.js?v=pwa2" defer></script></body></html>
+
+<meta name="trainer-build" content="stage1-08cb8dae8709"></head><body><div id="app"></div><div id="live" class="sr-only" aria-live="polite"></div><div id="overlay"></div><script type="application/json" data-trainer-assets>{"schemaVersion":1,"trainer":"bricks","build":"stage1-08cb8dae8709","styles":[{"path":"bricks/style.css","href":"style.css?v=s1-4fa6abdcbb72","hash":"4fa6abdcbb72e446c2083c254ee5eb41cff4d42e7b5ff546af274981ddcc1265","checksum":2323357330},{"path":"bricks/bricks.css","href":"bricks.css?v=s1-465fa53a5f12","hash":"465fa53a5f12f63f476b4145668a6038c447e8beb1a9758158154aa3154ef4f1","checksum":3630227626},{"path":"place-value.css","href":"../place-value.css?v=s1-6ab4b3290d60","hash":"6ab4b3290d6074db9cf114184b7b57ce9cb0193eba2b8847af11889b2e321b55","checksum":2653633302},{"path":"place-value-activities.css","href":"../place-value-activities.css?v=s1-e1e9e551c71f","hash":"e1e9e551c71fd8ec7fa00bc9661209c71365e0226a69f926663bfd688ecb2e54","checksum":1686569150}],"scripts":[{"path":"math-range.js","href":"../math-range.js?v=s1-d28d7a297b9a","hash":"d28d7a297b9adffddc5f2a690c051ecbab839556616fa3a16fa946a99ee04efb","checksum":3538749163},{"path":"learning-progress.js","href":"../learning-progress.js?v=s1-b6ebfd2bf2d3","hash":"b6ebfd2bf2d3ad47fa035c5aaba36318ed0aed294f31f4c088466ba54b3d6e12","checksum":2782824135},{"path":"bricks/course.js","href":"course.js?v=s1-3159849bc65c","hash":"3159849bc65cd51403c01e143d3638c852b34e96ea1a8658dfba006edb468c47","checksum":290431123},{"path":"bricks/engine.js","href":"engine.js?v=s1-de16802683f0","hash":"de16802683f061ac0076dab1c85dc3fb2085e880eeb1a309bc4055e496d54a03","checksum":2608700204},{"path":"bricks/voice-manifest.js","href":"voice-manifest.js?v=s1-247916d9cd8c","hash":"247916d9cd8caa55278687b3ce2db5f84b194c5ef6ba85b34559a47ef368a132","checksum":2335623776},{"path":"bricks/recorded-voice.js","href":"recorded-voice.js?v=s1-cd5f60cad10d","hash":"cd5f60cad10d60f99041903ded23afda10c36a36df055343382047152af94173","checksum":2351575960},{"path":"place-value.js","href":"../place-value.js?v=s1-8e9b59c8d08e","hash":"8e9b59c8d08e9e655522883861e0842553b3c7dba24ff39b6e5c560dcb039b53","checksum":1446454350},{"path":"place-value-motion.js","href":"../place-value-motion.js?v=s1-07576297e173","hash":"07576297e173d83c53f2e569e5abb06f2c89a396260a15f576a02e70aa549113","checksum":2345316646},{"path":"place-value-activities.js","href":"../place-value-activities.js?v=s1-b302ff223496","hash":"b302ff223496f1921773caf74537a7db685f9ec797ce5b321f6145c375cf0441","checksum":3365926627},{"path":"offline-bundle.js","href":"../offline-bundle.js?v=s1-2021a0866611","hash":"2021a08666119ff985cdd62ab2ef8df17bc845f7301f3fd95bb7b133701b6666","checksum":2784760937},{"path":"bricks/app.js","href":"app.js?v=s1-b81f22ff9c0b","hash":"b81f22ff9c0bb0f71ca130f6a7742b04184ad49e17ded3ea7ab509530f2b4a3f","checksum":1299056325}]}</script><script data-trainer-bootstrap>(function(){
+'use strict';
+var doc=document,node=doc.querySelector('script[data-trainer-assets]');
+if(!node)return;
+var manifest=JSON.parse(node.textContent),base=new URL('./',location.href);
+function cached(url){return window.caches?caches.match(url).then(function(r){if(r&&r.ok)return r;throw Error('missing-cache');}):Promise.reject(Error('no-cache'));}
+function checksum(text){var h=2166136261;for(var i=0;i<text.length;i++)h=Math.imul(h^text.charCodeAt(i),16777619);return h>>>0;}
+function verified(response,item){if(!response||!response.ok)throw Error('resource');return response.text().then(function(text){if(checksum(text)!==item.checksum)throw Error('different-build');if(window.crypto&&crypto.subtle&&window.TextEncoder)return crypto.subtle.digest('SHA-256',new TextEncoder().encode(text)).then(function(hash){var hex=Array.from(new Uint8Array(hash)).map(function(n){return n.toString(16).padStart(2,'0');}).join('');if(hex!==item.hash)throw Error('different-build');return text;});return text;});}
+function content(item){var url=new URL(item.href,base).href;return fetch(url,{cache:'no-store'}).then(function(r){return verified(r,item);}).catch(function(){return cached(url).then(function(r){return verified(r,item);});});}
+function script(source){return new Promise(function(resolve,reject){var el=doc.createElement('script'),url=URL.createObjectURL(new Blob([source],{type:'text/javascript'}));el.onload=function(){URL.revokeObjectURL(url);el.remove();resolve();};el.onerror=function(){URL.revokeObjectURL(url);el.remove();reject(Error('script'));};el.src=url;doc.body.appendChild(el);});}
+var chain=Promise.resolve();
+manifest.styles.forEach(function(item){chain=chain.then(function(){return content(item);}).then(function(text){var el=doc.createElement('style');el.dataset.trainerStyle=item.path;el.textContent=text;doc.head.appendChild(el);});});
+// Load source bytes before running any app. A missing dependency never permits a
+// partial app to overwrite saved data. Prepared caches cover pending SW updates.
+var sources=[];
+manifest.scripts.forEach(function(item){chain=chain.then(function(){return content(item);}).then(function(text){sources.push(text);});});
+chain.then(function(){var run=Promise.resolve();sources.forEach(function(text){run=run.then(function(){return script(text);});});return run;}).catch(function(){var app=doc.getElementById('app');if(app)app.innerHTML='<main style="max-width:36em;margin:12vh auto;padding:24px;font:18px/1.6 sans-serif"><h1>Завершим обновление</h1><p>Подключись к интернету и открой тренажёр ещё раз. Сохранённые результаты останутся на устройстве.</p><a href="../">Все игры</a></main>';});
+})();
+</script><script data-pwa src="../pwa.js?v=pwa2" defer></script></body></html>

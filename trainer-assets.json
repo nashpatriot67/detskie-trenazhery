@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "trainers": {
+    "kubiki": {
+      "styles": ["kubiki/style.css", "place-value.css", "place-value-activities.css"],
+      "scripts": ["math-range.js", "learning-progress.js", "kubiki/course.js", "kubiki/engine.js", "kubiki/voice-manifest.js", "kubiki/recorded-voice.js", "place-value.js", "place-value-motion.js", "place-value-activities.js", "offline-bundle.js", "kubiki/app.js"]
+    },
+    "bricks": {
+      "styles": ["bricks/style.css", "bricks/bricks.css", "place-value.css", "place-value-activities.css"],
+      "scripts": ["math-range.js", "learning-progress.js", "bricks/course.js", "bricks/engine.js", "bricks/voice-manifest.js", "bricks/recorded-voice.js", "place-value.js", "place-value-motion.js", "place-value-activities.js", "offline-bundle.js", "bricks/app.js"]
+    },
+    "slovograd": {
+      "styles": ["slovograd/style.css", "slovograd/lessons.css"],
+      "scripts": ["learning-progress.js", "slovograd/words.js", "slovograd/sentences.js", "slovograd/creative.js", "slovograd/illustrations.js", "slovograd/core.js", "slovograd/voice-manifest.js", "slovograd/recorded-voice.js", "slovograd/voice.js", "slovograd/lessons.js", "offline-bundle.js", "slovograd/app.js"]
+    }
+  }
+}

@@ -11,10 +11,12 @@ function harness(folder,storage={},denyStorage=false){
  const listeners={},classes=()=>({add(){},remove(){},toggle(){},contains(){return false;}});
  const node=(extra={})=>({value:'',disabled:false,dataset:{},classList:classes(),focus(){},setAttribute(name,value){this[name]=value;},getAttribute(name){return this[name]||null;},removeAttribute(name){delete this[name];},closest(){return {classList:classes()};},matches(selector){return selector==='[data-ws-input]'&&Object.hasOwn(this.dataset,'wsInput');},addEventListener(){},...extra});
  const nodes={'#live':node(),'#overlay':node()};let fields=[];
- const app=node({dataset:{}});let html='';Object.defineProperty(app,'innerHTML',{get(){return html;},set(value){html=value;delete nodes['#answer'];fields=[];for(const match of html.matchAll(/<input\b[^>]*>/g)){const tag=match[0],value=tag.match(/\bvalue="([^"]*)"/)?.[1]||'',disabled=/\bdisabled\b/.test(tag),index=tag.match(/\bdata-ws-input="(\d+)"/)?.[1];if(tag.includes('id="answer"'))nodes['#answer']=node({id:'answer',value,disabled});if(index!==undefined)fields.push(node({dataset:{wsInput:index},value,disabled}));}}});nodes['#app']=app;
- const doc={activeElement:null,visibilityState:'visible',querySelector(selector){if(nodes[selector])return nodes[selector];const index=selector.match(/^\[data-ws-input="(\d+)"\]$/)?.[1];return index===undefined?null:fields.find(el=>el.dataset.wsInput===index)||null;},querySelectorAll(selector){if(selector.startsWith('[data-ws-input]'))return selector.includes(':not(:disabled)')?fields.filter(el=>!el.disabled):fields;return [];},addEventListener(name,fn){(listeners[name]??=[]).push(fn);},body:{append(){}},head:{innerHTML:''}};
+ const app=node({dataset:{},prepend(){}});let html='';Object.defineProperty(app,'innerHTML',{get(){return html;},set(value){html=value;delete nodes['#answer'];fields=[];for(const match of html.matchAll(/<input\b[^>]*>/g)){const tag=match[0],value=tag.match(/\bvalue="([^"]*)"/)?.[1]||'',disabled=/\bdisabled\b/.test(tag),index=tag.match(/\bdata-ws-input="(\d+)"/)?.[1];if(tag.includes('id="answer"'))nodes['#answer']=node({id:'answer',value,disabled});if(index!==undefined)fields.push(node({dataset:{wsInput:index},value,disabled}));}}});nodes['#app']=app;
+ const doc={createElement(){return node();},activeElement:null,visibilityState:'visible',querySelector(selector){if(nodes[selector])return nodes[selector];const index=selector.match(/^\[data-ws-input="(\d+)"\]$/)?.[1];return index===undefined?null:fields.find(el=>el.dataset.wsInput===index)||null;},querySelectorAll(selector){if(selector.startsWith('[data-ws-input]'))return selector.includes(':not(:disabled)')?fields.filter(el=>!el.disabled):fields;return [];},addEventListener(name,fn){(listeners[name]??=[]).push(fn);},body:{append(){}},head:{innerHTML:''}};
  const context=vm.createContext({document:doc,localStorage:{getItem(key){if(denyStorage)throw Error('storage disabled');return storage[key]||null;},setItem(key,value){if(denyStorage)throw Error('storage disabled');storage[key]=value;}},window:{scrollTo(){},matchMedia(){return {matches:true};},addEventListener(){}},MutationObserver:class{observe(){}},setTimeout(){},console,URL,Blob});
+ vm.runInContext(fs.readFileSync(path.join(root,'math-range.js'),'utf8'),context,{filename:'math-range.js'});
  for(const name of ['engine.js','course.js'])vm.runInContext(fs.readFileSync(path.join(root,folder,name),'utf8'),context,{filename:name});context.COURSE=context.window.COURSE;
+ for(const shared of ['learning-progress.js','place-value.js','place-value-motion.js','place-value-activities.js'])vm.runInContext(fs.readFileSync(path.join(root,shared),'utf8'),context,{filename:shared});
  vm.runInContext(fs.readFileSync(path.join(root,folder,'app.js'),'utf8'),context,{filename:folder+'/app.js'});
  const run=code=>vm.runInContext(code,context);
  function input(selector,text){const el=doc.querySelector(selector);assert.ok(el,selector);el.value=text;for(const fn of listeners.input||[])fn({target:el});}
@@ -22,7 +24,7 @@ function harness(folder,storage={},denyStorage=false){
  return {run,input,click,storage,doc,html:()=>html};
 }
 
-function finishLearn(h){for(let step=0;step<3;step++)h.click({action:'learn-next'});}
+function finishLearn(h){let guard=0;while(h.run("state.mode==='learn'")){if(++guard>20)throw Error('Explanation loop');h.click({action:'learn-next'});}}
 function solveBoard(h){h.run("state.zones={a:K.parts(isBuild()?task().answer:task().result),b:K.empty(),removed:!isBuild()&&task().op==='-'?K.parts(task().b):K.empty()};render();");h.input('#answer',String(h.run('task().answer')));h.click({action:'check'});}
 function fillNotebook(h){for(let i=0;i<16;i++){const field=h.doc.querySelector('[data-ws-input="'+i+'"]');if(field&&!field.disabled)h.input('[data-ws-input="'+i+'"]',String(h.run('tasks()['+i+'].answer')));}h.click({action:'check-worksheet'});}
 function marksFor(id){return Object.fromEntries(Array.from({length:18},(_,i)=>[id+':'+i,true]));}
@@ -30,7 +32,7 @@ for(const [folder,key]of [['kubiki','kubiki-progress-v1'],['bricks','detalki-pro
  let storage={},h=harness(folder,storage);
  eq(h.run('({lesson:state.lesson,mode:state.mode,step:state.step})'),{lesson:1,mode:'learn',step:0},folder+': a new lesson begins with explanation');
  h.click({action:'learn-next'});h=harness(folder,storage);eq(h.run('({mode:state.mode,step:state.step})'),{mode:'learn',step:1},'Explanation mode and step survive restart');
- h.click({action:'learn-next'});h.click({action:'learn-next'});eq(h.run('({mode:state.mode,index:state.index,demo:state.demo})'),{mode:'play',index:0,demo:false});
+ finishLearn(h);eq(h.run('({mode:state.mode,index:state.index,demo:state.demo})'),{mode:'play',index:0,demo:false});
  ok(h.run('progress.read.includes(1)'),'Finishing explanation records only its own stage');
  // A complete course exercises every stage transition and every source task.
  let routeTasks=0;

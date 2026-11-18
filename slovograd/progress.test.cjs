@@ -18,7 +18,7 @@ function harness(storage={}){
  let capturedBlob=null;
  const w={RusVoice:voice,scrollTo(){},matchMedia(){return{matches:true};},addEventListener(){}};
  const context=vm.createContext({window:w,document,localStorage:{getItem:key=>storage[key]||null,setItem:(key,value)=>{storage[key]=value;}},console,Blob,URL:Object.assign(class extends URL {},{createObjectURL(blob){capturedBlob=blob;return'blob:test';},revokeObjectURL(){}}),setTimeout(){return 1;},clearTimeout(){},location:{protocol:'https:',href:'https://nashpatriot67.github.io/detskie-trenazhery/slovograd/'},fetch:async name=>({ok:true,text:async()=>fs.readFileSync(path+name,'utf8')})});
- for(const file of ['words.js','sentences.js','creative.js','illustrations.js','core.js','lessons.js']){
+ for(const file of ['../learning-progress.js','words.js','sentences.js','creative.js','illustrations.js','core.js','lessons.js']){
   if(!fs.existsSync(path+file))throw new Error('Lesson integration is not ready: missing '+file);
   vm.runInContext(fs.readFileSync(path+file,'utf8'),context,{filename:file});
  }

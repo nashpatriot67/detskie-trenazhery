@@ -127,3 +127,20 @@ body{background:linear-gradient(140deg,#f6f8fd,#f9f8f4)}
  .exchange-empty{font-size:11px;min-height:0;padding:2px 0 4px;line-height:1.8}
 }
 @media(max-width:360px){.pieces .piece.brick{--pitch:16px;--pad:4px}.pieces .piece.brick.hundred{--pitch:9px;--pad:4px}.pieces{gap:16px 14px}.show-counts .pieces .piece.brick:not(.hundred) .stud::after{font-size:8px}.exchange-head .count-toggle{font-size:10px}}
+
+/* P0: keep each stud visible and give even the bank's small pieces a real,
+   non-overlapping transparent touch target on mouse and touch screens. */
+.pieces{gap:16px}
+.piece.brick:not(.mini)::before{
+ content:'';display:block;position:absolute;left:50%;top:50%;right:auto;bottom:auto;
+ width:100%;min-width:44px;height:100%;min-height:44px;transform:translate(-50%,-50%);
+ border:0;background:transparent;z-index:2;border-radius:5px;
+}
+.piece.brick.mini::before{display:none;content:none}
+.bank-pieces>div{min-width:44px}
+.bank-pieces{gap:20px 24px}
+@media(max-width:600px){
+ .toolbox{flex-wrap:wrap}
+ .toolbox .bank-pieces{flex:1 1 100%;margin-left:0;justify-content:center;gap:18px 24px}
+}
+@media(max-width:360px){.pieces{gap:20px}}
