@@ -4,7 +4,7 @@
  */
 'use strict';
 
-const VERSION = 'stage1-08cb8dae8709';
+const VERSION = 'stage1-f8b5512dd867';
 const ROOT = new URL('./', self.location.href);
 const CACHE_PREFIX = 'trainers:' + ROOT.pathname + ':core:';
 const CACHE_NAME = CACHE_PREFIX + VERSION;
@@ -36,8 +36,17 @@ const CORE = [
   "kubiki/style.css?v=s1-b6e26f0668b2",
   "place-value.css?v=s1-6ab4b3290d60",
   "place-value-activities.css?v=s1-e1e9e551c71f",
+  "concepts.css?v=s1-d91965c0780c",
+  "life-quests.css?v=s1-097549463ae5",
+  "active-breaks.css?v=s1-9979bca8127f",
+  "practice-hub.css?v=s1-c31811a62d05",
   "math-range.js?v=s1-d28d7a297b9a",
-  "learning-progress.js?v=s1-b6ebfd2bf2d3",
+  "learning-progress.js?v=s1-5e68799babe3",
+  "concepts.js?v=s1-96c8e962aeef",
+  "life-quest-data.js?v=s1-3164635a0abf",
+  "life-quests.js?v=s1-424632ee5d60",
+  "active-breaks.js?v=s1-68e4000c954c",
+  "practice-hub.js?v=s1-ab6076c9bdb8",
   "kubiki/course.js?v=s1-c13d0497e759",
   "kubiki/engine.js?v=s1-18fc3d8be232",
   "kubiki/voice-manifest.js?v=s1-ce17c4f55cbb",
@@ -46,7 +55,7 @@ const CORE = [
   "place-value-motion.js?v=s1-07576297e173",
   "place-value-activities.js?v=s1-b302ff223496",
   "offline-bundle.js?v=s1-2021a0866611",
-  "kubiki/app.js?v=s1-b3c3e0600a04",
+  "kubiki/app.js?v=s1-240e74e978a1",
   "bricks/",
   "bricks/index.html",
   "bricks/manifest.webmanifest",
@@ -57,7 +66,7 @@ const CORE = [
   "bricks/engine.js?v=s1-de16802683f0",
   "bricks/voice-manifest.js?v=s1-247916d9cd8c",
   "bricks/recorded-voice.js?v=s1-cd5f60cad10d",
-  "bricks/app.js?v=s1-b81f22ff9c0b",
+  "bricks/app.js?v=s1-3576a94353a2",
   "slovograd/",
   "slovograd/index.html",
   "slovograd/manifest.webmanifest",
@@ -73,7 +82,7 @@ const CORE = [
   "slovograd/recorded-voice.js?v=s1-cd5f60cad10d",
   "slovograd/voice.js?v=s1-3010a8c6bfdf",
   "slovograd/lessons.js?v=s1-83190b3e0a89",
-  "slovograd/app.js?v=s1-fb00cb08fb6f",
+  "slovograd/app.js?v=s1-08702e0f8c1e",
   "otkryt-bez-interneta.html"
 ];
 const CORE_URLS = CORE.map(path => new URL(path, ROOT).href);

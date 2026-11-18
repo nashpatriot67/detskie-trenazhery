@@ -409,3 +409,13 @@ if(typeof window.addEventListener==='function')window.addEventListener('storage'
  let latest;try{latest=JSON.parse(event.newValue||'{}');if(!record(latest))throw Error('invalid');}catch(_){storageBlocked=true;memory=true;return;}
  if(state.view==='placevalue'&&foreignPvConflict(latest)){blockPvWrite(latest);userIntent=false;render();}
 });
+// Shared activities keep their snapshots inside this trainer's existing owner.
+// The host stays outside #app, so opening it leaves the lesson DOM and draft intact.
+if(!booting&&window.PracticeHub&&typeof window.PracticeHub.mount==='function')window.PracticeHub.mount({
+ subject:'math',storageKey:STORAGE_KEY,
+ beforeOpen(){save(true);stopVoice();M.cancel();},
+ atBoundary(){return state.solved===true;},
+ // Do not acknowledge raw here: it may also contain another tab's lesson
+ // changes. The existing save path must reconcile the complete owner record.
+ syncLearning(learning){progress.learning=LP.merge(progress.learning,learning,{generation:progress.resetEpoch});}
+});

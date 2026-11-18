@@ -588,3 +588,13 @@ if(typeof window.addEventListener==='function'){
  window.addEventListener('storage',event=>{if(event.key==='slovograd-v1'&&event.newValue!==lastStoredRaw){writeIntent=false;inspectExternal(event.newValue);if(storageConflict)render();}});
 }
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&resumeReady)save(true);});
+// Keep the current word/sentence and its assistance in the original progress
+// owner before opening a shared activity outside the application's render tree.
+if(resumeReady&&!russianBooting&&window.PracticeHub&&typeof window.PracticeHub.mount==='function')window.PracticeHub.mount({
+ subject:'russian',storageKey:'slovograd-v1',
+ beforeOpen(){save(true);resetVoice();},
+ atBoundary(){return state.solved===true&&!state.lesson&&!(state.meaning?.open&&!state.meaning.finished);},
+ // Leave the complete raw record unacknowledged so save() still reconciles
+ // any lesson/draft changes written by another tab alongside these modules.
+ syncLearning(learning){progress.learning=LP.merge(progress.learning,learning,{generation:progress.resetEpoch});}
+});

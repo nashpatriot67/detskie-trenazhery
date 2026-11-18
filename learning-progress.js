@@ -2,7 +2,7 @@
 'use strict';
 // Optional observations inside each existing subject's progress object.
 // No storage, network, migration, or claims of mastery belong in this module.
-var VERSION=1,MAX_HISTORY=240,MAX_ACTIVITY_BYTES=48*1024,counter=0;
+var VERSION=1,MAX_HISTORY=240,MAX_ACTIVITY_BYTES=48*1024,MAX_MODULES=8,counter=0;
 var own=function(o,k){return Object.prototype.hasOwnProperty.call(o,k);};
 var object=function(v){return v!==null&&typeof v==='object'&&!Array.isArray(v);};
 var identifier=function(v){return typeof v==='string'&&/^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,159}$/.test(v)?v:'';};
@@ -97,14 +97,35 @@ function cleanActivity(value){
  var state=value.state===null?null:clone(value.state,MAX_ACTIVITY_BYTES);if(state===null&&value.state!==null)return null;
  return {revision:integer(value.revision,0),updatedAt:stamp(value.updatedAt,0),ownerId:identifier(value.ownerId)||'local',state:state};
 }
+// Named activities share their owner's existing learning record. The original
+// place-value activity stays separate, so opening a concept or life quest never
+// replaces its board. App code still owns storage and concurrent-writer guards.
+function moduleIdentifier(value){return identifier(value)&&value!=='__proto__'&&value!=='constructor'&&value!=='prototype'?value:'';}
+function cleanModules(value){
+ var result={};if(!object(value))return result;
+ // Supported clients write at most eight entries. Bound malformed input before
+ // cloning the state payloads, then keep the latest entries deterministically.
+ var entries=Object.keys(value).filter(moduleIdentifier).sort().slice(0,64).map(function(key){return {key:key,value:cleanActivity(value[key])};}).filter(function(entry){return entry.value;});
+ entries.sort(function(a,b){return b.value.updatedAt-a.value.updatedAt||b.value.revision-a.value.revision||(a.key<b.key?-1:a.key>b.key?1:0);});
+ entries.slice(0,MAX_MODULES).sort(function(a,b){return a.key<b.key?-1:a.key>b.key?1:0;}).forEach(function(entry){result[entry.key]=entry.value;});
+ return result;
+}
+function learningMetadata(value){
+ // Clone extensions independently of bounded history/activity payloads. Eight
+ // valid 48KiB modules must not make unrelated metadata disappear merely by
+ // pushing the complete learning object over clone()'s default size budget.
+ var metadata={};Object.keys(value).forEach(function(key){if(key!=='observations'&&key!=='activity'&&key!=='modules'&&key!=='__proto__'&&key!=='constructor'&&key!=='prototype')metadata[key]=value[key];});
+ return clone(metadata)||{};
+}
 function clean(value,epoch){
  if(object(value)&&!supported(value))return clone(value)||value;
  if(!object(value)||value.version!==VERSION)return empty(epoch);
- var result=clone(value)||empty(value.generation),g=generation(value.generation);
+ var result=learningMetadata(value),g=generation(value.generation);
  var raw=Array.isArray(value.observations)?value.observations:[];
  // Bound work before normalization as well as retained storage.
  var entries=raw.slice(-2000).map(function(event){return cleanObservation(event,g);}).filter(Boolean),c=compact(entries);
  result.version=VERSION;result.generation=g;result.observations=c.observations;result.activity=cleanActivity(value.activity);
+ if(own(value,'modules'))result.modules=cleanModules(value.modules);
  if(value.historyLimited===true||c.limited||raw.length>2000)result.historyLimited=true;else delete result.historyLimited;
  return result;
 }
@@ -129,7 +150,12 @@ function record(learning,value){
  if(event.generation!==undefined&&generation(event.generation)!==result.generation)return result;
  event.generation=result.generation;event.eventId=identifier(event.eventId||event.attemptId)||id('observation');
  var previous=result.observations.find(function(item){return item.eventId===event.eventId;});
- event.revision=integer(event.revision,previous?previous.revision+1:1);event.observedAt=stamp(event.observedAt,now());
+ event.revision=integer(event.revision,previous?previous.revision+1:1);
+ // Several answers can be recorded in one millisecond (for example a checked
+ // worksheet). Preserve their actual recording order instead of letting a
+ // random attempt ID decide which skill observation is considered latest.
+ var latestStamp=result.observations.reduce(function(max,item){return Math.max(max,item.observedAt);},0);
+ event.observedAt=stamp(event.observedAt,Math.max(now(),latestStamp+1));
  var normalized=cleanObservation(event,result.generation);if(!normalized)return result;
  if(previous)normalized=combine(previous,normalized);
  var c=compact(result.observations.filter(function(item){return item.eventId!==normalized.eventId;}).concat([normalized]));
@@ -151,6 +177,11 @@ function merge(left,right,options){
  if(b.generation!==g)return a;
  var result=Object.assign({},a,b),c=compact(a.observations.concat(b.observations));
  result.version=VERSION;result.generation=g;result.observations=c.observations;result.activity=activityWinner(a.activity,b.activity);
+ if(own(a,'modules')||own(b,'modules')){
+  var modules={},am=a.modules||{},bm=b.modules||{};
+  Object.keys(am).concat(Object.keys(bm)).forEach(function(key){modules[key]=activityWinner(am[key],bm[key]);});
+  result.modules=cleanModules(modules);
+ }
  if(a.historyLimited||b.historyLimited||c.limited)result.historyLimited=true;
  return result;
 }
@@ -159,11 +190,23 @@ function setActivity(learning,state,options){
  var activity=cleanActivity({revision:integer(options.revision,current?current.revision+1:1),updatedAt:stamp(options.updatedAt,now()),ownerId:identifier(options.ownerId)||current&&current.ownerId||'local',state:state});
  if(activity)result.activity=activity;return result;
 }
+function getModule(learning,key){
+ if(!moduleIdentifier(key)||!supported(learning))return null;
+ var result=clean(learning);return result.modules&&own(result.modules,key)?cleanActivity(result.modules[key]):null;
+}
+function setModule(learning,key,state,options){
+ if(!supported(learning))return clean(learning);options=options||{};var result=clean(learning);
+ if(!moduleIdentifier(key)||own(options,'generation')&&generation(options.generation)!==result.generation)return result;
+ var modules=result.modules||{},current=own(modules,key)?modules[key]:null;
+ if(!current&&Object.keys(modules).length>=MAX_MODULES)return result;
+ var activity=cleanActivity({revision:integer(options.revision,current?current.revision+1:1),updatedAt:stamp(options.updatedAt,now()),ownerId:identifier(options.ownerId)||current&&current.ownerId||'local',state:state});
+ if(activity){modules[key]=activity;result.modules=cleanModules(modules);}return result;
+}
 function latest(learning,skillId){
  var value=clean(learning);if(!supported(value))return null;
  var list=value.observations.filter(function(event){return event.skillIds.indexOf(skillId)!==-1&&event.finalOutcome!=='notchecked';});
  return list.length?clone(list[list.length-1]):null;
 }
 function status(learning,skillId){var event=latest(learning,skillId);return event?classify(event):'notchecked';}
-root.LearningProgress={VERSION:VERSION,MAX_HISTORY:MAX_HISTORY,MAX_ACTIVITY_BYTES:MAX_ACTIVITY_BYTES,empty:empty,reset:empty,isSupported:supported,clean:clean,attempt:attempt,help:help,record:record,merge:merge,setActivity:setActivity,clearActivity:function(learning,options){return setActivity(learning,null,options);},latest:latest,status:status,classify:classify};
+root.LearningProgress={VERSION:VERSION,MAX_HISTORY:MAX_HISTORY,MAX_ACTIVITY_BYTES:MAX_ACTIVITY_BYTES,MAX_MODULES:MAX_MODULES,empty:empty,reset:empty,isSupported:supported,clean:clean,attempt:attempt,help:help,record:record,merge:merge,setActivity:setActivity,clearActivity:function(learning,options){return setActivity(learning,null,options);},getModule:getModule,setModule:setModule,latest:latest,status:status,classify:classify};
 })(typeof window==='undefined'?globalThis:window);
