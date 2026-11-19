@@ -96,6 +96,7 @@
 
   function silence() {
     if (!audio) return;
+    audio.onplaying = null;
     audio.onended = null;
     audio.onerror = null;
     try { audio.pause(); } catch (ignore) {}
@@ -129,6 +130,11 @@
     if (active !== session || session.done) return false;
     if (hidden()) { finish(session, null, true); return false; }
     var clip = ++session.clip;
+    audio.onplaying = function () {
+      if (!current(session, clip) || session.started) return;
+      session.started = true;
+      call(session.options.onStart);
+    };
     audio.onended = function () {
       if (!current(session, clip)) return;
       session.index += 1;
@@ -177,7 +183,7 @@
         return false;
       }
     }
-    var session = { queue: queue, index: 0, clip: 0, done: false, options: options };
+    var session = { queue: queue, index: 0, clip: 0, started: false, done: false, options: options };
     active = session;
     return playClip(session);
   }

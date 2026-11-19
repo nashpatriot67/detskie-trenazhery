@@ -153,6 +153,7 @@
         "room-props.js",
         "room-toy-art.js",
         "room-input.js",
+        "room-pool-art.js",
         "room-game.js",
         "room-tidy-scene.js",
         "room-tidy-layout.js",

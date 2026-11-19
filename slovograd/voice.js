@@ -37,6 +37,7 @@
     const previous = speech;
     speech = null;
     if (previous && previous.utterance) {
+      previous.utterance.onstart = null;
       previous.utterance.onend = null;
       previous.utterance.onerror = null;
     }
@@ -59,6 +60,9 @@
       speech = session;
       try {
         const started = root.RecordedVoice.speak(text, {
+          onStart: function () {
+            if (speech === session) emit(options.onStart);
+          },
           onEnd: function (result) {
             if (speech !== session) return;
             speech = null;
@@ -98,6 +102,9 @@
       // If voices have not loaded, lang still lets the system choose Russian.
       const session = { utterance, options };
       speech = session;
+      utterance.onstart = function () {
+        if (speech === session) emit(options.onStart);
+      };
       utterance.onend = function () {
         if (speech !== session) return;
         speech = null;
@@ -175,7 +182,9 @@
       rec.interimResults = false;
       rec.maxAlternatives = 1;
       rec.onstart = function () {
-        if (!session.finished) emit(options.onStatus, 'Слушаю. Скажи ответ и сделай небольшую паузу.');
+        if (session.finished) return;
+        emit(options.onStart);
+        emit(options.onStatus, 'Слушаю. Скажи ответ и сделай небольшую паузу.');
       };
       rec.onresult = function (event) {
         if (session.finished || session.received) return;
@@ -327,6 +336,7 @@
         try { if (rec.state !== 'inactive') rec.stop(); } catch (_) {}
       };
       rec.start();
+      emit(options.onStart);
       emit(options.onStatus, 'Запись идёт. Говори спокойно, затем нажми «Остановить запись».');
       if (typeof root.setTimeout === 'function') {
         session.timer = root.setTimeout(function () {

@@ -1,0 +1,455 @@
+'use strict';
+const D=window.RUS_DATA,K=window.RusCore,V=window.RusVoice,L=window.RUS_LESSONS,LP=window.LearningProgress,$=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const glyphs={book:'<path d="M3 5q5-2 9 1 4-3 9-1v15q-5-2-9 1-4-3-9-1ZM12 6v15"/>',letters:'<path d="m3 19 6-14 6 14M5 14h8m5-3v8m0-5c5-5 7 4 0 5"/>',puzzle:'<path d="M4 4h6v3a2 2 0 1 0 4 0V4h6v6h-3a2 2 0 1 0 0 4h3v6h-6v-3a2 2 0 1 0-4 0v3H4v-6h3a2 2 0 1 0 0-4H4Z"/>',tree:'<path d="M12 4v6M5 20v-5h14v5M12 10v10"/><rect x="7" y="2" width="10" height="5" rx="1"/><rect x="2" y="18" width="6" height="4" rx="1"/><rect x="9" y="18" width="6" height="4" rx="1"/><rect x="16" y="18" width="6" height="4" rx="1"/>',build:'<path d="M3 4h7v6H3Zm11 0h7v6h-7ZM3 14h7v6H3Zm11 0h7v6h-7Z"/>',magic:'<path d="m4 20 13-13 3 3L7 23ZM14 3v-2M20 4l2-2M22 9h2M5 7V3M3 5h4M9 15v-4M7 13h4"/>',chat:'<path d="M21 12a9 9 0 0 1-9 9 9 9 0 0 1-4-1l-5 1 1-5a9 9 0 1 1 17-4Z"/><path d="M8 10h8M8 14h5"/>',chart:'<path d="M4 3v17h17M9 16v-4M14 16V8M19 16V4"/>',sound:'<path d="m10 4-5 5H2v6h3l5 5ZM14 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/>',mic:'<rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3M8 22h8"/>',check:'<path d="m5 12 4 4L19 6"/>',arrow:'<path d="M4 12h16m-6-6 6 6-6 6"/>',back:'<path d="M20 12H4m6-6-6 6 6 6"/>',star:'<path d="m12 3 3 6 6 1-4.5 4.5 1 6L12 18l-5.5 2.5 1-6L3 10l6-1Z"/>',bulb:'<path d="M9 18h6m-5 3h4M8 14a6 6 0 1 1 8 0c-1 1-1 2-1 2H9s0-1-1-2Z"/>',close:'<path d="m6 6 12 12M6 18 18 6"/>',reset:'<path d="M4 10a8 8 0 1 1 1 7M4 4v6h6"/>',home:'<path d="m3 10 9-7 9 7v11h-7v-7h-4v7H3Z"/>',help:'<circle cx="12" cy="12" r="9"/><path d="M9 9a3 3 0 1 1 4 3v2M12 17h.01"/>',stop:'<rect x="6" y="6" width="12" height="12" rx="2"/>'};
+const ico=n=>`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${glyphs[n]||glyphs.book}</svg>`;
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const META={spelling:{title:'Буквенная мастерская',short:'Пишем без ошибок',icon:'letters',color:'mint',desc:'Слушай, собирай и пиши слова.',data:'spelling'},morphology:{title:'Секреты слова',short:'Из чего состоит слово',icon:'puzzle',color:'coral',desc:'Найди корень и познакомься с частями слова.',data:'morphology'},syntax:{title:'Команда предложения',short:'Кто? Что делает?',icon:'tree',color:'gold',desc:'Узнай, кто главный в предложении.',data:'syntax'},builder:{title:'Собери предложение',short:'Конструктор предложений',icon:'build',color:'blue',desc:'Поставь карточки в нужном порядке.',data:'builder'},creative:{title:'Говорим красиво',short:'Мастерская красивой речи',icon:'magic',color:'lavender',desc:'Добавь точные слова и нарисуй картину речью.',data:'creative'},dialogues:{title:'Поболтаем с Соней',short:'Речь и учебные диалоги',icon:'chat',color:'rose',desc:'Рассказывай, отвечай и слушай свой голос.',data:'dialogues'}};
+const PARTS={prefix:{name:'Приставка',color:'#a58cbe',question:'перед корнем'},root:{name:'Корень',color:'#e58c75',question:'общая часть родственных слов'},suffix:{name:'Суффикс',color:'#d6ab4d',question:'после корня'},ending:{name:'Окончание',color:'#74a4cc',question:'изменяемая часть'}};
+const ROLES={subject:{name:'Подлежащее',question:'Кто? Что?',color:'#6d9f8a'},predicate:{name:'Сказуемое',question:'Что делает?',color:'#df9a7f'},attribute:{name:'Определение',question:'Какой? Чей?',color:'#b19bc8'},object:{name:'Дополнение',question:'Кого? Чего? Кому? Что?',color:'#80a5c6'},adverbial:{name:'Обстоятельство',question:'Где? Когда? Как?',color:'#d6b95e'}};
+const TOPICS={"morphology": [{"id": "all", "label": "Все части слова", "description": "Чередуем простые слова, слова с приставками, с суффиксами и с обеими частями. Можно начать с простого и постепенно разбирать больше частей."}, {"id": "basic", "label": "Корень и окончание", "description": "Найди общую часть родственных слов и окончание, которое меняется при изменении формы слова."}, {"id": "prefix", "label": "Слова с приставкой", "description": "Найди приставку перед корнем, затем выдели остальные части слова. Приставка помогает образовать новое слово."}, {"id": "suffix", "label": "Слова с суффиксом", "description": "Найди суффикс после корня, затем выдели остальные части слова. Суффикс помогает образовать новое слово."}, {"id": "full", "label": "Приставка + корень + суффикс + окончание", "description": "Разбери слово полностью: найди приставку, корень, суффикс и окончание. Основа — всё слово без окончания."}, {"id": "zero", "label": "Нулевое окончание", "description": "Измени форму слова. Если окончание есть, но сейчас не выражено буквами, выбери ∅. Не путай нулевое окончание с отсутствием окончания."}], "prepositions": [{"id": "all", "label": "Предлог или приставка", "description": "Сравниваем отдельные слова-предлоги и приставки, которые пишутся со словом слитно."}, {"id": "separate", "label": "Предлоги: раздельно", "description": "Предлог — отдельное слово. Между ним и следующим словом часто можно вставить ещё одно слово: под большим столом."}, {"id": "together", "label": "Приставки: слитно", "description": "Приставка — часть слова перед корнем. Между приставкой и корнем другое слово вставить нельзя."}], "syntax": [{"id": "all", "label": "Разные предложения", "description": "Задавай вопросы к словам и находи основу. В полном разборе чередуем предложения с разными второстепенными членами."}, {"id": "simple", "label": "Только главные члены", "description": "Найди подлежащее и сказуемое в коротком предложении. Кто или что? Что делает?"}, {"id": "attribute", "label": "Определение", "description": "Определение называет признак предмета. Задай вопрос какой, какая, какое, какие или чей. Затем разбери остальные члены предложения."}, {"id": "object", "label": "Дополнение", "description": "Дополнение отвечает на вопросы косвенных падежей: кого, чего, кому, что и другие. Сначала найди основу, затем задай вопрос к дополнению."}, {"id": "adverbial", "label": "Обстоятельство", "description": "Обстоятельство помогает уточнить место, время или способ действия: где, куда, когда, как. Группу с предлогом разбираем вместе."}, {"id": "inversion", "label": "Сказуемое перед подлежащим", "description": "Порядок слов не определяет их роль. Найди действие, затем спроси, кто или что его выполняет."}], "builder": [{"id": "all", "label": "Разные модели", "description": "Чередуем разные схемы предложений. Собирай карточки по вопросам в модели, сохраняя смысл."}, {"id": "foundation", "label": "Основа предложения", "description": "Собери предложение из подлежащего и сказуемого. Сначала прочитай модель: действие может стоять перед героем."}, {"id": "attribute", "label": "Добавляем признак", "description": "Поставь признак рядом с тем предметом, который он описывает. Следуй вопросам в модели."}, {"id": "object", "label": "Добавляем дополнение", "description": "Уточни, на кого или на что направлено действие, кому оно адресовано. Расставь карточки по заданным вопросам."}, {"id": "adverbial", "label": "Добавляем место, время или способ", "description": "Дополни мысль обстоятельством: где, когда или как происходит действие. Соблюдай заданную модель."}, {"id": "inversion", "label": "Сначала действие", "description": "Сегодня модель начинается со сказуемого. Найди действие и того, кто его выполняет."}, {"id": "extended", "label": "Развёрнутая мысль", "description": "Собери предложение с несколькими уточнениями. Проверь, что каждая карточка соответствует своему вопросу."}], "creative": [{"id": "all", "label": "Разные речевые задачи", "description": "Не только добавляем красивые слова: тренируем точность, сравнения, вежливость, причины и последовательность."}, {"id": "description", "label": "Описание", "description": "Добавь точные признаки, место, цвет или звук, чтобы слушатель мог представить картину."}, {"id": "precision", "label": "Точные слова", "description": "Выбери точный глагол или важную подробность вместо общих слов. Прочитай и проверь смысл."}, {"id": "comparison", "label": "Сравнение", "description": "Расскажи, на что похож предмет или чем два предмета отличаются. Сравнение должно быть понятно слушателю."}, {"id": "politeness", "label": "Вежливые слова", "description": "Попробуй вежливо попросить, поблагодарить, извиниться, отказаться или поддержать собеседника."}, {"id": "sequence", "label": "Порядок событий", "description": "Покажи, что было сначала и что потом. Слова сначала, затем и после этого помогают слушателю следить за мыслью."}, {"id": "reason", "label": "Причина и цель", "description": "Объясни, почему это произошло или для чего нужно действие. Используй потому что, поэтому или чтобы."}, {"id": "coherence", "label": "Без лишних повторов", "description": "Свяжи предложения и убери ненужные повторы. Проверь, понятно ли, к кому относится слово он или она."}, {"id": "feelings", "label": "Чувства и настроение", "description": "Назови чувство точно и добавь понятную подробность или причину, чтобы слушатель тебя понял."}], "dialogues": [{"id": "all", "label": "Разные разговоры", "description": "Чередуем описания, истории, вежливые разговоры, объяснения, чувства и сравнения."}, {"id": "description", "label": "Описание и наблюдение", "description": "Отвечай так, чтобы собеседник мог представить предмет, место или явление."}, {"id": "politeness", "label": "Вежливый разговор", "description": "Слушай вопрос, отвечай по делу, вежливо проси и уточняй непонятное."}, {"id": "story", "label": "Рассказ по порядку", "description": "Расскажи начало, событие и завершение. Старайся не пропускать важные шаги."}, {"id": "explain", "label": "Объяснение и план", "description": "Объясни выбор, правило или порядок действий так, чтобы собеседник мог тебя понять."}, {"id": "feelings", "label": "Чувства и поддержка", "description": "Назови чувство и его причину. Подумай, какие слова помогут поддержать собеседника."}, {"id": "comparison", "label": "Сравниваем и выбираем", "description": "Найди сходства и различия, затем объясни свой выбор или наблюдение."}]};
+Object.assign(PARTS.prefix,{description:'Приставка стоит перед корнем и помогает образовывать новые слова: ход — переход.'});
+Object.assign(PARTS.root,{description:'Корень — общая часть родственных слов, близких по смыслу: лес, лесной, лесник.'});
+Object.assign(PARTS.suffix,{description:'Суффикс стоит после корня и помогает образовывать новые слова: дом — домик.'});
+Object.assign(PARTS.ending,{description:'Окончание меняется при изменении формы слова: вода, воды, воду. Нулевое окончание обозначаем знаком ∅.'});
+Object.assign(ROLES.subject,{description:'Подлежащее называет, о ком или о чём говорится, и отвечает на вопрос кто или что.'});
+Object.assign(ROLES.predicate,{description:'Сказуемое сообщает действие: что делает, что сделал или что будет делать герой.'});
+Object.assign(ROLES.attribute,{description:'Определение называет признак предмета и отвечает на вопросы какой, какая, какое, какие или чей.'});
+Object.assign(ROLES.object,{description:'Дополнение помогает уточнить, на кого или на что направлено действие. Вопросы: кого, чего, кому, чему, что и другие.'});
+Object.assign(ROLES.adverbial,{description:'Обстоятельство уточняет, где, когда, куда или как происходит действие. Предлог относится ко всей группе, а не является отдельным членом.'});
+let memory=false,storageBlocked=false,lastStoredRaw=null,progress={};try{lastStoredRaw=localStorage.getItem('slovograd-v1');progress=JSON.parse(lastStoredRaw||'{}');if(!progress||typeof progress!=='object'||Array.isArray(progress))throw Error('invalid-progress');}catch{memory=true;storageBlocked=true;progress={};}progress.done=progress.done&&typeof progress.done==='object'?progress.done:{};progress.mistakes=progress.mistakes&&typeof progress.mistakes==='object'?progress.mistakes:{};progress.creations=Array.isArray(progress.creations)?progress.creations:[];progress.lessonRead=progress.lessonRead&&typeof progress.lessonRead==='object'&&!Array.isArray(progress.lessonRead)?progress.lessonRead:{};progress.lessonReviews=progress.lessonReviews&&typeof progress.lessonReviews==='object'&&!Array.isArray(progress.lessonReviews)?progress.lessonReviews:{};
+if(!progress.spellingCourse||typeof progress.spellingCourse!=='object'||Array.isArray(progress.spellingCourse))progress.spellingCourse={};
+for(const field of ['done','cursor','lastScope'])if(!progress.spellingCourse[field]||typeof progress.spellingCourse[field]!=='object'||Array.isArray(progress.spellingCourse[field]))progress.spellingCourse[field]={};
+const state={view:'home',grade:progress.grade===1?1:2,mode:{spelling:'construct',morphology:'parts',syntax:'base'},index:{},category:'all',topic:'all',harder:false,spellingFree:false,courseCategory:null,courseFinished:false,review:false,reviewLists:{},nonce:0,brush:'root',marks:[],zero:false,assembled:[],bank:[],draft:'',choices:[],plan:[],feedback:null,solved:false,revealed:false,sound:progress.sound!==false,voice:{status:'',listening:false,recording:false,url:null},turn:0,chat:[],dialogDone:false,lesson:null,attempt:null,meaning:null};
+// Existing key remains the sole owner of achievements, drafts and new evidence.
+let writeIntent=false,resetting=false,pendingEvents=[],storageConflict=false,russianBooting=true;
+const pendingAwards={done:{},completions:{},course:{},read:{},mistakes:{},reviews:{}};
+const writerId='rus-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);
+progress.resetEpoch=typeof progress.resetEpoch==='string'?progress.resetEpoch:'initial';
+if(LP)progress.learning=LP.clean(progress.learning,progress.resetEpoch);
+function storageEpoch(value,raw){return typeof value?.resetEpoch==='string'?value.resetEpoch:raw===null?'cleared':'initial';}
+function foreignContextChanged(latest){
+ if(!META[state.view])return false;
+ let previous;try{previous=JSON.parse(lastStoredRaw||'{}');}catch{return true;}
+ const scope=resumeScope();return JSON.stringify(previous.resume?.contexts?.[scope]||null)!==JSON.stringify(latest.resume?.contexts?.[scope]||null);
+}
+function inspectExternal(raw){
+ let latest;try{latest=JSON.parse(raw||'{}');}catch{storageBlocked=true;memory=true;return null;}
+ if(!latest||typeof latest!=='object'||Array.isArray(latest)){storageBlocked=true;memory=true;return null;}
+ if(storageEpoch(latest,raw)!==progress.resetEpoch||foreignContextChanged(latest)){storageConflict=true;writeIntent=false;return null;}
+ return latest;
+}
+function beginIntent(){
+ if(russianBooting||storageConflict)return false;
+ try{const raw=localStorage.getItem('slovograd-v1');if(raw!==lastStoredRaw){const latest=inspectExternal(raw);if(storageConflict)return false;if(latest){progress=mergeRussian(latest);lastStoredRaw=raw;}}}catch{memory=true;}
+ writeIntent=true;return true;
+}
+function mergeRussian(latest){
+ const epoch=typeof latest.resetEpoch==='string'?latest.resetEpoch:'initial',same=epoch===progress.resetEpoch,local=progress;
+ const obj=value=>value&&typeof value==='object'&&!Array.isArray(value)?value:{};
+ const union=(a,b)=>({...obj(a),...obj(b)}),result={...local,...latest,resetEpoch:epoch};
+ for(const field of ['done','completions'])result[field]=union(same?local[field]:{},latest[field]);
+ result.lessonRead=union(same?local.lessonRead:{},latest.lessonRead);
+ result.lessonReviews=union({},latest.lessonReviews);result.mistakes=union({},latest.mistakes);
+ result.spellingCourse={...obj(local.spellingCourse),...obj(latest.spellingCourse),done:union(same?local.spellingCourse?.done:{},latest.spellingCourse?.done),cursor:union({},latest.spellingCourse?.cursor),lastScope:union({},latest.spellingCourse?.lastScope)};
+ const remoteResume=latest.resume&&latest.resume.version===1?latest.resume:{version:1,contexts:{},sections:{}};
+ result.resume={...remoteResume,contexts:union({},remoteResume.contexts),sections:union({},remoteResume.sections)};
+ if(same&&META[state.view]){
+  const scope=resumeScope(),section=state.grade+':'+state.view;
+  if(local.resume?.contexts?.[scope])result.resume.contexts[scope]=local.resume.contexts[scope];
+  if(local.resume?.sections?.[section])result.resume.sections[section]=local.resume.sections[section];
+  result.resume.current=local.resume?.current;result.resume.lastStudy=local.resume?.lastStudy||remoteResume.lastStudy;
+  if(inSpellingCourse()){
+   const course=courseScope();if(local.spellingCourse?.cursor?.[course])result.spellingCourse.cursor[course]=local.spellingCourse.cursor[course];
+   if(local.spellingCourse?.lastScope?.[state.grade]!==undefined)result.spellingCourse.lastScope[state.grade]=local.spellingCourse.lastScope[state.grade];
+  }
+ }else if(same&&local.resume?.current)result.resume.current=local.resume.current;
+ if(same){const entries=[...(latest.creations||[]),...(local.creations||[])].filter(x=>x&&typeof x.id==='string'&&typeof x.text==='string'),seen=new Set();result.creations=entries.filter(x=>{const id=x.id+'\n'+x.text;if(seen.has(id))return false;seen.add(id);return true;}).slice(-30);}else result.creations=Array.isArray(latest.creations)?latest.creations:[];
+ if(LP){result.learning=LP.merge(local.learning,latest.learning,{generation:epoch});if(!same)result.learning=LP.clean(latest.learning,epoch);}
+ if(same)for(const [field,pending]of Object.entries(pendingAwards)){const dest=field==='course'?result.spellingCourse.done:field==='read'?result.lessonRead:field==='reviews'?result.lessonReviews:result[field];for(const [key,value]of Object.entries(pending)){if(value===false)delete dest[key];else dest[key]=field==='read'?Math.max(Number(dest[key])||0,value):value;}}
+ return result;
+}
+function save(passive=false){
+ if(russianBooting)return;
+ if((storageBlocked||storageConflict)&&!resetting)return;
+ progress.grade=state.grade;progress.sound=state.sound;
+ try{
+  const raw=localStorage.getItem('slovograd-v1');
+  // A background or merely redrawn tab cannot replace another tab's cursor.
+  if(!resetting&&raw!==lastStoredRaw&&(passive||!writeIntent))return;
+  if(!resetting&&raw!==lastStoredRaw){const latest=inspectExternal(raw);if(!latest)return;progress=mergeRussian(latest);}
+  progress.grade=state.grade;progress.sound=state.sound;
+  if(LP&&LP.isSupported(progress.learning)){for(const event of pendingEvents)progress.learning=LP.record(progress.learning,event);}
+  const next=JSON.stringify(progress);localStorage.setItem('slovograd-v1',next);lastStoredRaw=next;pendingEvents=[];for(const pending of Object.values(pendingAwards))for(const key of Object.keys(pending))delete pending[key];writeIntent=false;resetting=false;storageBlocked=false;memory=false;
+ }catch{memory=true;}
+}
+// Keep the learning position separately from the historical discovery counter.
+const resumeObject=value=>value&&typeof value==='object'&&!Array.isArray(value);
+progress.completions=resumeObject(progress.completions)?progress.completions:{};
+progress.resume=resumeObject(progress.resume)&&progress.resume.version===1?progress.resume:{version:1,contexts:{},sections:{}};
+progress.resume.contexts=resumeObject(progress.resume.contexts)?progress.resume.contexts:{};
+progress.resume.sections=resumeObject(progress.resume.sections)?progress.resume.sections:{};
+let resumeReady=false;
+const RESUME_MODES={spelling:['construct','write','dictation'],morphology:['parts','prepositions'],syntax:['base','full']};
+function exerciseMode(){return state.mode[state.view]||'standard';}
+function completionKey(t=current()){return state.grade+':'+source()+':'+exerciseMode()+':'+t?.id;}
+function taskCompleted(t){return !!t&&(inSpellingCourse()?courseDone(state.mode.spelling,t):progress.completions[completionKey(t)]===true);}
+function taskHistory(t){return !!t&&progress.done[source()+':'+t.id]===true&&!taskCompleted(t);}
+function resumeScope(){return JSON.stringify([state.grade,state.view,exerciseMode(),state.topic,state.category,state.harder,state.spellingFree,state.review,inSpellingCourse()?state.courseCategory:null]);}
+function sessionConfig(){return {view:state.view,grade:state.grade,mode:{...state.mode},topic:state.topic,category:state.category,harder:state.harder,spellingFree:state.spellingFree,courseCategory:state.courseCategory,review:state.review,reviewIds:state.review?list().map(t=>t.id):[]};}
+function rememberSession(){
+ if(!resumeReady)return;
+ progress.resume.current=META[state.view]?sessionConfig():{view:state.view==='progress'?'progress':'home',grade:state.grade};
+ if(META[state.view]){
+  const config=sessionConfig(),t=current(),scope=resumeScope();
+  progress.resume.sections[state.grade+':'+state.view]=config;progress.resume.lastStudy=config;
+  progress.resume.contexts[scope]={taskId:t?.id||null,nonce:state.nonce,draft:state.draft,marks:[...state.marks],zero:state.zero,assembled:[...state.assembled],choices:[...state.choices],plan:[...state.plan],brush:state.brush,turn:state.turn,chat:state.chat.map(x=>({who:x.who,text:x.text})),dialogDone:state.dialogDone,solved:state.solved,revealed:state.revealed,repeating:!!state.repeating,finished:!!state.practiceFinished,lesson:state.lesson?{...state.lesson}:null,feedback:state.feedback?{...state.feedback}:null,attempt:cleanAttempt(state.attempt),meaning:meaningSnapshot()};
+  const keys=Object.keys(progress.resume.contexts);while(keys.length>120)delete progress.resume.contexts[keys.shift()];
+ }
+ save();
+}
+function applySessionConfig(config){
+ if(!resumeObject(config)||!META[config.view]||![1,2].includes(config.grade))return false;
+ state.view=config.view;state.grade=config.grade;
+ for(const [section,modes] of Object.entries(RESUME_MODES)){const mode=config.mode?.[section];if(modes.includes(mode))state.mode[section]=mode;}
+ state.harder=state.grade===1&&config.harder===true;state.spellingFree=config.spellingFree===true;state.review=config.review===true;state.reviewLists={};state.topic='all';state.category='all';
+ if(state.view==='spelling'&&spellingCategories().includes(config.category))state.category=config.category;
+ if(topicOptions().some(topic=>topic.id===config.topic))state.topic=config.topic;
+ if(state.review&&Array.isArray(config.reviewIds)){const ids=new Set((D[source()]||[]).map(t=>t.id));state.reviewLists[source()]=config.reviewIds.filter(id=>ids.has(id)).slice(0,500);}
+ state.courseCategory=typeof config.courseCategory==='string'?config.courseCategory:null;
+ if(inSpellingCourse())resumeCourse();
+ return true;
+}
+function firstUnfinished(a,legacyHint=false){
+ let index=a.findIndex(t=>!taskCompleted(t));
+ // Old saves did not record a mode. Use them as a starting-position hint only;
+ // they remain historical marks and never complete every mode or grade.
+ if(legacyHint&&!inSpellingCourse()&&!Object.keys(progress.completions).some(k=>k.startsWith(state.grade+':'+source()+':'+exerciseMode()+':'))&&(!RESUME_MODES[state.view]||exerciseMode()===RESUME_MODES[state.view][0])){
+  const hinted=a.findIndex(t=>!taskCompleted(t)&&!progress.done[source()+':'+t.id]);if(hinted>=0)index=hinted;
+ }
+ return index;
+}
+function resumeContext(){
+ const a=list(),snapshot=progress.resume.contexts[resumeScope()];
+ if(!a.length){prepare();return;}
+ let index=resumeObject(snapshot)?a.findIndex(t=>t.id===snapshot.taskId):-1;
+ const valid=index>=0;
+ if(!valid)index=firstUnfinished(a,true);
+ const resumeMeaning=valid&&snapshot.solved===true&&resumeObject(snapshot.meaning)&&snapshot.meaning.open===true&&!snapshot.meaning.finished;
+ if(valid&&snapshot.solved===true&&!resumeMeaning){
+  if(inSpellingCourse()){resumeCourse();prepare();return;}
+  index=-1;for(let step=1;step<=a.length;step++){const i=(a.findIndex(t=>t.id===snapshot.taskId)+step)%a.length;if(!taskCompleted(a[i])){index=i;break;}}
+ }
+ if(index<0){state.index[source()]=0;prepare();state.practiceFinished=true;return;}
+ state.index[source()]=index;
+ state.nonce=valid&&Number.isInteger(snapshot.nonce)&&snapshot.nonce>=0&&snapshot.nonce<1e9?snapshot.nonce:0;
+ prepare();
+ if(!valid||snapshot.solved===true&&!resumeMeaning)return;
+ state.attempt=cleanAttempt(snapshot.attempt)||newAttempt();if(resumeMeaning){state.solved=true;state.meaning=restoreMeaning(snapshot.meaning);}
+ const t=current(),allowed=state.view==='syntax'?ROLES:PARTS;
+ state.draft=typeof snapshot.draft==='string'?snapshot.draft.slice(0,1800):'';
+ if(Array.isArray(snapshot.marks))state.marks=state.marks.map((_,i)=>Object.hasOwn(allowed,snapshot.marks[i])?snapshot.marks[i]:'');
+ state.zero=snapshot.zero===true;
+ const limit=state.view==='spelling'?t.word.length:state.view==='builder'?t.chunks.length:0;
+ const ids=state.view==='spelling'?new Set(state.bank.map(x=>x.id)):new Set(t.chunks?.map((_,i)=>i)||[]);
+ state.assembled=Array.isArray(snapshot.assembled)?[...new Set(snapshot.assembled.filter(id=>Number.isInteger(id)&&ids.has(id)))].slice(0,limit):[];
+ state.choices=state.view==='morphology'&&state.mode.morphology==='prepositions'?(['together','separate'].includes(snapshot.choices?.[0])?[snapshot.choices[0]]:[]):(t.banks||[]).slice(0,Array.isArray(snapshot.choices)?snapshot.choices.length:0).map((bank,i)=>Number.isInteger(snapshot.choices?.[i])&&snapshot.choices[i]>=0&&snapshot.choices[i]<bank.options.length?snapshot.choices[i]:null);
+ state.plan=(t.plan||[]).slice(0,Array.isArray(snapshot.plan)?snapshot.plan.length:0).map((_,i)=>snapshot.plan?.[i]===true);
+ if(Object.hasOwn(allowed,snapshot.brush))state.brush=snapshot.brush;
+ if(state.view==='dialogues'&&Array.isArray(snapshot.chat)){
+  const turn=Number.isInteger(snapshot.turn)?snapshot.turn:0;
+  if(turn>=0&&turn<t.turns.length){state.turn=turn;const chat=snapshot.chat.filter(x=>resumeObject(x)&&['coach','child'].includes(x.who)&&typeof x.text==='string').slice(0,30).map(x=>({who:x.who,text:x.text.slice(0,1800)}));if(chat.filter(x=>x.who==='child').length===turn)state.chat=chat;else state.turn=0;}
+ }
+ state.revealed=snapshot.revealed===true;state.repeating=snapshot.repeating===true;state.practiceFinished=snapshot.finished===true;
+ if(resumeObject(snapshot.feedback)&&typeof snapshot.feedback.text==='string'&&['hint','error','success'].includes(snapshot.feedback.type))state.feedback={text:snapshot.feedback.text.slice(0,1800),type:snapshot.feedback.type};
+ // Rebuild lesson variants from the restored task before trusting a saved rule.
+ const required=pendingLesson(),savedLesson=snapshot.lesson;
+ if(!required&&resumeObject(savedLesson)&&L[savedLesson.id]&&(savedLesson.reason!=='initial'||progress.lessonRead[savedLesson.id]!==L[savedLesson.id].version)&&savedLesson.contextKey===key()&&['manual','initial','worked'].includes(savedLesson.reason))state.lesson={id:savedLesson.id,parentId:lessonForCurrent(),reason:savedLesson.reason,contextKey:key(),feedback:typeof savedLesson.feedback==='string'?savedLesson.feedback.slice(0,1800):'',quizChoice:Number.isInteger(savedLesson.quizChoice)&&savedLesson.quizChoice>=0&&savedLesson.quizChoice<L[savedLesson.id].check.options.length?savedLesson.quizChoice:null,after:savedLesson.after==='reveal'?'reveal':null};
+ if(required)state.lesson=null;
+ ensureLesson();
+}
+function continueSection(view){
+ const config=progress.resume.sections[state.grade+':'+view];
+ if(!applySessionConfig(config)){state.view=view;state.review=false;state.reviewLists={};state.category='all';state.topic='all';if(inSpellingCourse())restoreCourseScope();}
+ resumeContext();
+}
+function restoreApplication(){
+ const config=progress.resume.current;
+ if(applySessionConfig(config)){resumeContext();return;}
+ if(resumeObject(config)&&['home','progress'].includes(config.view)){state.view=config.view;prepare();return;}
+ // A prior guided course has an exact grade/mode cursor even in older saves.
+ if(Object.keys(progress.spellingCourse.cursor).length){state.view='spelling';restoreCourseScope();resumeContext();return;}
+ const knownSection=key=>{if(typeof key!=='string')return null;const split=key.indexOf(':'),section=key.slice(0,split),id=key.slice(split+1);return (D[section]||[]).some(t=>t.id===id)?section:null;};
+ const review=Object.values(progress.lessonReviews).reverse().find(item=>resumeObject(item)&&Array.isArray(D[item.section]));
+ const section=review?.section||Object.keys(progress.done).reverse().map(knownSection).find(Boolean)||Object.keys(progress.mistakes).reverse().map(knownSection).find(Boolean);
+ const view=section==='prepositions'?'morphology':Object.keys(META).find(view=>META[view].data===section);
+ if(view){
+  state.view=view;if(section==='prepositions')state.mode.morphology='prepositions';
+  if(inSpellingCourse()){
+   restoreCourseScope();const a=list(),index=a.findIndex(t=>!courseDone(state.mode.spelling,t)&&!progress.done['spelling:'+t.id]);if(index>=0)state.index.spelling=index;rememberCourse();prepare();
+  }else resumeContext();
+  return;
+ }
+ prepare();
+}
+function taskLabel(t){return state.view==='spelling'?(state.mode.spelling==='dictation'?'Слово под диктовку':'Слово для самостоятельной проверки'):state.view==='dialogues'?t.title:state.view==='morphology'?(t.word||t.left+'…'+t.right):state.view==='syntax'?t.words.join(' '):state.view==='builder'?t.pattern:t.seed;}
+function taskMark(t){return taskCompleted(t)?'✓ ':taskHistory(t)?'◇ ':'○ ';}
+function taskProgress(){const a=list(),done=a.filter(taskCompleted).length;return `<div class="task-progress" aria-label="Выполненные задания"><div><strong>${done} из ${a.length} выполнено в этом режиме</strong><span>✓ Выполнено · ○ Осталось${a.some(taskHistory)?' · ◇ Есть другой результат':''}</span></div>${progressBar(done,a.length)}${state.repeating?'<p>Повторяем пройденное. Отметки сохраняются. <button class="btn ghost" data-action="continue-learning">Продолжить прохождение</button></p>':''}<details><summary>Какие задания уже пройдены?</summary><div class="task-map">${a.map((t,i)=>`<button class="task-map-item ${taskCompleted(t)?'complete':''} ${i===(state.index[source()]||0)%a.length?'current':''}" data-task-index="${i}" ${i===(state.index[source()]||0)%a.length?'aria-current="step"':''} aria-label="${esc((taskCompleted(t)?'Выполнено: ':taskHistory(t)?'Есть прежний результат: ':'Осталось: ')+taskLabel(t))}">${taskMark(t)}${i+1}</button>`).join('')}</div><p>Выбери номер, чтобы посмотреть или повторить задание.${a.some(taskHistory)?' Знак ◇ означает результат из другого класса или режима либо отметку прежней версии. Знак ✓ относится к выбранному классу и режиму.':''}</p></details></div>`;}
+function practiceEnd(){return intro('ЭТОТ НАБОР ПРОЙДЕН','Все задания получились!',`${META[state.view].title}: результаты этого класса и режима сохранены.`)+tabs()+`<section class="exercise-card practice-end"><h2>Можно перейти к другой теме или повторить</h2><p>Заново задания сами не начинаются. Все выполненные номера отмечены ниже.</p>${taskProgress()}<div class="action-row"><button class="btn primary" data-action="repeat-practice">Повторить задания</button><button class="btn secondary" data-view="home">Выбрать раздел</button></div></section>`;}
+function resumeHome(){const config=progress.resume.lastStudy;return config&&META[config.view]?`<section class="resume-card"><div><b>Продолжим с того места, где остановились</b><p>${esc(META[config.view].title)} · ${config.grade} класс</p></div><button class="btn primary" data-action="resume-study">Продолжить ${ico('arrow')}</button></section>`:'';}
+
+function sayLive(s){$('#live').textContent=s;}
+function doneCount(section){return Object.keys(progress.done).filter(k=>k.startsWith(section+':')).length;}
+function countAll(){return Object.keys(progress.done).length;}
+function source(){return state.view==='morphology'&&state.mode.morphology==='prepositions'?'prepositions':META[state.view]?.data;}
+function gradePool(section){return (D[section]||[]).filter(t=>state.harder||t.level<=state.grade);}
+function topicOptions(){const section=source();return (TOPICS[section]||[]).filter(option=>option.id==='all'||gradePool(section).some(t=>K.topicMatches(section,t,option.id)));}
+function inSpellingCourse(){return state.view==='spelling'&&!state.spellingFree&&!state.review;}
+function spellingCourse(){return K.spellingCourse(D.spelling,state.grade);}
+function courseScope(){return state.grade+':'+state.category;}
+function courseDone(mode,task){return !!progress.spellingCourse.done[state.grade+':'+mode+':'+task.id];}
+function courseUnit(){return spellingCourse().find(unit=>unit.category===state.courseCategory);}
+function courseStage(){return courseUnit()?.stages.find(stage=>stage.mode===state.mode.spelling);}
+function stageDone(stage){return stage.tasks.every(task=>courseDone(stage.mode,task));}
+function rememberCourse(){if(!inSpellingCourse()||state.courseFinished)return;const stage=courseStage(),task=stage?.tasks[(state.index.spelling||0)%Math.max(1,stage.tasks.length)];if(task){progress.spellingCourse.cursor[courseScope()]={category:state.courseCategory,mode:stage.mode,id:task.id};progress.spellingCourse.lastScope[state.grade]=state.category;save();}}
+function restoreCourseScope(){const category=progress.spellingCourse.lastScope[state.grade];state.category=spellingCategories().includes(category)?category:'all';resumeCourse();}
+function selectCourseStage(unit,stage,index=0){state.courseCategory=unit.category;state.mode.spelling=stage.mode;state.index.spelling=index;state.courseFinished=false;rememberCourse();}
+function resumeCourse(){
+ if(!inSpellingCourse())return;
+ const units=spellingCourse().filter(unit=>state.category==='all'||unit.category===state.category),saved=progress.spellingCourse.cursor[courseScope()];
+ if(saved){const unit=units.find(unit=>unit.category===saved.category),stage=unit?.stages.find(stage=>stage.mode===saved.mode);if(stage&&!stageDone(stage)&&units.slice(0,units.indexOf(unit)).every(unit=>unit.stages.every(stageDone))&&unit.stages.slice(0,unit.stages.indexOf(stage)).every(stageDone)){const index=stage.tasks.findIndex(task=>task.id===saved.id&&!courseDone(stage.mode,task));if(index>=0){selectCourseStage(unit,stage,index);return;}}}
+ for(const unit of units)for(const stage of unit.stages)if(!stageDone(stage)){selectCourseStage(unit,stage,stage.tasks.findIndex(task=>!courseDone(stage.mode,task)));return;}
+ state.courseFinished=true;state.courseCategory=units[units.length-1]?.category||null;
+}
+function list(){
+ if(inSpellingCourse())return state.courseFinished?[]:courseStage()?.tasks||[];
+ const section=source(),explicitTopic=state.topic!=='all';
+ let a=gradePool(section);
+ if(section==='spelling'&&state.category!=='all')a=a.filter(t=>t.category===state.category);
+ if(explicitTopic)a=a.filter(t=>K.topicMatches(section,t,state.topic));
+ a=[...a].sort((a,b)=>state.grade===1?a.level-b.level:b.level-a.level);
+ a=K.mixTopics(a,section);
+ if(state.review){if(!state.reviewLists[section])state.reviewLists[section]=a.filter(t=>progress.mistakes[section+':'+t.id]).map(t=>t.id);const ids=new Set(state.reviewLists[section]);a=a.filter(t=>ids.has(t.id));}
+ return a;
+}
+function availableCount(section){return D[section].filter(t=>t.level<=state.grade).length;}
+function topicRule(){const option=topicOptions().find(t=>t.id===state.topic);if(!option)return '';return `<div class="topic-rule"><span>ТРЕНИРУЕМ: ${esc(option.label)}</span><p>${esc(option.description)}</p></div>`;}
+
+function current(){const a=list();return a[(state.index[source()]||0)%Math.max(1,a.length)];}
+function key(){return source()+':'+current()?.id;}
+function notify(text,type='hint'){state.feedback={text,type};sayLive(text);}
+let voiceEpoch=0;
+function resetVoice(){voiceEpoch++;V.dispose();state.voice={status:'',listening:false,recording:false,url:null};}
+const SPELL_LESSONS={'ЖИ–ШИ':'spell-zhishi','ЧА–ЩА':'spell-chashcha','ЧУ–ЩУ':'spell-chushchu','Словарные слова':'spell-dictionary','Безударные гласные':'spell-vowels','Парные согласные':'spell-consonants','Мягкий знак':'spell-soft','Разделительный Ь':'spell-soft-separator','Разделительный Ъ':'spell-hard-separator'};
+function lessonVariant(baseId,topic){
+ if(!topic||topic==='all')return baseId;
+ const option=topicOptions().find(x=>x.id===topic);if(!option)return baseId;
+ const id=baseId+'--'+topic;
+ if(!L[id])L[id]={...L[baseId],id,title:option.label,lead:option.description,steps:[{title:'Что тренируем сегодня',text:option.description},...L[baseId].steps]};
+ return id;
+}
+function lessonForCurrent(){
+ const t=current();if(!t||!META[state.view])return null;
+ if(state.view==='spelling')return SPELL_LESSONS[t.category];
+ if(state.view==='morphology'){
+  if(state.mode.morphology==='prepositions')return 'prepositions';
+  const topic=state.topic==='all'?K.morphemeStructure(t):state.topic;
+  if(topic==='basic'&&t.parts.some(part=>part.kind==='ending'&&!part.text))return 'morph-zero';
+  return ({prefix:'morph-prefix',suffix:'morph-suffix',full:'morph-full',zero:'morph-zero'}[topic]||'morph-basics');
+ }
+ if(state.view==='syntax')return ({attribute:'syntax-attribute',object:'syntax-object',adverbial:'syntax-adverbial'}[state.topic])||(state.mode.syntax==='full'?'syntax-full':lessonVariant('syntax-base',state.topic));
+ if(state.view==='builder')return lessonVariant('builder',state.topic);
+ if(state.view==='dialogues')return lessonVariant('dialogue',state.topic);
+ return 'creative-'+(state.topic==='all'?(t.goals?.[0]||'description'):state.topic);
+}
+function pendingLesson(){const parent=lessonForCurrent();if(!parent)return null;const exact=progress.lessonReviews[parent];if(exact)return {parentId:parent,...exact};const entry=Object.entries(progress.lessonReviews).find(([,r])=>r.section===source());return entry?{parentId:entry[0],...entry[1]}:null;}
+function openLesson(id=lessonForCurrent(),reason='manual',options={}){
+ if(!id||!L[id])return false;
+ markAssistance('explanation');
+ $$('audio').forEach(a=>a.pause());
+ if(state.voice.recording||state.voice.listening)resetVoice();else V.stopSpeech();
+ if(drag){drag.ghost?.remove();drag=null;}
+ state.lesson={id,parentId:options.parentId||lessonForCurrent(),reason,contextKey:key(),feedback:options.feedback??state.feedback?.text??'',quizChoice:null,after:options.after||null};
+ sayLive(reason==='mistake'?'Давай вернёмся к правилу. Твой ответ остаётся на месте.':'Сначала разберём правило, затем перейдём к заданию.');
+ return true;
+}
+// Returns true whenever practice must wait for a deliberate acknowledgement.
+function ensureLesson(){
+ const id=lessonForCurrent();if(!id)return false;
+ if(state.lesson&&state.lesson.contextKey===key())return true;
+ if(state.lesson)state.lesson=null;
+ const pending=pendingLesson();
+ if(pending&&L[pending.id])return openLesson(pending.id,'mistake',{parentId:pending.parentId,feedback:pending.feedback||'Повторим способ решения и попробуем ещё раз.'});
+ if(progress.lessonRead[id]!==L[id].version)return openLesson(id,'initial');
+ return false;
+}
+function requireLesson(id){
+ const parentId=lessonForCurrent();if(!parentId)return;
+ progress.lessonReviews[parentId]={id:id&&L[id]?id:parentId,section:source(),feedback:state.feedback?.text||'Разберём способ решения по шагам.'};pendingAwards.reviews[parentId]=progress.lessonReviews[parentId];save();
+ const required=progress.lessonReviews[parentId];openLesson(required.id,'mistake',{parentId,feedback:required.feedback});
+}
+function acknowledgeLesson(){
+ const lesson=state.lesson;if(!lesson)return;
+ V.stopSpeech();progress.lessonRead[lesson.id]=L[lesson.id].version;pendingAwards.read[lesson.id]=L[lesson.id].version;
+ if(lesson.reason==='mistake'){delete progress.lessonReviews[lesson.parentId];pendingAwards.reviews[lesson.parentId]=false;}
+ state.lesson=null;rememberSession();save();
+ if(lesson.after==='reveal'){applyWorkedExample();return;}
+ if(lesson.reason==='mistake')notify('Вернулись к заданию. Твой ответ сохранён — проверь его по шагам и исправь то, что нужно.');
+ render();$('.exercise-card,.task-body')?.scrollIntoView({behavior:window.matchMedia(rusMotionPreference).matches?'instant':'smooth',block:'start'});
+}
+function remediationLesson(){
+ const t=current();if(state.view==='morphology'&&state.mode.morphology==='parts'){
+  const expected=K.morphemes(t),index=expected.findIndex((kind,i)=>kind!==state.marks[i]);
+  if(index<0)return 'morph-zero';
+  return 'morph-'+expected[index];
+ }
+ if(state.view==='syntax'){
+  const expected=t.roles.map(role=>state.mode.syntax==='full'||role==='subject'||role==='predicate'?role:'');
+  const index=expected.findIndex((role,i)=>role!==(state.marks[i]||'')),role=t.roles[index];
+  return state.mode.syntax==='full'&&['attribute','object','adverbial'].includes(role)?'syntax-'+role:'syntax-base';
+ }
+ return state.view==='builder'?'builder':lessonForCurrent();
+}
+// Existing theory remains first. The short concept check belongs to this rule,
+// not to a separate menu with unrelated terminology.
+function learningStages(reading){return `<div class="learning-stages" aria-label="Этапы занятия"><span class="${reading?'active':'done'}">${reading?'1':'✓'} Разберёмся</span><i aria-hidden="true">→</i><span class="${reading?'':'done'}">${reading?'2':'✓'} Проверим правило</span><i aria-hidden="true">→</i><span class="${reading?'':'active'}">3 Потренируемся</span></div>`;}
+function russianGateConfig(){
+ if(!META[state.view]||!current()||!window.RussianJourney)return null;
+ return window.RussianJourney.gateFor({lessonId:lessonForCurrent(),grade:state.grade,section:state.view,mode:exerciseMode(),category:state.category,topic:state.topic,taskId:current().id});
+}
+function sameRussianContext(context){return context&&context.trainerId==='slovograd'&&context.grade===state.grade&&context.section===state.view&&context.mode===exerciseMode()&&context.category===state.category&&context.topic===state.topic&&context.taskId===current()?.id;}
+function ensureConcepts(){
+ if(state.lesson||state.courseFinished||state.practiceFinished||!window.PracticeHub?.requireConcepts)return false;
+ const gate=russianGateConfig();return gate?window.PracticeHub.requireConcepts(gate)===true:false;
+}
+function conceptWaiting(){return intro('СНАЧАЛА ПРАВИЛО — ПОТОМ ЗАДАНИЯ','Три маленьких шага по этой теме','Проверим, как пользоваться правилом. Затем вернёмся к этому же заданию.')+`<section class="exercise-card"><p>Твой ответ и место занятия сохранены. Можно остановиться и продолжить позже.</p><button class="btn primary" data-action="concept-resume">Продолжить изучение правила ${ico('arrow')}</button><button class="btn ghost" data-view="home">На главную</button></section>`;}
+
+const GRAMMAR_STROKES={
+ prefix:'M2 4H42V9',
+ root:'M2 10Q22 -4 42 10',
+ suffix:'M2 9 22 2 42 9',
+ subject:'M1 7H43',
+ predicate:'M1 4H43 M1 9H43',
+ attribute:'M1 7q3-5 6 0t6 0 6 0 6 0 6 0 6 0 6 0',
+ object:'M1 7h6 m3 0h6 m3 0h6 m3 0h6 m3 0h6',
+ adverbial:'M1 7h7 m3 0h.2 m3 0h7 m3 0h.2 m3 0h7 m3 0h.2 m3 0h5'
+};
+function grammarStroke(kind){
+ const path=GRAMMAR_STROKES[kind];
+ return path?`<svg class="rus-grammar-stroke" viewBox="0 0 44 12" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="${path}" pathLength="1" vector-effect="non-scaling-stroke"/></svg>`:'';
+}
+const DIAGRAM_LABELS={prefix:'приставка',root:'корень',suffix:'суффикс',ending:'окончание',zero:'нулевое окончание',subject:'подлежащее',predicate:'сказуемое',attribute:'определение',object:'дополнение',adverbial:'обстоятельство',right:'верно',wrong:'так не пишем',rest:'',step:''};
+function diagramView(diagram){return `<figure class="lesson-diagram"><h3>${esc(diagram.title)}</h3>${diagram.rows.map(row=>`<div class="diagram-row">${row.label?`<div class="diagram-label">${esc(row.label)}</div>`:''}<div class="diagram-parts">${row.parts.map(part=>`<span class="diagram-part ${part.kind}"><span class="rus-diagram-text">${esc(part.text)}${grammarStroke(part.kind)}</span>${DIAGRAM_LABELS[part.kind]?`<small>${DIAGRAM_LABELS[part.kind]}</small>`:''}</span>`).join('')}</div>${row.caption?`<p class="diagram-caption">${esc(row.caption)}</p>`:''}</div>`).join('')}${diagram.caption?`<figcaption class="diagram-caption">${esc(diagram.caption)}</figcaption>`:''}</figure>`;}
+function workedDiagram(){
+ const t=current();if(state.view==='morphology'&&state.mode.morphology==='parts')return {title:'Разбираем этот пример по шагам',rows:[{parts:t.parts.map(p=>({text:p.text||'∅',kind:p.text?p.kind:'zero'})),caption:t.explain}],caption:'Основа: '+t.base+'. Это учебный пример, отметку за него не ставим.'};
+ if(state.view==='syntax'){
+  const parts=[];for(let i=0;i<t.words.length;i++){let text=t.words[i],role=t.roles[i];if(state.mode.syntax==='base'&&!['subject','predicate'].includes(role))role='rest';if(/^(в|во|на|под|над|за|из|к|по|от|с|со|у|без|для|перед|после|около)$/i.test(text)&&t.roles[i+1]===t.roles[i])text+=' '+t.words[++i];parts.push({text,kind:role});}
+  return {title:'Учебный разбор предложения',rows:[{parts,caption:t.explain}],caption:'Сначала найди основу. Предлог входит в группу, отдельным членом не является.'};
+ }
+ return null;
+}
+function lessonTaskFocus(){
+ const t=current();if(state.lesson?.reason!=='mistake'||!t)return '';
+ if(state.view==='morphology'&&state.mode.morphology==='parts')return `<section class="lesson-focus"><h3>Теперь примени способ к слову «${esc(t.word)}»</h3><p>Для поиска корня сравни родственные слова: <b>${esc(t.relatives.join(', '))}</b>. Для поиска окончания измени форму самого слова. Сначала отдели окончание, а затем проверь остальные части.</p><p class="muted">Твой вариант разбора остаётся в задании — его можно будет исправить.</p></section>`;
+ if(state.view==='spelling')return `<section class="lesson-focus"><h3>Вернёмся к твоему слову</h3><p class="lesson-focus-word">${esc(t.masked)}</p><p>${esc(t.checkWord?'Проверь нужную букву с помощью слова «'+t.checkWord+'».':'Примени правило, которое только что повторили, к пропущенной букве.')}</p></section>`;
+ return '';
+}
+function lessonScreen(){
+ const active=state.lesson,unit=L[active.id],retry=active.reason==='mistake',worked=active.reason==='worked',quiz=unit.check,choice=active.quizChoice,correct=choice===quiz.correct;
+ return intro(retry?'ОШИБКА ПОДСКАЗАЛА, ЧТО ПОВТОРИТЬ':'СНАЧАЛА ПОЙМЁМ — ПОТОМ ПОПРОБУЕМ',retry?'Давай разберёмся вместе':'Маленькое объяснение перед практикой','Можно прочитать или послушать. Затем вернёмся к заданию.')+`<section class="lesson-screen trainer-workspace" data-workspace-key="${esc(russianWorkspaceKey('lesson:'+unit.id))}" role="region" aria-labelledby="lesson-heading">${learningStages(true)}<article class="lesson-card"><div class="lesson-top"><div><span class="lesson-kicker">${retry?'ПОВТОРИМ СПОСОБ РЕШЕНИЯ':worked?'УЧЕБНЫЙ ПРИМЕР':'РАЗБИРАЕМ ПО ШАГАМ'}</span><h2 class="lesson-title" id="lesson-heading" data-workspace-focus tabindex="-1">${esc(unit.title)}</h2></div><span class="lesson-guide-owl rus-sonya-avatar">${window.RUS_ART.owl}${speechWaves()}</span></div><p class="lesson-lead">${esc(unit.lead)}</p>${retry?`<div class="lesson-context"><b>На что обратим внимание</b><p>${esc(active.feedback)}</p><small>Ответ остаётся в задании. После объяснения можно будет его исправить.</small></div>`:''}<div class="lesson-actions"><button class="btn secondary" data-action="lesson-read">${ico('sound')} Послушать объяснение</button><button class="btn ghost" data-action="lesson-stop">${ico('stop')} Остановить</button></div><div class="lesson-steps">${unit.steps.map((step,i)=>`<section class="lesson-step"><span class="lesson-step-num">${i+1}</span><div class="lesson-step-body"><h3>${esc(step.title)}</h3><p>${esc(step.text)}</p>${step.example?`<div class="lesson-example">${esc(step.example)}</div>`:''}<button class="btn ghost lesson-step-sound" data-action="lesson-read" data-step="${i}" aria-label="Послушать шаг ${i+1}">${ico('sound')} Послушать шаг</button></div></section>`).join('')}</div><div class="lesson-diagrams">${unit.diagrams.map(diagramView).join('')}${worked&&workedDiagram()?diagramView(workedDiagram()):''}</div><section class="lesson-remember"><h3>Возьми с собой в задание</h3><ul>${unit.remember.map(text=>`<li>${esc(text)}</li>`).join('')}</ul></section><div class="lesson-details">${unit.details.map((detail,i)=>`<details data-rule-key="${unit.id}:detail:${i}"><summary>${esc(detail.title)}</summary><p>${esc(detail.text)}</p></details>`).join('')}</div><details class="lesson-check" ${choice!==null?'open':''}><summary>Хочешь проверить себя?</summary><p>${esc(quiz.prompt)}</p><div class="lesson-choices">${quiz.options.map((option,i)=>`<button class="lesson-choice ${choice===i?'chosen '+(correct?'correct':'incorrect'):''}" data-lesson-choice="${i}" aria-pressed="${choice===i}">${esc(option)}</button>`).join('')}</div>${choice!==null?`<p class="lesson-check-feedback">${correct?'Верно! ':'Подумай ещё. '}${esc(quiz.explanation)}</p>`:''}<small>Это небольшая самопроверка, отметка за неё не ставится.</small></details>${state.feedback&&state.feedback.text!==active.feedback?feedbackView():''}${lessonTaskFocus()}<div class="lesson-return workspace-actions"><p>${retry?'Теперь попробуй применить эти шаги к своему ответу.':'Когда будешь готов, переходи к практике.'}</p><button class="btn primary" data-action="lesson-continue">${retry?'Понял — исправлю ответ':worked?'Понял — к учебному примеру':'Понял — к заданию'} ${ico('arrow')}</button></div></article></section>`;
+}
+function inlineLesson(){
+ const id=state.view==='morphology'&&state.mode.morphology==='parts'&&PARTS[state.brush]?'morph-'+state.brush:lessonForCurrent(),unit=L[id];if(!unit)return '';
+ return `<details class="lesson-inline" data-rule-key="${id}:inline"><summary>Подробнее: ${esc(unit.title)}</summary><div class="lesson-inline-body"><p>${esc(unit.lead)}</p><ol>${unit.steps.map(step=>`<li><b>${esc(step.title)}</b><p>${esc(step.text)}</p>${step.example?`<p class="lesson-example">${esc(step.example)}</p>`:''}</li>`).join('')}</ol>${unit.details.map((d,i)=>`<details data-rule-key="${unit.id}:inline:${i}"><summary>${esc(d.title)}</summary><p>${esc(d.text)}</p></details>`).join('')}<button class="btn secondary lesson-inline-open" data-action="lesson-open" data-lesson-id="${id}">${ico('book')} Открыть со схемами</button></div></details>`;
+}
+function readLesson(step){
+ markAssistance('explanation');
+ const unit=L[state.lesson?.id||lessonForCurrent()];if(!unit)return;
+ const index=step===undefined?null:Number(step),stepText=s=>s.title+'. '+s.text+' '+(s.example||'');
+ const text=index!==null&&unit.steps[index]?stepText(unit.steps[index]):[unit.title+'. '+unit.lead,...unit.steps.map(stepText),unit.remember.join(' ')];
+ speak(text,true);
+}
+
+function prepare(){
+ const continuingAttempt=cleanAttempt(state.attempt),continuingWorked=state.revealed===true;
+ writeIntent=true;state.practiceFinished=false;state.repeating=false;state.lesson=null;state.feedback=null;state.solved=false;state.revealed=false;state.draft='';state.assembled=[];state.bank=[];state.marks=[];state.zero=false;state.choices=[];state.plan=[];state.turn=0;state.chat=[];state.dialogDone=false;resetVoice();const t=current();if(!t)return;
+ state.attempt=continuingAttempt||newAttempt();if(continuingAttempt&&continuingWorked)state.revealed=true;state.meaning=null;
+ state.marks=Array.from({length:state.view==='syntax'?t.words.length:t.word?.length||0},()=> '');state.brush=state.view==='syntax'?(ROLES[state.topic]?state.topic:'subject'):state.view==='morphology'&&['prefix','suffix'].includes(state.topic)?state.topic:'root';
+ if(state.view==='spelling'){const pool=K.spellingPool(t);state.bank=K.shuffled(pool,K.hash(t.id)+state.nonce).map((text,id)=>({id,text}));}
+ if(state.view==='builder')state.bank=K.shuffled(t.chunks.map((_,i)=>i),K.hash(t.id)+state.nonce);
+ if(state.view==='dialogues')state.chat=[{who:'coach',text:t.intro},{who:'coach',text:t.turns[0].prompt}];
+ ensureLesson();
+}
+function go(view){writeIntent=true;rememberSession();rememberCourse();resetVoice();if(META[view])continueSection(view);else{state.view=view;state.review=false;state.reviewLists={};state.category='all';state.topic='all';prepare();}render();window.scrollTo({top:0,behavior:window.matchMedia(rusMotionPreference).matches?'instant':'smooth'});}
+function complete(){writeIntent=true;if(!state.revealed){const oldKey=key(),scope=completionKey();progress.done[oldKey]=true;progress.completions[scope]=true;delete progress.mistakes[oldKey];pendingAwards.done[oldKey]=true;pendingAwards.completions[scope]=true;pendingAwards.mistakes[oldKey]=false;if(inSpellingCourse()){const ck=state.grade+':'+state.mode.spelling+':'+current().id;progress.spellingCourse.done[ck]=true;pendingAwards.course[ck]=true;}observeAttempt('correct');save();}state.solved=true;if(state.view==='spelling'&&!state.revealed)state.meaning=makeMeaning();}
+function mistake(){writeIntent=true;markAssistance('error');progress.mistakes[key()]=true;pendingAwards.mistakes[key()]=true;observeAttempt('incorrect');save();}
+// New evidence is additive; historical completion never fabricates independence.
+function spellingSkill(t=current()){return 'rus.spelling.'+(SPELL_LESSONS[t?.category]||'practice');}
+function observationTaskId(){const t=current();return t?'rus.'+source()+'.'+exerciseMode()+'.'+t.id:'';}
+function observationSkills(){return state.view==='spelling'?[spellingSkill()]:['rus.'+source()+'.'+exerciseMode()];}
+function newAttempt(){const taskId=observationTaskId();if(!taskId)return null;return LP?LP.attempt(taskId,observationSkills(),{generation:progress.resetEpoch,subject:'russian',mode:exerciseMode(),evidenceKind:'exercise',materialRevision:1,criteriaRevision:1}):{attemptId:'attempt-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2),taskId,skillIds:observationSkills(),generation:progress.resetEpoch,firstOutcome:'notchecked',errors:0,assistance:{explanation:false,visual:false,afterError:false,workedExample:false}};}
+function cleanAttempt(value){
+ if(!value||typeof value!=='object'||value.taskId!==observationTaskId()||typeof value.attemptId!=='string'||!/^[A-Za-z0-9_.:/-]{1,160}$/.test(value.attemptId))return null;
+ const result=newAttempt();result.attemptId=value.attemptId;if(Number.isFinite(value.startedAt)&&value.startedAt>=0)result.startedAt=value.startedAt;result.generation=typeof value.generation==='string'?value.generation:progress.resetEpoch;result.firstOutcome=['notchecked','correct','incorrect','skipped'].includes(value.firstOutcome)?value.firstOutcome:'notchecked';result.errors=Number.isInteger(value.errors)?Math.max(0,Math.min(1000,value.errors)):0;
+ for(const kind of ['explanation','visual','afterError','workedExample'])result.assistance[kind]=value.assistance?.[kind]===true;
+ return result;
+}
+function markAssistance(kind){
+ const active=state.solved?(state.meaning?.eligible&&!state.meaning.finished?state.meaning.attempt:null):(state.attempt||(state.attempt=newAttempt()));if(!active)return;
+ if(LP)LP.help(active,kind);else if(kind==='error'){active.assistance.afterError=true;active.firstOutcome='incorrect';active.errors++;}else active.assistance[kind]=true;
+}
+function observeAttempt(outcome,attempt=state.attempt,extra={}){if(!attempt)return;if(attempt.firstOutcome==='notchecked')attempt.firstOutcome=outcome;const event={...attempt,assistance:{...attempt.assistance},outcome,eventId:attempt.attemptId,...extra};pendingEvents.push(event);if(LP&&LP.isSupported(progress.learning))progress.learning=LP.record(progress.learning,event);}
+function attemptLabel(attempt){const a=attempt?.assistance||{};if(a.workedExample)return 'Учебный пример — самостоятельность не проверялась';const parts=[];if(a.explanation)parts.push('после объяснения');if(a.visual)parts.push('с визуальной подсказкой');if(a.afterError)parts.push(parts.length?'после ошибки':'исправил сам после ошибки');return parts.length?parts.join(' · '):'без подсказок';}
+function attemptResult(){return `<p class="attempt-result task-note" data-attempt-outcome="${esc(state.attempt?.assistance?.explanation||state.attempt?.assistance?.visual?'assisted':state.attempt?.assistance?.afterError?'after-error':'independent')}">Как получилось: <b>${esc(attemptLabel(state.attempt))}</b>. Это наблюдение, а не подтверждение устойчивого освоения.</p>`;}
+function categoryLabel(category){return state.solved||state.revealed?category:'Правило '+(Object.keys(SPELL_LESSONS).indexOf(category)+1);}
+function makeMeaning(){
+ const t=current();if(state.view!=='spelling'||!t||(!t.checkWord&&K.hash(t.id)%5!==0))return null;
+ let kind='checkword',prompt,correct,options,probe=t;
+ if(t.checkWord){correct=t.checkWord;prompt='Какое слово поможет проверить пропущенную букву в слове «'+t.masked+'»?';const n=K.norm(t.word),proof=K.norm(correct);const traps=['мяч','сыр','кот','стол','мост','дуб'].filter(w=>w!==proof&&!n.includes(w)&&!proof.includes(w));options=[correct,...traps.slice(0,2)];}
+ else{kind='transfer-letter';probe=D.spelling.find(item=>item.category===t.category&&item.id!==t.id&&item.masked.indexOf('□')>=0);if(!probe)return null;const i=probe.masked.indexOf('□');correct=probe.word[i];const wrong=probe.confusions?.find(c=>c.index===i&&c.wrong)?.wrong;options=[correct,...[wrong,'а','о','ы','и','е','у'].filter((x,j,a)=>x&&x!==correct&&a.indexOf(x)===j).slice(0,2)];prompt='Примени то же правило к новому слову: «'+probe.masked+'». Какую букву поставишь в окошко?';}
+ options=K.shuffled([...new Set(options)],K.hash(t.id)+97);const id='rus.spelling.meaning.'+t.id+'.'+probe.id;
+ const skill='rus.spelling.meaning.'+(SPELL_LESSONS[t.category]||'practice');
+ const attempt=LP?LP.attempt(id,[skill],{generation:progress.resetEpoch,subject:'russian',mode:'meaning',evidenceKind:kind,variantId:probe.id,materialRevision:1,criteriaRevision:1}):{attemptId:'meaning-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2),taskId:id,skillIds:[skill],generation:progress.resetEpoch,firstOutcome:'notchecked',assistance:{},errors:0};
+ return {eligible:true,open:false,finished:false,kind,prompt,correct,options,probeId:probe.id,attempt,choice:null,hint:false,outcome:null};
+}
+function meaningSnapshot(){const q=state.meaning;return q?{open:q.open===true,finished:q.finished===true,probeId:q.probeId,choice:q.choice,hint:q.hint===true,outcome:q.outcome,attempt:q.attempt}:null;}
+function restoreMeaning(raw){const q=makeMeaning();if(!q||raw.probeId!==q.probeId)return null;for(const flag of ['open','finished','hint'])q[flag]=raw[flag]===true;q.choice=Number.isInteger(raw.choice)&&raw.choice>=0&&raw.choice<q.options.length?raw.choice:null;q.outcome=['correct','incorrect','skipped'].includes(raw.outcome)?raw.outcome:null;if(raw.attempt&&raw.attempt.taskId===q.attempt.taskId&&typeof raw.attempt.attemptId==='string'){q.attempt={...q.attempt,...raw.attempt,skillIds:q.attempt.skillIds,assistance:{explanation:raw.attempt.assistance?.explanation===true,visual:raw.attempt.assistance?.visual===true,afterError:raw.attempt.assistance?.afterError===true,workedExample:false}};}return q;}
+function meaningInvitation(){const q=state.meaning;return q?.eligible?`<section class="example-card meaning-invitation"><h3>Проверим смысл на другом шаге?</h3><p>Один короткий вопрос. Его можно отложить; написанное слово уже сохранено.</p><button class="btn secondary" data-action="meaning-open">${q.finished?'Посмотреть проверку смысла':'Одна проверка смысла'}</button><p class="task-note">${q.finished?'Результат: '+esc(q.outcome==='correct'?attemptLabel(q.attempt):q.outcome==='skipped'?'пропущено':'пока не получилось'):'Понимание пока не проверено.'}</p></section>`:'';}
+function meaningScreen(){const q=state.meaning;if(!q)return '';return intro('КОРОТКО ПРОВЕРИМ ПОНИМАНИЕ','Почему так?','Написание уже получилось. Здесь проверяем другую связь, без готового объяснения.')+`<section class="exercise-card meaning-screen trainer-workspace" data-workspace-key="${esc(russianWorkspaceKey('meaning:'+q.probeId))}"><div class="content"><h2 data-workspace-focus tabindex="-1">${esc(q.prompt)}</h2><div class="choice-group">${q.options.map((text,i)=>`<button class="choice-btn ${q.choice===i?'active':''}" data-meaning-choice="${i}" ${q.finished?'disabled':''}>${esc(text)}</button>`).join('')}</div>${q.hint?`<div class="question-card meaning-help">${esc(q.kind==='checkword'?'Подбери родственное слово или форму, где нужный звук слышен ясно. Сравни смысл слов.':D.spelling.find(t=>t.id===q.probeId)?.rule||'Вспомни правило из объяснения.')}</div>`:''}${q.outcome?`<p class="feedback" role="status">${q.outcome==='correct'?'Получилось. '+esc(attemptLabel(q.attempt))+'. Проверим эту связь позднее на новом примере.':q.outcome==='skipped'?'Вопрос пропущен. Это не ошибка.':'Пока не получилось. Подумай о способе проверки; можно исправить выбор или открыть помощь.'}</p>`:''}<div class="action-row">${q.finished?'<button class="btn primary" data-action="meaning-close">Вернуться к слову</button>':'<button class="btn secondary" data-action="meaning-hint">Подсказка к смыслу</button><button class="btn ghost" data-action="meaning-skip">Отложить вопрос</button>'}</div><p class="task-note">Готовая запись слова и успешное участие сами по себе не подтверждают понимание правила.</p></div></section>`;}
+function answerMeaning(index){const q=state.meaning;if(!q||q.finished||!Number.isInteger(index)||index<0||index>=q.options.length)return;writeIntent=true;q.choice=index;const correct=K.norm(q.options[index])===K.norm(q.correct);q.outcome=correct?'correct':'incorrect';if(!correct){if(LP)LP.help(q.attempt,'error');else{q.attempt.assistance.afterError=true;q.attempt.firstOutcome='incorrect';}}q.finished=correct;observeAttempt(q.outcome,q.attempt);render();}
+function meaningHint(){const q=state.meaning;if(!q||q.finished)return;writeIntent=true;q.hint=true;if(LP)LP.help(q.attempt,'explanation');else q.attempt.assistance.explanation=true;render();}
+function skipMeaning(){const q=state.meaning;if(!q)return;writeIntent=true;q.outcome='skipped';q.finished=true;observeAttempt('skipped',q.attempt);q.open=false;render();}
+function evidenceSummary(){
+ const skills=Object.values(SPELL_LESSONS).map(id=>'rus.spelling.'+id);const labels={notchecked:'не проверено',independent:'без подсказок',assisted:'с помощью',incorrect:'пока не получилось',skipped:'пропущено'};
+ return `<section class="example-card evidence-summary"><h2>Как получалось в новых попытках</h2><p>Старые галочки остаются результатами прохождения. Самостоятельность прежних ответов не проверялась.</p><div class="completed-words">${skills.map(skill=>{const status=LP?LP.status(progress.learning,skill):'notchecked',event=LP?LP.latest(progress.learning,skill):null;return `<span data-skill="${skill}" data-evidence-status="${status}">${esc(Object.keys(SPELL_LESSONS).find(category=>'rus.spelling.'+SPELL_LESSONS[category]===skill))}: <b>${esc(event?.assistance?.afterError&&status==='independent'?'исправил сам после ошибки':labels[status]||labels.notchecked)}</b></span>`;}).join('')}</div><p class="task-note">Одна попытка не даёт окончательного вывода о понимании. Устойчивость проверяется новым заданием и повторением позже.</p></section>`;
+}
+
+function progressBar(n,total){return `<div class="progress-track"><i style="width:${total?Math.min(100,n/total*100):0}%"></i></div>`;}
+function shell(content){return `<div class="app-shell ${META[state.view]?'rus-study-shell':''}"><aside class="sidebar"><a href="#" class="brand" data-action="home"><span class="brand-icon">${ico('book')}</span><span><span class="brand-name">словоград<span>·</span></span><span class="brand-sub">Русский с интересом</span></span></a><div class="side-label">МАЛЕНЬКИЕ ОТКРЫТИЯ</div><nav aria-label="Разделы тренажёра"><button class="nav-btn ${state.view==='home'?'active':''}" data-view="home">${ico('home')}<span>Мой Словоград</span></button>${Object.entries(META).map(([id,m])=>`<button class="nav-btn ${state.view===id?'active':''}" data-view="${id}" aria-label="${m.title}"><span class="nav-icon ${m.color}">${ico(m.icon)}</span><span>${m.title}</span></button>`).join('')}<button class="nav-btn ${state.view==='progress'?'active':''}" data-view="progress" aria-label="Мои открытия">${ico('chart')}<span>Мои открытия</span></button></nav><div class="sidebar-bottom"><div class="sidebar-coach">${window.RUS_ART.owl}<p>Ошибка — это подсказка.<br><b>Попробуем ещё раз!</b></p></div><div class="mini-progress"><span>Твои открытия <strong>${countAll()}</strong></span>${progressBar(countAll(),Object.values(META).reduce((n,m)=>n+(D[m.data]?.length||0),0)+(D.prepositions?.length||0))}</div></div></aside><main class="main"><header class="topbar"><div class="topbar-location"><a class="hub-link" href="../" aria-label="Все игры — главная страница">${ico('back')}<span>Все игры</span></a><div class="breadcrumb">Русский язык <span>/</span> <strong>${META[state.view]?.title|| (state.view==='progress'?'Мои открытия':'Мой Словоград')}</strong></div></div><div class="top-actions"><label class="grade-select"><span class="sr-only">Класс</span><select data-control="grade"><option value="1" ${state.grade===1?'selected':''}>1 класс</option><option value="2" ${state.grade===2?'selected':''}>2 класс</option></select></label><button class="icon-btn sound-toggle ${state.sound?'on':''}" data-action="sound" aria-label="${state.sound?'Выключить':'Включить'} озвучку" aria-pressed="${state.sound}">${ico('sound')}</button><button class="icon-btn" data-action="help" aria-label="Как заниматься">${ico('help')}</button></div></header>${content}<footer class="app-footer"><span>Словоград · учимся в своём темпе</span><span>1–2 класс · слова, мысли и маленькие открытия</span></footer></main></div>`;}
+function intro(eyebrow,title,text){return `<div class="intro"><div class="eyebrow">${eyebrow}</div><h1>${title}</h1><p>${text}</p></div>`;}
+function home(){const total=Object.values(META).reduce((n,m)=>n+availableCount(m.data),0)+availableCount('prepositions');return resumeHome()+`<section class="hero"><div class="hero-copy"><span class="hero-badge">${ico('star')} МЕСТО, ГДЕ СЛОВА ОЖИВАЮТ</span><h1>Большой мир<br><span>маленьких слов</span></h1><p>Привет! Я сова Соня. Давай строить слова, сочинять истории и открывать секреты русского языка.</p><div class="hero-actions"><button class="btn primary" data-view="spelling">Начать приключение ${ico('arrow')}</button><button class="btn ghost" data-action="greeting">${ico('sound')} Послушать Соню</button></div><div class="hero-note">Без оценок и спешки. Каждая попытка помогает учиться.</div></div><div class="hero-art" aria-hidden="true">${window.RUS_ART.hero}</div></section><div class="section-heading"><div><div class="eyebrow">ВЫБИРАЙ, ЧТО ИНТЕРЕСНО</div><h2>Шесть мест для открытий</h2></div><span class="muted">${total} заданий для ${state.grade}-го класса</span></div><div class="section-grid">${Object.entries(META).map(([id,m],i)=>`<button class="section-card ${m.color}" data-view="${id}"><span class="section-icon">${ico(m.icon)}</span><span class="section-number">0${i+1}</span><h3>${m.title}</h3><p>${m.desc}</p><div class="section-card-bottom"><span>${id==='morphology'?availableCount('morphology')+' слов + '+availableCount('prepositions')+' задания':availableCount(m.data)+' заданий'}</span>${ico('arrow')}</div></button>`).join('')}</div><div class="dashboard-lower"><section class="daily-card"><span class="eyebrow">ПОНЕМНОГУ КАЖДЫЙ ДЕНЬ</span><h3>Маленькая прогулка — большие открытия</h3><p>Собери слово, придумай предложение и расскажи Соне что-нибудь интересное. Можно заниматься 10–15 минут.</p><div class="chip-row"><span class="chip">${ico('letters')} Собрать</span><span class="chip">${ico('bulb')} Понять</span><span class="chip">${ico('mic')} Рассказать</span></div></section><section class="coach-card"><span class="eyebrow">УЖЕ ПОЛУЧИЛОСЬ</span><div class="stats-row"><div class="stat"><strong>${countAll()}</strong><span>открытий</span></div><div class="stat"><strong>${Object.keys(progress.mistakes).length}</strong><span>для повторения</span></div></div><button class="btn secondary" data-view="progress">Посмотреть успехи ${ico('arrow')}</button></section></div>`;}
+function guidance(){const t=current(),section=state.view;if((!state.solved&&!state.revealed)||state.meaning?.eligible&&!state.meaning.finished)return `<aside class="guide-panel"><section class="guide-card"><span class="guide-icon">${ico('bulb')}</span><div class="eyebrow">САМОСТОЯТЕЛЬНАЯ ПОПЫТКА</div><h3>Сначала попробуй сам</h3><p>Условие остаётся в задании. Если понадобится, открой объяснение или подсказку. Помощь сохранится отдельно от самостоятельного решения.</p><button class="btn secondary" data-action="lesson-open">${ico('book')} Открыть объяснение</button><button class="btn ghost" data-action="hint">${ico('bulb')} Подсказка</button></section></aside>`;let title='',text='',extra='';if(section==='spelling'){title=t.category;text=t.rule;extra=`${t.checkWord?`<div class="question-card">Проверочное слово: <b>${esc(t.checkWord)}</b></div>`:''}<p>Сначала попробуй сам. Можно собрать слово, написать его или устроить маленький диктант.</p>`;}else if(section==='morphology'&&state.mode.morphology==='prepositions'){title='Предлог или приставка?';text='Предлог — отдельное слово: на столе. Приставка — часть слова: написал.';extra='<div class="question-card">На <b>большом</b> столе: между предлогом и словом можно вставить другое слово.</div><p>Предлог не входит в состав слова.</p>';}else if(section==='morphology'){title='У каждого слова есть секрет';text='Родственные слова похожи по смыслу и имеют общий корень. Окончание меняется вместе со словом.';extra=`<div class="legend">${Object.entries(PARTS).map(([id,x])=>`<div class="legend-item"><i class="swatch ${id}" style="background:${x.color}"></i><span><b>${x.name}</b><small>${x.question}</small></span></div>`).join('')}</div><p>Основа — слово без окончания. ∅ обозначает нулевое окончание.</p><div class="question-card">Родственные слова: <b>${esc(t.relatives.join(', '))}</b></div>`;}else if(section==='syntax'){title='Главные в предложении';text='Подлежащее называет, о ком или о чём говорится. Сказуемое сообщает действие.';extra=`<div class="legend">${Object.entries(ROLES).filter(([id])=>state.mode.syntax==='full'||['subject','predicate'].includes(id)).map(([id,x])=>`<div class="legend-item"><i class="swatch" style="background:${x.color}"></i><span><b>${x.name}</b><small>${x.question}</small></span></div>`).join('')}</div><p>Предлог сам не бывает членом предложения. В полном разборе выделяем всю группу: например, «на ветке».</p>`;}else if(section==='builder'){title='Мысли любят порядок';text='У предложения есть смысл. Первое слово начинается с большой буквы, а в конце стоит знак.';extra='<div class="question-card">Сегодня собираем по заданной модели. В обычной речи порядок слов может быть разным.</div><p>Перетаскивай карточки или нажимай на них. Карточку в предложении можно вернуть обратно нажатием.</p>';}else if(section==='creative'){title='Красиво — значит точно';text='Не нужно много сложных слов. Выбери такие слова, которые помогают представить картину.';extra=`<ol class="guide-plan">${t.plan.map(x=>`<li>${esc(x)}</li>`).join('')}</ol><p>${esc(t.tips[0]||'Прочитай вслух: звучит ли твоя мысль понятно?')}</p>`;}else{title='Соня умеет слушать';text='Это учебный диалог по шагам. Соня задаёт вопросы, а ты придумываешь свои ответы.';extra='<p>Можно говорить или писать. После распознавания проверь текст — устройство иногда ошибается.</p><div class="question-card">Не нужно называть фамилию, адрес или школу. Рассказываем об идеях и выдуманных героях.</div>';}return `<aside class="guide-panel"><section class="guide-card"><span class="guide-icon">${ico('bulb')}</span><div class="eyebrow">МАЛЕНЬКАЯ ПОДСКАЗКА</div><h3>${esc(title)}</h3><p>${esc(text)}</p>${extra}${inlineLesson()}${(section==='morphology'&&state.mode.morphology==='parts'&&PARTS[state.brush])||(section==='syntax'&&ROLES[state.brush])?`<div class="question-card active-part-rule"><b>${esc((section==='morphology'?PARTS:ROLES)[state.brush].name)}</b><p>${esc((section==='morphology'?PARTS:ROLES)[state.brush].description)}</p></div>`:''}<button class="btn ghost" data-action="read-rule">${ico('sound')} Послушать объяснение</button></section><section class="guide-card sonya-tip">${window.RUS_ART.owl}<p>Не торопись. Можно ошибиться, подумать и попробовать ещё!</p></section></aside>`;}
+function russianWorkspaceKey(context='task'){
+ const task=current();
+ return ['rus',state.grade,state.view,exerciseMode(),task?.id||'none',context,state.view==='dialogues'?state.turn:''].join(':');
+}
+function exercise(){
+ if(state.meaning?.open)return meaningScreen();
+ if(inSpellingCourse()&&state.courseFinished)return courseEnd();
+ if(!inSpellingCourse()&&state.practiceFinished)return practiceEnd();
+ const m=META[state.view],t=current(),a=list();
+ if(t&&ensureLesson())return lessonScreen();
+ if(t&&ensureConcepts())return conceptWaiting();
+ if(!t)return intro('МОЖНО ВЫДОХНУТЬ','Всё повторено!','В этом наборе пока нет заданий для повторения.')+tabs()+`<button class="btn primary" data-action="all-tasks">Открыть все задания ${ico('arrow')}</button>`;
+ const categorySelect=state.view==='spelling'?`<label class="select-field">Тема<select data-control="category"><option value="all">Все темы</option>${spellingCategories().map(c=>`<option value="${esc(c)}" ${c===state.category?'selected':''}>${esc(categoryLabel(c))}</option>`).join('')}</select></label>`:'';
+ const modeLabel=state.view==='spelling'?({construct:'Собираем',write:'Пишем',dictation:'Диктант'}[state.mode.spelling]):state.view==='morphology'?(state.mode.morphology==='parts'?'Части слова':'Предлог и приставка'):state.view==='syntax'?(state.mode.syntax==='full'?'Весь разбор':'Главные слова'):m.title;
+ const body=state.view==='spelling'?spellingView():state.view==='morphology'?morphologyView():state.view==='syntax'?syntaxView():state.view==='builder'?builderView():state.view==='creative'?creativeView():dialogView();
+ return `<div class="learning-layout rus-learning-layout trainer-workspace" data-workspace-key="${esc(russianWorkspaceKey())}"><section class="exercise-card ${m.color} rus-workspace-card"><div class="exercise-head"><span class="section-tag">${ico(m.icon)} ${esc(m.title)} · ${state.grade} класс</span><span class="task-index">${(state.index[source()]||0)%a.length+1} / ${a.length}</span></div><details class="exercise-settings" data-workspace-disclosure="rus:settings:${state.view}" data-rule-key="workspace:settings:${state.view}"><summary><span>Тема, режим и пройденные задания</span><b>${esc(state.view==='spelling'?categoryLabel(t.category)+' · '+modeLabel:modeLabel)}</b></summary><div class="exercise-settings-body">${gradeContext()}<div class="task-toolbar">${categorySelect}${topicOptions().length?`<label class="select-field topic-picker">Тема<select data-control="topic" aria-label="Выбрать учебную тему">${topicOptions().map(option=>`<option value="${option.id}" ${state.topic===option.id?'selected':''}>${esc(option.label)}</option>`).join('')}</select></label>`:''}<label class="select-field exercise-picker">Задание<select data-control="exercise" aria-label="Выбрать задание">${a.map((item,i)=>`<option value="${i}" ${i===(state.index[source()]||0)%a.length?'selected':''}>${taskMark(item)}${i+1}. ${esc(taskLabel(item))}</option>`).join('')}</select></label><button class="btn ghost" data-action="random-task">Случайное</button></div>${tabs()}${state.view==='spelling'?spellingJourney():''}${learningStages(false)}${taskProgress()}${topicRule()}</div></details><div class="task-body rus-task-body workspace-task" data-rus-mode="${state.view}">${body.replace('<h2>','<h2 data-workspace-focus tabindex="-1">')}${feedbackView()}${state.view!=='dialogues'?`<div class="action-row task-actions workspace-actions"><button class="btn ghost" data-action="hint">${ico('bulb')} Подсказка</button><button class="btn secondary" data-action="reset-task">${ico('reset')} Заново</button><button class="btn primary" data-action="${state.solved?'next':'check'}">${state.solved?'Следующее задание':'Проверить'} ${ico(state.solved?'arrow':'check')}</button></div>`:''}</div><div class="rus-task-utilities"><button class="btn ghost" data-action="read-task">${ico('sound')} Послушать задание</button><details class="workspace-guide" data-workspace-disclosure="rus:help:${state.view}" data-rule-key="workspace:help:${state.view}"><summary>${ico('book')} Объяснение и помощь</summary>${guidance()}</details></div><div class="task-nav"><button class="btn ghost" data-action="prev">${ico('back')} Назад</button><span>${taskCompleted(t)?'✓ Этот шаг уже получился!':'Учимся в своём темпе'}</span><button class="btn ghost" data-action="next">Дальше ${ico('arrow')}</button></div></section></div>`;
+}
+
+function tabs(){if(inSpellingCourse())return '';let pairs=state.view==='spelling'?[['construct','Собери'],['write','Напиши'],['dictation','Диктант']]:state.view==='morphology'?[['parts','Части слова'],['prepositions','Предлог и приставка']]:state.view==='syntax'?[['base','Главные слова'],['full','Весь разбор · сложнее']]:[];return pairs.length?`<div class="mode-tabs" role="tablist">${pairs.map(([id,label])=>`<button class="${state.mode[state.view]===id?'active':''}" role="tab" aria-selected="${state.mode[state.view]===id}" data-mode="${id}">${label}</button>`).join('')}</div>`:'';}
+function speechWaves(){
+ return '<span class="rus-speech-waves" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>';
+}
+function spellingView(){const t=current(),mode=state.mode.spelling;return `<h2>${mode==='construct'?'Собери слово по буквам':mode==='write'?'Впиши слово целиком':'Слушай и пиши'}</h2><p class="task-subtitle">${mode==='construct'?'Нажимай на буквы или перетаскивай их. В наборе есть лишние: вспомни правило и выбери верные.':mode==='write'?'Подумай о пропущенной букве. Напиши слово самостоятельно.':'Послушай слово, затем напиши его. Можно прослушать ещё раз.'}</p>${mode==='dictation'&&!state.solved?`<button class="dictation-button" data-action="say-word">${ico('sound')} Послушать слово${speechWaves()}</button>`:`<div class="big-word">${[...(state.solved?t.word:t.masked)].map(c=>`<span class="letter ${c==='□'?'gap':''}">${c}</span>`).join('')}</div>`}${mode==='construct'?`<div class="word-slots drop-area" data-drop="word" role="group" aria-label="Собираем слово">${Array.from({length:t.word.length},(_,i)=>state.assembled[i]!==undefined?`<button class="slot filled" data-remove="${i}" data-drag="assembled" data-id="${state.assembled[i]}" data-slot="${i}" aria-label="Убрать букву ${state.bank[state.assembled[i]].text}">${state.bank[state.assembled[i]].text}</button>`:`<span class="slot empty" data-slot="${i}">${i+1}</span>`).join('')}</div><div class="letter-bank drop-area" data-drop="bank" aria-label="Буквы для сборки">${state.bank.map(x=>`<button class="letter-tile ${state.assembled.includes(x.id)?'used':''}" data-letter="${x.id}" data-drag="letter" data-id="${x.id}" ${state.assembled.includes(x.id)||state.solved?'disabled':''}>${x.text}</button>`).join('')}</div>`:`<label class="answer-label" for="word-answer">Моё слово<input id="word-answer" class="writing-input answer-input" data-input="draft" value="${esc(state.draft)}" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Пиши здесь…" ${state.solved?'disabled':''}></label>`}${state.solved?`<div class="example-card"><b>${esc(t.word)}</b><p>${esc(t.sentence)}</p><button class="btn ghost" data-action="lesson-open">Почему так пишется?</button></div>${attemptResult()}${meaningInvitation()}`:''}`;}
+function brushes(defs){return `<div class="brushes" role="group" aria-label="Выбери цвет для разбора">${Object.entries(defs).map(([id,x])=>`<button class="brush ${state.brush===id?'active':''} ${id}" data-brush="${id}" aria-pressed="${state.brush===id}"><i style="background:${x.color}"></i>${x.name}</button>`).join('')}<button class="brush ${state.brush===''?'active':''}" data-brush="" aria-label="Ластик" aria-pressed="${state.brush===''}">Ластик</button></div>`;}
+function morphologyView(){const t=current();if(state.mode.morphology==='prepositions')return `<h2>Раздельно или слитно?</h2><p class="task-subtitle">Предлог — отдельное слово. Приставка пишется со словом.</p><div class="question-card sentence-context">${esc(t.context)}</div><div class="preposition-pair"><span>${esc(t.left)}</span><span>?</span><span>${esc(t.right)}</span></div><div class="choice-group"><button class="choice-btn ${state.choices[0]==='separate'?'active':''}" data-preposition="separate" aria-p

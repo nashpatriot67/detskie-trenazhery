@@ -4,3 +4,116 @@
 .zone-value{display:block}.pv-model{min-width:0;flex:1}.pv-model>.zone-title{margin-bottom:6px}.pv-model .quantity-summary{align-items:center;text-align:center;margin-top:10px}.pv-model .mini-pieces{justify-content:center}.learn-visual.pv-learning{align-items:flex-start;gap:20px}.learn-visual.pv-learning>.pv-model{max-width:100%;min-width:0}.learn-visual.pv-learning .pv-model-removed{opacity:.75;border-left:1px solid #dce7de;padding-left:12px}
 .pv-conservation{padding:12px 14px;margin-top:12px;background:#eef5ed;border:1px solid #dce8db;border-radius:11px;font-size:12px;line-height:1.7;color:#4b7258}.pv-conservation strong{display:block}.pv-exchange-note{margin-top:10px;font-size:12px;line-height:1.6;color:#48725b;background:#eff6ed;padding:10px 13px;border-radius:9px}.pv-action-note{font-size:11px;color:#809184;margin:8px 0 14px}.pv-learning-status{font-size:11px;line-height:1.6;color:#809184}
 @media(max-width:600px){.quantity-summary strong{font-size:12px}.quantity-summary [data-expanded]{font-size:11px}.learn-visual.pv-learning{flex-wrap:wrap;gap:14px}.learn-visual.pv-learning>.pv-model{flex:1 1 100%}.learn-visual.pv-learning .pv-model-removed{border-left:0;border-top:1px solid #dce7de;padding:12px 0 0}.pv-conservation{font-size:11px}}
+
+/* One lighting model for the board pieces and their moving counterparts. */
+.piece:not(.brick), .pv-flight-piece {
+  --piece-face: #68b4df;
+  --piece-edge: #3279a7;
+  --piece-columns: 1;
+  --piece-rows: 1;
+  --piece-depth: 4px;
+  --piece-finish: linear-gradient(150deg, #fff9, #ffffff18 35%, #23466f18 100%);
+}
+.piece.ten:not(.brick) {
+  --piece-face: #efc451;
+  --piece-edge: #a97521;
+  --piece-rows: 10;
+}
+.piece.hundred:not(.brick) {
+  --piece-face: #c4addd;
+  --piece-edge: #8265a1;
+  --piece-columns: 10;
+  --piece-rows: 10;
+}
+.piece.brick {
+  --piece-face: var(--brick);
+  --piece-edge: var(--brick-deep);
+  --piece-depth: 5px;
+}
+.piece:not(.brick):is(.unit, .ten, .hundred), .pv-flight-piece {
+  --piece-seams: linear-gradient(to right, transparent calc(100% - 1px), #22385142 0),
+    linear-gradient(to bottom, transparent calc(100% - 1px), #22385142 0);
+  --piece-tile: calc(100% / var(--piece-columns)) calc(100% / var(--piece-rows));
+  border: 1px solid var(--piece-edge);
+  border-radius: 3px;
+  background-color: var(--piece-face);
+  background-image: var(--piece-seams), var(--piece-finish);
+  background-size: var(--piece-tile), var(--piece-tile), 100% 100%;
+  background-origin: border-box;
+  background-clip: border-box;
+  box-shadow: inset 1px 1px 2px #fffd, inset -1px -1px 1px #20385b26,
+    1px var(--piece-depth) 0 var(--piece-edge), 2px calc(var(--piece-depth) + 3px) 4px #20374f25;
+}
+.piece:not(.brick)::after { content: none; }
+.piece.mini:not(.brick) { --piece-depth: 2px; }
+.math-shell .piece.brick {
+  background: linear-gradient(148deg, var(--brick-light), var(--brick) 36%, var(--brick-dark) 115%);
+  box-shadow: inset 0 2px 1px #fffb, inset 2px 0 2px #fff5, inset -2px -2px 3px #17345321,
+    0 var(--piece-depth) 0 var(--brick-dark), 0 calc(var(--piece-depth) + 1px) 0 var(--brick-deep),
+    2px calc(var(--piece-depth) + 4px) 5px #23435c33;
+}
+.math-shell .piece.brick.mini { --piece-depth: 3px; }
+.math-shell .piece.brick .stud {
+  background: radial-gradient(ellipse at 35% 22%, #fffc, #fff2 45%, transparent 67%),
+    linear-gradient(150deg, var(--brick-light), var(--brick) 53%, var(--brick-dark) 126%);
+  box-shadow: inset 0 1px 1px #fffb, inset -1px -1px 1px #17345322,
+    0 2px 0 var(--brick-dark), 1px 3px 2px #243a5550;
+}
+.math-shell .piece:not(.mini) {
+  transition: transform .17s cubic-bezier(.22,.7,.22,1), filter .17s, opacity .12s;
+}
+.math-shell .piece.mini { cursor: default; }
+.math-shell .piece.mini:hover { transform: none; filter: none; }
+.math-shell .piece:not(.mini):active { transform: translateY(1px); }
+.math-shell .piece.pv-held { opacity: .2; }
+
+.pv-exchange-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 14;
+  pointer-events: none;
+  overflow: hidden;
+}
+.pv-flight-piece {
+  position: absolute;
+  box-sizing: border-box;
+  pointer-events: none;
+  border-color: currentColor;
+  box-shadow: inset 1px 1px 2px #fffd, inset -1px -1px 1px #20385b24, 1px 3px 0 currentColor;
+}
+.pv-flight-brick {
+  background-image: var(--piece-finish);
+  background-size: 100% 100%;
+  border-radius: 4px;
+  box-shadow: inset 0 2px 1px #fffb, inset -1px -1px 2px #17345322, 0 4px 0 currentColor;
+}
+.pv-flight-studs {
+  position: absolute;
+  display: grid;
+  grid-template-columns: repeat(var(--piece-columns), minmax(0, 1fr));
+  grid-template-rows: repeat(var(--piece-rows), minmax(0, 1fr));
+  place-items: center;
+}
+.pv-flight-studs > i {
+  display: block;
+  width: var(--pv-stud-size);
+  aspect-ratio: 1;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 36% 27%, #ffffffa8, #fff4 45%, transparent 84%),
+    linear-gradient(#fff3, #0002);
+  box-shadow: inset 0 1px 1px #fff8, 0 1px 0 currentColor;
+}
+.pv-drag-preview {
+  position: fixed;
+  z-index: 150;
+  transform: translate(-50%, -50%) perspective(720px) rotateX(12deg) rotateZ(-6deg);
+  filter: drop-shadow(3px 12px 7px #162a4845);
+}
+.pv-exchanging .pv-teach-quantity { visibility: hidden; }
+
+@media (prefers-reduced-motion: reduce) {
+  .math-shell .piece:not(.mini) { transition: none; }
+  .math-shell .piece:not(.mini):is(:hover, :active, .selected-piece) { transform: none; }
+  .pv-drag-preview { transform: translate(-50%, -50%); }
+}

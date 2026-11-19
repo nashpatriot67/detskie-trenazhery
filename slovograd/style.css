@@ -275,3 +275,264 @@
 .rus-task-body .rus-word-scroll .char{flex:0 0 44px;min-width:44px;width:44px;min-height:48px;font-size:29px}
 .rus-task-body .rus-word-pan-note{font-size:12px;color:#6c8062;line-height:1.5;margin:4px 0 8px}
 @media(max-width:650px){.rus-task-body .rus-word-scroll .morpheme-word{padding:12px 7px}.rus-task-body .rus-word-scroll .char{min-width:44px;width:44px;font-size:28px}}
+
+/* The workbench uses paper for the answer and a shallow wooden tray for the pieces. */
+.rus-workspace-card{
+ --rus-ink:#365746;
+ --rus-accent:#698c75;
+ --rus-wash:#eef5eb;
+ border-color:#d8e5da;
+ box-shadow:0 18px 46px -26px #304c3c64,0 2px 4px #43604d0c;
+}
+.rus-workspace-card.coral{--rus-accent:#b47a65;--rus-wash:#fbf1e9}
+.rus-workspace-card.gold{--rus-accent:#9a7f3e;--rus-wash:#fbf5e5}
+.rus-workspace-card.blue{--rus-accent:#60849c;--rus-wash:#edf4f8}
+.rus-workspace-card.lavender{--rus-accent:#8a72a0;--rus-wash:#f5eff8}
+.rus-workspace-card.rose{--rus-accent:#9f746b;--rus-wash:#fbefea}
+.rus-workspace-card .exercise-head{
+ background:linear-gradient(110deg,var(--rus-wash),#fcfdfa 72%);
+ border-bottom-color:#e8eee5;
+}
+.rus-workspace-card .section-tag>.icon{color:var(--rus-accent)}
+.rus-task-body h2{color:var(--rus-ink)}
+.rus-task-body .big-word,
+.rus-task-body .sentence-slots,
+.rus-task-body .syntax-sentence,
+.rus-task-body .rus-word-scroll{
+ background:repeating-linear-gradient(180deg,transparent 0 27px,#77978415 27px 28px),#fbfcf7;
+ border:1px solid #d9e5d7;
+ box-shadow:inset 0 1px 3px #556f5410;
+}
+.rus-task-body .big-word{color:#385848}
+.rus-task-body .big-word .letter.gap{
+ color:#775a22;
+ border-color:#cfaf6f;
+ background:#fff8e4;
+}
+.rus-task-body .letter-bank,.rus-task-body .builder-bank{
+ position:relative;
+ border:1px solid #d9c8a5;
+ border-top-color:#ddd0b4;
+ background:repeating-linear-gradient(3deg,#865e2a08 0 1px,transparent 1px 7px, #fcf6e72e 7px 9px,transparent 9px 15px),
+            linear-gradient(164deg,#fbf4e4,#eee0c5);
+ box-shadow:inset 0 2px 4px #8b63311c,inset 0 -4px 0 #fff9eb91,0 2px 0 #e3d7bc;
+}
+.rus-task-body .letter-tile,.drag-ghost.letter-tile{
+ color:#684b26;
+ background:linear-gradient(158deg,#fffcf0,#f6e5bf);
+ border-color:#d1b983;
+ border-top-color:#fff7df;
+ box-shadow:0 3px 0 #bfa579,0 5px 7px #70552e24,inset 0 1px 1px #fffefa;
+}
+.rus-task-body .letter-tile.used{box-shadow:none;opacity:.24}
+.rus-task-body .word-slots{
+ padding:5px 2px 6px;
+ background:linear-gradient(0deg,#c2d4c3 0 2px,#e8f0e6 2px 8px,transparent 8px);
+ border-radius:8px;
+}
+.rus-task-body .slot.empty{color:#617965;border-color:#b9cdbc;background:#f7faf5}
+.rus-task-body .slot.filled,.drag-ghost.slot.filled{
+ color:#335745;
+ background:linear-gradient(152deg,#fcfef8,#e1efe0);
+ border-color:#b5cbb6;
+ box-shadow:0 3px 0 #a5c0aa,0 4px 6px #527c5e23,inset 0 1px 1px white;
+}
+.rus-task-body [data-drop].drop-over{
+ outline:2px solid #78a88b;
+ outline-offset:2px;
+}
+.rus-task-body .sentence-chip,.drag-ghost.sentence-chip{
+ position:relative;
+ border-bottom-width:2px;
+ box-shadow:0 2px 0 #65735d38,0 4px 6px #4f49351c,inset 0 1px 0 #fffef9;
+}
+.rus-task-body .sentence-chip.subject{color:#385d46}
+.rus-task-body .sentence-chip.predicate{color:#785441}
+.rus-task-body .sentence-chip.attribute{color:#664c80}
+.rus-task-body .sentence-chip.object{color:#42687e}
+.rus-task-body .sentence-chip.adverbial{color:#6c5a27}
+.rus-task-body .builder-bank .sentence-chip small{font-size:11px;opacity:1}
+.rus-task-body .pattern{
+ background:var(--rus-wash);
+ color:#40647b;
+}
+.rus-pattern-step{
+ padding:3px 8px;
+ border-radius:6px;
+ background:#f9fcfe;
+ border:1px solid #cbdae3;
+ box-shadow:0 1px 0 #b5cbd8;
+ font-weight:650;
+}
+.rus-pattern-arrow{color:#62859a}
+.rus-task-body .drop-area .rus-tile-lifted{opacity:.24}
+.rus-tile-travel{position:relative;z-index:6}
+.drag-ghost{
+ box-shadow:0 8px 15px #3e382470,inset 0 1px 0 white!important;
+ opacity:.96;
+}
+.drag-ghost.sentence-chip[data-chunk]{flex-direction:column;gap:2px}
+.rus-task-body .syntax-token{
+ position:relative;
+ padding-bottom:10px;
+ border-bottom-width:1px;
+ text-decoration:none;
+}
+.rus-task-body .syntax-token .rus-grammar-stroke{
+ position:absolute;
+ left:8px;
+ bottom:4px;
+ width:calc(100% - 16px);
+ height:9px;
+}
+.rus-task-body .syntax-token.subject{color:#385d46}
+.rus-task-body .syntax-token.predicate{color:#785441;border-bottom-style:solid}
+.rus-task-body .syntax-token.attribute{color:#664c80}
+.rus-task-body .syntax-token.object{color:#42687e;border-bottom-style:solid}
+.rus-task-body .syntax-token.adverbial{color:#6c5a27;border-bottom-style:solid}
+.rus-grammar-stroke{
+ display:block;
+ color:inherit;
+ fill:none;
+ stroke:currentColor;
+ stroke-linecap:round;
+ stroke-linejoin:round;
+ stroke-width:1.6;
+ pointer-events:none;
+}
+.rus-task-body .creative-seed{
+ border-inline-start:4px solid #b49bc6;
+ background:linear-gradient(105deg,#f5edf9,#fcf9fd);
+ color:#59446b;
+}
+.rus-task-body textarea.writing-input{
+ color:#394f45;
+ background:repeating-linear-gradient(to bottom,#fdfcf8 0 25px,#e6eadd 25px 26px) 0 11px;
+ background-attachment:local;
+ line-height:26px;
+ font-size:16px;
+}
+.rus-task-body .feedback{
+ border-left:4px solid currentColor;
+ box-shadow:0 2px 0 #484d3620;
+}
+.rus-task-body .feedback.success{
+ background:#edf7ec;
+ color:#426e4a;
+}
+.rus-task-body .feedback.error{color:#8b5037}
+.rus-task-body .feedback.hint{color:#795d26}
+.rus-task-body .feedback.success>.icon{
+ background:#dbeddc;
+ border-radius:50%;
+ padding:3px;
+ width:24px;
+ height:24px;
+ margin-top:0;
+}
+.rus-sonya-card{
+ display:grid;
+ grid-template-columns:auto minmax(0,1fr);
+ align-items:center;
+ gap:12px;
+ margin:0 0 12px;
+}
+.rus-sonya-avatar{
+ display:grid;
+ place-items:center;
+ position:relative;
+}
+.rus-sonya-card .rus-sonya-avatar{
+ width:clamp(45px,9vw,66px);
+ aspect-ratio:1;
+ padding:3px;
+ border:1px solid #ddddd0;
+ border-radius:40% 45% 44% 42%;
+ background:radial-gradient(ellipse at 45% 36%,#fffaf0,#f0ead8);
+}
+.rus-sonya-avatar>svg{display:block;width:100%;height:auto}
+.rus-sonya-message{
+ position:relative;
+ display:block;
+ color:#69484a;
+ background:linear-gradient(150deg,#fffdf9,#f9eee8);
+ border:1px solid #e8d4cc;
+ border-radius:13px;
+ padding:9px 13px 11px;
+ box-shadow:0 2px 0 #dfc6bc42;
+}
+.rus-sonya-message::before{
+ content:"";
+ position:absolute;
+ inset-inline-start:-5px;
+ top:50%;
+ width:8px;
+ height:8px;
+ transform:translateY(-50%) rotate(45deg);
+ background:#fcf4ed;
+ border-inline-start:1px solid #e8d4cc;
+ border-bottom:1px solid #e8d4cc;
+}
+.rus-sonya-message strong{display:block;font-size:clamp(15px,2.4vw,18px);line-height:1.42}
+.rus-sonya-message .step-caption{
+ display:block;
+ margin:0;
+ color:#825959;
+ font-size:11px;
+ letter-spacing:.025em;
+ text-transform:none;
+}
+.rus-dialog-progress{
+ display:flex;
+ width:min(105px,100%);
+ gap:3px;
+ margin:4px 0 7px;
+}
+.rus-dialog-progress>i{height:3px;flex:1;background:#e7d5cf;border-radius:4px}
+.rus-dialog-progress>.done{background:#6c9c80}
+.rus-dialog-progress>.current{background:#bb7c65}
+.rus-dialog-completed .rus-sonya-message{background:#f3f8ed;border-color:#d4e3ce;color:#446443}
+.rus-dialog-completed .rus-sonya-message::before{background:#f3f8ed;border-color:#d4e3ce}
+.rus-dialog-completed h3{margin-bottom:9px}
+.rus-speech-waves{
+ display:inline-flex;
+ align-items:center;
+ justify-content:center;
+ gap:2px;
+ height:14px;
+ min-width:22px;
+ color:#477a66;
+ opacity:0;
+ pointer-events:none;
+}
+.rus-sonya-avatar>.rus-speech-waves{
+ position:absolute;
+ bottom:-3px;
+ left:50%;
+ transform:translateX(-50%);
+ padding:0 3px;
+ background:#fffaf0;
+ border-radius:8px;
+ box-shadow:0 1px 2px #3f574a26;
+}
+.rus-speech-waves>i{
+ display:block;
+ width:2px;
+ height:6px;
+ background:currentColor;
+ border-radius:3px;
+ transform:scaleY(.62);
+}
+.rus-speech-waves>i:nth-child(2),.rus-speech-waves>i:nth-child(4){height:10px;animation-delay:-.17s}
+.rus-speech-waves>i:nth-child(3){height:13px;animation-delay:-.38s}
+[data-rus-speaking] .rus-speech-waves,[data-voice-active] .rus-speech-waves{opacity:1}
+@media(prefers-reduced-motion:no-preference){
+ [data-rus-speaking] .rus-speech-waves>i,[data-voice-active] .rus-speech-waves>i{animation-name:rus-speech;animation-duration:.66s;animation-timing-function:ease-in-out;animation-iteration-count:infinite;animation-direction:alternate}
+ [data-rus-speaking] .rus-sonya-avatar>svg,[data-rus-speaking].rus-sonya-avatar>svg{transform-origin:50% 87%;animation:rus-sonya-talk 1.2s ease-in-out infinite}
+}
+@keyframes rus-speech{from{transform:scaleY(.42)}to{transform:scaleY(1)}}
+@keyframes rus-sonya-talk{0%,100%{transform:none}25%{transform:translateY(-1px) rotate(-2deg)}65%{transform:translateY(-1px) rotate(1.5deg)}}
+@media(max-width:650px){
+ .rus-task-body .builder-bank .sentence-chip small{font-size:10px}
+ .rus-task-body .builder-bank,.rus-task-body .sentence-slots{gap:7px}
+}

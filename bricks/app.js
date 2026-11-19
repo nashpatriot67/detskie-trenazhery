@@ -201,13 +201,16 @@ function nextPlaceValue(afterBreak=false){
  if(state.pv.track==='practice'&&!afterBreak&&window.PracticeHub?.cycleBoundary){save();const t=A.current(state.pv);if(window.PracticeHub.cycleBoundary({id:t.id+'.next',context:{kind:'math-pv-next',snapshot:A.snapshot(state)}}))return;}
  userIntent=true;A.handle(state,'next',{},pvEnv());pvDirty=true;renderFresh();requirePvConcepts();
 }
-function handlePlaceValue(action,data){
+function handlePlaceValue(action,data,interrupted=false){
  if(requirePvConcepts())return;
  userIntent=true;
  if(action==='next'){if(mathHubReady)nextPlaceValue();else if(A.handle(state,action,data,pvEnv())){pvDirty=true;renderFresh();}return;}
  clearMathAdvance();A.capture(state,document);
- if(A.handle(state,action,data,pvEnv())){
-  pvDirty=true;if(action==='reset')$('#app').dataset.context='';render();
+ const env=pvEnv(),reverse=action==='teach-back';
+ const frame=!interrupted&&state.pv?.teaching&&(action==='teach-next'||reverse)?A.teachingFrames(state,env)[state.pv.frame+(reverse?0:1)]:null;
+ const motion=frame?M.transition(frame,reverse,zone=>$(`.pv-teach-models [data-learn-zone="${zone}"]`),K):null;
+ if(A.handle(state,action,data,env)){
+  pvDirty=true;if(action==='reset')$('#app').dataset.context='';render();motion?.();
   if(mathHubReady&&state.pv.track==='practice'&&state.solved&&!state.pv.skipped&&!state.pv.teaching&&(!state.pv.meaningActive||state.pv.meaningDone)&&state.feedback?.type!=='error')queueMathAdvance();
  }
 }
@@ -290,14 +293,16 @@ function quantitySummary(p,frame){const info=P.describe(p,K),policy=presentation
 const explanationCache={};
 function learningPlan(){const t=lesson().example,key=state.lesson+':'+t.a+':'+t.op+':'+t.b;if(!explanationCache[key])explanationCache[key]=P.explanation(t,K);return explanationCache[key];}
 function learningFrame(){const plan=learningPlan();return state.step===0?plan.initial:state.step===2?plan.final:plan.transformations[Math.min(state.learnFrame||0,plan.transformations.length-1)];}
-function advanceExplanation(delta){
- stopVoice();M.cancel();const old=learningFrame(),snapshot=M.capture($('.learn-visual [data-learn-zone="a"]'),K),plan=learningPlan();
+function advanceExplanation(delta,interrupted=false){
+ stopVoice();M.cancel();
+ const plan=learningPlan(),frame=delta<0?learningFrame():plan.transformations[state.step===0?0:state.step===1?(state.learnFrame||0)+1:-1];
+ const motion=frame&&!interrupted?M.transition(frame,delta<0,zone=>$(`.learn-visual [data-learn-zone="${zone}"]`),K):null;
  if(delta<0){if(state.step===2){state.step=1;state.learnFrame=plan.transformations.length-1;}else if(state.step===1&&(state.learnFrame||0)>0)state.learnFrame--;else state.step=0;}
  else if(state.step===0){state.step=1;state.learnFrame=0;}
  else if(state.step===1&&(state.learnFrame||0)<plan.transformations.length-1)state.learnFrame=(state.learnFrame||0)+1;
  else if(state.step===1)state.step=2;
  else{markRead(state.lesson);save();continueRoute(state.lesson);renderFresh();return;}
- render();const next=learningFrame();if(delta>0&&['pack','split','pack100','split100'].includes(next.operation))M.animate($('.learn-visual [data-learn-zone="a"]'),snapshot,old.zones.a,next.zones.a,K,{action:next.operation});
+ render();motion?.();
 }
 function exchangeAvailable(p,action){if(K.canExchange)return K.canExchange(p,action);return action==='pack'?p.unit>=10:action==='split'?p.ten>0:action==='pack100'?p.ten>=10:action==='split100'?p.hundred>0:false;}
 function exchangeOnBoard(action){
@@ -358,7 +363,22 @@ function render(){
 }
 function renderFresh(){$('#app').dataset.context='';render();}
 function mutate(fn){if(ensureCurrentMathConcepts())return;if(state.solved||state.view==='placevalue'&&(state.pvConflict||A.current(state.pv)?.kind==='predict'&&!state.pv.predictionConfirmed))return;userIntent=true;history();if(fn()===false){state.undo.pop();return;}state.selected=null;state.feedback=null;if(state.view==='placevalue')pvDirty=true;render();}
-function movePiece(from,to,type){mutate(()=>K.move(state.zones,from,to,type));$(`[data-zone="${to}"]`)?.focus({preventScroll:true});}
+function movePiece(from,to,type,source,dropPoint){
+ const origin=source||$(`.selected-piece[data-from="${from}"][data-piece="${type}"]`);
+ const snapshot={[type]:[M.capturePiece(origin,dropPoint)]},before={...state.zones[to]};
+ let moved=false;mutate(()=>{moved=K.move(state.zones,from,to,type);return moved;});
+ const destination=$(`[data-zone="${to}"]`);
+ if(moved)M.move(destination,snapshot,before,to==='bank'?{[type]:1}:state.zones[to]);
+ destination?.focus({preventScroll:true});
+}
+function combineGroups(){
+ const before={...state.zones.a},snapshot=M.capture($('[data-zone="b"]'),K,state.zones.b);
+ let joined=false;mutate(()=>{
+  for(const type of Object.keys(K.values)){state.zones.a[type]+=state.zones.b[type];state.zones.b[type]=0;}
+  joined=true;return true;
+ });
+ if(joined)M.move($('[data-zone="a"]'),snapshot,before,state.zones.a,'join');
+}
 function hint(){
  legacyHelp('visual');
  if(state.mode==='worksheet'&&!state.worksheetTask){feedback('Впиши число в пустое окошко. Нажми на значок детали у примера, чтобы решить его на поле.');render();return;}
@@ -413,16 +433,18 @@ function speak(){
 }
 // Delegated navigation keeps all controls available after a board redraw.
 document.addEventListener('click',event=>{
- if(booting)return;const el=event.target.closest('button,a');if(!el||el.disabled)return;userIntent=true;if((el.dataset.exchange||el.dataset.action==='learn-next')&&M.isBusy())return;if(!el.dataset.exchange)M.cancel();
+ if(booting)return;const el=event.target.closest('button,a');if(!el||el.disabled)return;userIntent=true;const interrupted=M.isBusy();
+ if((el.dataset.exchange||el.dataset.action==='learn-next'||el.dataset.pvAction==='teach-next')&&interrupted)return;
+ if(!el.dataset.exchange)M.cancel();
  if(el.dataset.pvOpen){openPlaceValue(el.dataset.pvOpen);return;}
- if(el.dataset.pvAction){if(suppressPvClick){suppressPvClick=false;return;}if(el.dataset.pvAction==='reload'){reloadPlaceValue();return;}handlePlaceValue(el.dataset.pvAction,el.dataset);return;}
+ if(el.dataset.pvAction){if(suppressPvClick){suppressPvClick=false;return;}if(el.dataset.pvAction==='reload'){reloadPlaceValue();return;}handlePlaceValue(el.dataset.pvAction,el.dataset,interrupted);return;}
  if(state.view==='placevalue'&&state.pvConflict&&el.dataset.view===undefined&&el.dataset.lesson===undefined)return;
  if(el.dataset.lesson){chooseLesson(+el.dataset.lesson);return;}
  if(el.dataset.view){clearMathAdvance();save();stopVoice();if(el.dataset.view==='trainer')resumeTraining(true);else if(el.dataset.view==='workshop')openWorkshop();else{state.view=el.dataset.view;state.feedback=null;state.selected=null;}renderFresh();window.scrollTo(0,0);return;}
  if(el.dataset.mode){stopVoice();selectMode(el.dataset.mode);return;}
  if(el.dataset.practice){openPractice(+el.dataset.practice,el.dataset.owner==='worksheet'?'worksheet':activeTaskMode());return;}
  if(el.dataset.exchange){exchangeOnBoard(el.dataset.exchange);return;}
- if(el.dataset.piece){if(suppressClick){suppressClick=false;return;}if(state.solved)return;const from=el.dataset.from,type=el.dataset.piece;if(from==='bank'){movePiece(from,'a',type);return;}if(state.view==='workshop'){mutate(()=>{state.zones.a[type]--;return true;});return;}if(state.selected?.from===from&&state.selected?.type===type){state.selected=null;$$('.selected-piece').forEach(p=>p.classList.remove('selected-piece'));return;}state.selected={from,type};$$('.selected-piece').forEach(p=>p.classList.remove('selected-piece'));el.classList.add('selected-piece');announce('Деталь выбрана. Нажми на область назначения.');return;}
+ if(el.dataset.piece){if(suppressClick){suppressClick=false;return;}if(state.solved)return;const from=el.dataset.from,type=el.dataset.piece;if(from==='bank'){movePiece(from,'a',type,el);return;}if(state.view==='workshop'){movePiece(from,'bank',type,el);return;}if(state.selected?.from===from&&state.selected?.type===type){state.selected=null;$$('.selected-piece').forEach(p=>p.classList.remove('selected-piece'));return;}state.selected={from,type};$$('.selected-piece').forEach(p=>p.classList.remove('selected-piece'));el.classList.add('selected-piece');announce('Деталь выбрана. Нажми на область назначения.');return;}
  const action=el.dataset.action;if(!action)return;event.preventDefault();
  if(action==='home'){save();resumeTraining(true);renderFresh();}
  else if(action==='help'){if(state.view==='placevalue'){A.assist(state,'explanation',LP);pvDirty=true;save();}help();}
@@ -438,8 +460,8 @@ document.addEventListener('click',event=>{
  else if(action==='prev-lesson')chooseLesson(Math.max(1,state.lesson-1));
  else if(action==='reset'){if(state.view==='placevalue'){A.handle(state,'reset',{},pvEnv());pvDirty=true;$('#app').dataset.context='';}else if(state.view==='workshop'){state.zones={a:K.empty(),b:K.empty(),removed:K.empty()};state.undo=[];state.feedback=null;state.solved=false;}else setup();renderFresh();}
  else if(action==='undo'){if(state.undo.length){state.zones=JSON.parse(state.undo.pop());state.selected=null;state.feedback=null;if(state.view==='placevalue')pvDirty=true;render();}}
- else if(action==='combine'){mutate(()=>{K.types.forEach(type=>{state.zones.a[type]+=state.zones.b[type];state.zones.b[type]=0;});return true;});}
- else if(action==='learn-back')advanceExplanation(-1);
+ else if(action==='combine')combineGroups();
+ else if(action==='learn-back')advanceExplanation(-1,interrupted);
  else if(action==='learn-next')advanceExplanation(1);
  else if(action==='random-target'){state.freeTarget=Math.floor(Math.random()*1001);state.zones={a:K.empty(),b:K.empty(),removed:K.empty()};state.undo=[];state.feedback=null;render();}
  else if(action==='check-free'){feedback(K.total(state.zones.a)===state.freeTarget?K.canonical(state.zones.a)?`Получилось! Ты собрал ${state.freeTarget}: ${nice(state.freeTarget)}.`:`Число ${state.freeTarget} собрано! Теперь объедини полные десятки и сотню.`:`Сейчас на поле ${K.total(state.zones.a)}, а нужно ${state.freeTarget}. Добавь или убери детали.`,K.total(state.zones.a)===state.freeTarget?'success':'hint');render();if(K.total(state.zones.a)===state.freeTarget&&K.canonical(state.zones.a))celebrate();}
@@ -453,10 +475,32 @@ document.addEventListener('input',e=>{userIntent=true;if(state.view==='placevalu
 document.addEventListener('change',e=>{userIntent=true;if(e.target.matches('[data-pv-task-select]')){openPlaceValue('practice',e.target.value);return;}if(e.target.id==='free-target'){e.target.value=state.freeTarget;}});
 // Pointer events support mouse, stylus and touch, with a movement threshold for taps.
 let drag=null, suppressClick=false;
-document.addEventListener('pointerdown',e=>{const el=e.target.closest('[data-piece]');if(!el||state.solved||e.button!==0)return;M.cancel();drag={id:e.pointerId,from:el.dataset.from,type:el.dataset.piece,x:e.clientX,y:e.clientY,active:false,el};el.setPointerCapture?.(e.pointerId);});
-document.addEventListener('pointermove',e=>{if(!drag||drag.id!==e.pointerId)return;if(!drag.active&&Math.hypot(e.clientX-drag.x,e.clientY-drag.y)>7){drag.active=true;const ghost=drag.el.cloneNode(true);ghost.classList.add('drag-ghost');ghost.removeAttribute('data-piece');ghost.removeAttribute('data-from');ghost.setAttribute('aria-hidden','true');document.body.append(ghost);drag.ghost=ghost;}if(drag.active){e.preventDefault();drag.ghost.style.left=e.clientX+'px';drag.ghost.style.top=e.clientY+'px';$$('.drop-over').forEach(x=>x.classList.remove('drop-over'));document.elementFromPoint(e.clientX,e.clientY)?.closest('[data-zone]')?.classList.add('drop-over');}},{passive:false});
-function finishDrag(e,cancel=false){if(!drag||e.pointerId!==drag.id)return;const d=drag;drag=null;d.ghost?.remove();$$('.drop-over').forEach(x=>x.classList.remove('drop-over'));if(d.active){suppressClick=true;setTimeout(()=>{suppressClick=false;},100);if(!cancel){const target=document.elementFromPoint(e.clientX,e.clientY)?.closest('[data-zone]');if(target)movePiece(d.from,target.dataset.zone,d.type);}}}
+document.addEventListener('pointerdown',e=>{const el=e.target.closest('[data-piece]');if(drag||!el||state.solved||e.button!==0)return;M.cancel();drag={id:e.pointerId,from:el.dataset.from,type:el.dataset.piece,x:e.clientX,y:e.clientY,active:false,el};el.setPointerCapture?.(e.pointerId);});
+document.addEventListener('pointermove',e=>{
+ if(!drag||drag.id!==e.pointerId)return;
+ if(!drag.active&&Math.hypot(e.clientX-drag.x,e.clientY-drag.y)>7){
+  drag.active=true;drag.ghost=M.preview(drag.el);
+  if(drag.ghost){drag.el.classList.add('pv-held');document.body.append(drag.ghost);}
+ }
+ if(drag.active){
+  e.preventDefault();
+  if(drag.ghost){drag.ghost.style.left=e.clientX+'px';drag.ghost.style.top=e.clientY+'px';}
+  $$('.drop-over').forEach(x=>x.classList.remove('drop-over'));
+  document.elementFromPoint(e.clientX,e.clientY)?.closest('[data-zone]')?.classList.add('drop-over');
+ }
+},{passive:false});
+function finishDrag(e,cancel=false){
+ if(!drag||e.pointerId!==drag.id)return;
+ const d=drag;drag=null;d.ghost?.remove();d.el.classList.remove('pv-held');
+ $$('.drop-over').forEach(x=>x.classList.remove('drop-over'));
+ if(!d.active)return;
+ suppressClick=true;setTimeout(()=>{suppressClick=false;},100);
+ if(cancel)return;
+ const target=document.elementFromPoint(e.clientX,e.clientY)?.closest('[data-zone]');
+ if(target)movePiece(d.from,target.dataset.zone,d.type,d.el,{x:e.clientX,y:e.clientY});
+}
 document.addEventListener('pointerup',e=>finishDrag(e));document.addEventListener('pointercancel',e=>finishDrag(e,true));
+document.addEventListener('lostpointercapture',e=>finishDrag(e,true));
 $('#overlay').addEventListener('click',e=>{if(e.target.classList.contains('modal-backdrop'))closeModal();});
 // Zones are keyboard destinations even after dynamic updates.
 const observer=new MutationObserver(()=>{$$('[data-zone]').forEach(z=>{z.tabIndex=0;});});observer.observe($('#app'),{childList:true,subtree:true});

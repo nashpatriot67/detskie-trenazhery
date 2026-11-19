@@ -129,3 +129,34 @@ details.lesson-inline{border:1px solid #dce7d1;background:#f7faf3;border-radius:
 .rus-study-shell .lesson-return>p{font-size:13px;line-height:1.6}
 .rus-study-shell .lesson-return .btn{min-height:46px;font-size:14px}
 @media(max-width:650px){.rus-study-shell .lesson-return{gap:6px;margin-left:-10px;margin-right:-10px;padding:9px 10px calc(9px + env(safe-area-inset-bottom,0px))}.rus-study-shell .lesson-return>p{font-size:12px}.rus-study-shell .lesson-return>.btn.primary{min-height:46px;padding:10px 12px}}
+
+/* Grammar marks on the example pieces match the marks drawn in practice. */
+.lesson-screen .lesson-diagram{
+ background:repeating-linear-gradient(180deg,transparent 0 27px,#748d7913 27px 28px),#fbfcf7;
+ border-color:#d8e3d5;
+ box-shadow:inset 0 1px 3px #556f540e;
+}
+.lesson-screen .diagram-part{
+ background:linear-gradient(160deg,#ffffff76,transparent),var(--part-bg);
+ box-shadow:0 2px 0 var(--part-border),0 4px 6px #4d574218;
+}
+.lesson-screen .diagram-part .rus-diagram-text{position:relative}
+.lesson-screen .diagram-part:is(.subject,.predicate,.attribute,.object,.adverbial)>.rus-diagram-text{
+ padding-bottom:5px;
+ text-decoration:none;
+}
+.lesson-screen .rus-diagram-text>.rus-grammar-stroke{
+ position:absolute;
+ width:100%;
+ height:9px;
+ bottom:-1px;
+ left:0;
+}
+.lesson-screen .diagram-part:is(.prefix,.root,.suffix)>.rus-diagram-text{padding-top:5px}
+.lesson-screen .diagram-part:is(.prefix,.root,.suffix) .rus-grammar-stroke{bottom:auto;top:0}
+.lesson-screen .diagram-part.ending>.rus-diagram-text{
+ padding-inline:4px;
+ outline:1.5px solid currentColor;
+ border-radius:2px;
+}
+.lesson-screen .lesson-guide-owl>.rus-speech-waves{bottom:0}

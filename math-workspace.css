@@ -82,13 +82,6 @@
 .math-shell .learn-wrap .learn-visual{margin-top:0;padding:14px;min-height:140px}
 .math-shell .learn-wrap .board-actions{position:sticky;bottom:0;z-index:6;padding:10px 0 2px;background:#fff;margin-top:8px}
 .math-shell .learn-wrap .board-actions .btn{min-height:46px;font-size:14px}
-/* Surface relief changes material, never the number or scale of cells. */
-.math-shell .piece:not(.brick){border-radius:3px;filter:drop-shadow(1px 2px 1px #34495116)}
-.math-shell .piece.unit:not(.brick){background:linear-gradient(140deg,#b0e5ff 0,#7ac6f1 20%,#59a7dd 80%);box-shadow:inset 0 2px 1px #fff9,inset 1px 0 1px #fff8,3px 3px 0 #4489bb,4px 5px 3px #30597224}
-.math-shell .piece.ten:not(.brick){box-shadow:inset 2px 0 1px #fff7,inset -2px 0 2px #aa721e18,3px 3px 0 #c7952f,4px 5px 3px #70552222}
-.math-shell .piece.hundred:not(.brick){box-shadow:inset 1px 2px 1px #fff9,inset -2px -2px 2px #6b548120,3px 3px 0 #9a80b4,4px 5px 3px #4f3b6124}
-.math-shell .piece.brick{box-shadow:inset 0 2px 2px #ffffffa0,inset 2px 0 2px #ffffff4d,inset -2px -2px 3px #00000014,0 5px 0 var(--brick-dark),0 6px 0 var(--brick-deep),2px 9px 6px #23435c25}
-.math-shell .piece.brick .stud{background:radial-gradient(ellipse at 35% 25%,#ffffff85,transparent 56%),linear-gradient(145deg,var(--brick-light),var(--brick));box-shadow:inset 0 1px 1px #ffffffa3,inset -1px -1px 1px #00000012,0 2px 0 var(--brick-dark),0 3px 2px #233b5227}
 @media(max-width:1200px){
  .math-shell.app-shell{display:block}
  .math-shell .sidebar{position:static;width:100%;height:auto;min-height:58px;padding:6px 16px;display:flex;flex-direction:row;align-items:center;gap:12px;inset:auto;border-right:0;border-bottom:1px solid var(--line)}
