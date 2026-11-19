@@ -15,7 +15,7 @@ const missions=[
 ];
 const esc=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const brand='<svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><rect width="64" height="64" rx="17" fill="#387d70"/><path d="M22 22v-5a10 10 0 0 1 20 0v5" stroke="#fff9e9" stroke-width="5"/><rect x="15" y="19" width="34" height="36" rx="10" fill="#fff9e9"/><rect x="21" y="33" width="22" height="15" rx="5" fill="#b8d7bd"/><path d="m27 40 4 4 7-8" stroke="#387d70" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-if(!root.LearningProgress||!root.LifeQuestData||!root.LifeQuests||!root.PracticeHub||typeof root.PracticeHub.mount!=='function'){
+if(!root.LearningProgress||!root.LifeQuestData||!root.LifeQuests||!root.PracticeHub||typeof root.PracticeHub.mount!=='function'||root.LifeSchoolSchedule&&!root.SchoolPackingFlow){
  app.innerHTML='<main class="life-update"><h1>Завершим обновление</h1><p>Подключись к интернету и открой тренажёр ещё раз. Прежние результаты останутся на устройстве.</p><a href="../">Все игры</a></main>';
  return;
 }

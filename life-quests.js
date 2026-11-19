@@ -18,8 +18,11 @@ const steps=q=>Array.isArray(q.steps)?q.steps:[];
 function generation(options){return typeof options.generation==='string'?options.generation:'initial';}
 function schedule(){return root.LifeSchoolSchedule||null;}
 function schoolChoice(value,options){const S=schedule();if(!S)return null;const recommended=S.recommended(options?.date),day=S.day(value?.dayId)||S.day(recommended.dayId),variants=S.variantsFor(day.id);return {dayId:day.id,variantId:variants.some(v=>v.id===value?.variantId)?value.variantId:'base'};}
-function create(options){options=options||{};return {school:schoolChoice(null,options),version:VERSION,generation:generation(options),view:'menu',category:'all',questId:null,phase:'intro',selected:null,placements:{},chosen:[],order:[],ruleId:null,feedback:null,issues:[],solved:false,attempt:null,undo:[],done:{},drafts:{},real:{},sequence:0,adultOpen:false,guide:null,guideSeen:{},motion:null,motionSeq:0,mission:{day:'',questId:'',history:[]}};}
+function create(options){options=options||{};return {school:schoolChoice(null,options),version:VERSION,generation:generation(options),view:'menu',category:'all',questId:null,packingFlow:null,phase:'intro',selected:null,placements:{},chosen:[],order:[],ruleId:null,feedback:null,issues:[],solved:false,attempt:null,undo:[],done:{},drafts:{},real:{},sequence:0,adultOpen:false,guide:null,guideSeen:{},motion:null,motionSeq:0,mission:{day:'',questId:'',history:[]}};}
 function current(state){return quest(state.questId);}
+function packingEngine(q){return q&&q.mode==='pack'&&Array.isArray(q.packingStages)&&q.packingStages.length&&root.SchoolPackingFlow?root.SchoolPackingFlow:null;}
+function packingCurrent(state,q){const F=packingEngine(q);return F&&state.packingFlow?F.current(q,state.packingFlow):null;}
+function syncPacking(state,q){const F=packingEngine(q);if(F&&state.packingFlow)state.chosen=F.chosen(q,state.packingFlow);}
 function startAttempt(q,env){const LP=env&&env.LP;const skills=['life.'+(q.skill||q.category||q.mode)];return LP?LP.attempt(q.id,skills,{generation:generation(env||{}),subject:'life',mode:q.mode,evidenceKind:'virtual-life-task',materialRevision:1,criteriaRevision:1}):{attemptId:'life-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2),taskId:q.id,skillIds:skills,generation:generation(env||{}),firstOutcome:'notchecked',assistance:{},errors:0};}
 function attemptClean(raw,q,env){
  const a=object(raw)?clone(raw):startAttempt(q,env);
@@ -32,13 +35,14 @@ function attemptClean(raw,q,env){
  a.errors=Number.isInteger(a.errors)?Math.min(1000,Math.max(0,a.errors)):0;
  a.firstOutcome=['correct','incorrect','skipped','notchecked'].includes(a.firstOutcome)?a.firstOutcome:'notchecked';return a;
 }
-function model(state){return {placements:clone(state.placements),chosen:state.chosen.slice(),order:state.order.slice(),ruleId:state.ruleId};}
-function cleanModel(raw,q){
- raw=object(raw)?raw:{};const result={placements:{},chosen:[],order:[],ruleId:null},ii=ids(q),zz=zoneIds(q),ss=steps(q).map(s=>s.id);
+function model(state){const result={placements:clone(state.placements),chosen:state.chosen.slice(),order:state.order.slice(),ruleId:state.ruleId},F=packingEngine(current(state));if(F&&state.packingFlow)result.packingFlow=F.snapshot(state.packingFlow,current(state));return result;}
+function cleanModel(raw,q,options){
+ raw=object(raw)?raw:{};options=options||{};const result={placements:{},chosen:[],order:[],ruleId:null},ii=ids(q),zz=zoneIds(q),ss=steps(q).map(s=>s.id);
  if(object(raw.placements))for(const id of ii)if(zz.includes(raw.placements[id]))result.placements[id]=raw.placements[id];
  result.chosen=Array.isArray(raw.chosen)?[...new Set(raw.chosen.filter(id=>ii.includes(id)))]:[];
  result.order=Array.isArray(raw.order)?[...new Set(raw.order.filter(id=>ss.includes(id)))]:[];
  if(Array.isArray(q.ruleChoices)&&q.ruleChoices.some(r=>r.id===raw.ruleId))result.ruleId=raw.ruleId;
+ const F=packingEngine(q);if(F){result.packingFlow=F.restore(raw.packingFlow,q,{chosen:result.chosen,solved:options.solved===true})||F.create(q,{chosen:result.chosen,solved:options.solved===true});result.chosen=F.chosen(q,result.packingFlow);}
  return result;
 }
 function shortAttempt(a){return {attemptId:a.attemptId,firstOutcome:a.firstOutcome,errors:a.errors,assistance:Object.fromEntries(Object.entries(a.assistance||{}).filter(([,v])=>v===true))};}
@@ -49,7 +53,7 @@ function compact(state){
  // evicting a draft merely because the child opened another adventure.
  for(const id of Object.keys(state.drafts)){
   const draft=state.drafts[id],q=quest(id);if(draft.solved||!q){delete state.drafts[id];continue;}
-  draft.attempt=shortAttempt(draft.attempt);delete draft.selected;delete draft.feedback;
+  draft.attempt=shortAttempt(draft.attempt);const F=packingEngine(q);if(F&&draft.packingFlow?.version===F.VERSION)draft.packingFlow=F.snapshot(draft.packingFlow,q);delete draft.selected;delete draft.feedback;
   if(q.mode==='sort'||q.mode==='rule'){delete draft.chosen;delete draft.order;}
   if(q.mode==='pack'){delete draft.placements;delete draft.order;delete draft.ruleId;}
   if(q.mode==='sequence'){delete draft.placements;delete draft.chosen;delete draft.ruleId;}
@@ -63,19 +67,29 @@ function cleanGuide(v){return object(v)?{step:Number.isInteger(v.step)?Math.max(
 function loadQuest(state,q,env,replay){
  if(current(state)&&state.view==='quest')saveDraft(state);
  if(q.schedule)state.school=schoolChoice({dayId:q.schedule.dayId,variantId:q.schedule.variantId},env);
- const draft=!replay&&state.drafts[q.id];state.view='quest';state.questId=q.id;state.selected=null;state.undo=[];state.adultOpen=false;state.guide=null;state.motion=null;
- if(draft){Object.assign(state,cleanModel(draft,q));state.phase=['intro','play','real','guide','small-real'].includes(draft.phase)?draft.phase:'play';state.solved=draft.solved===true;state.attempt=attemptClean(draft.attempt,q,env);state.issues=cleanIssues(draft.issues,q);state.guide=cleanGuide(draft.guide);state.feedback=cleanFeedback(draft.feedback)||(state.issues.length?{type:'error',text:'Продолжим с сохранённого места. Здесь остались пункты для проверки.'}:null);}
- else if(!replay&&state.done[q.id]&&state.done[q.id].model){const past=state.done[q.id];Object.assign(state,cleanModel(past.model,q));state.phase='play';state.solved=true;state.attempt=startAttempt(q,env);state.attempt.assistance.visual=past.helped;state.attempt.assistance.afterError=past.afterError;state.attempt.firstOutcome=past.afterError?'incorrect':'correct';state.feedback={type:'success',text:'Ты уже справился с этой игровой ситуацией. Можно посмотреть свой план или попробовать заново.'};state.issues=[];}
+ const draft=!replay&&state.drafts[q.id];state.view='quest';state.questId=q.id;state.packingFlow=null;state.selected=null;state.undo=[];state.adultOpen=false;state.guide=null;state.motion=null;
+ if(draft){Object.assign(state,cleanModel(draft,q,{solved:draft.solved===true}));state.phase=['intro','play','real','guide','small-real'].includes(draft.phase)?draft.phase:'play';state.solved=draft.solved===true;state.attempt=attemptClean(draft.attempt,q,env);state.issues=cleanIssues(draft.issues,q);state.guide=cleanGuide(draft.guide);state.feedback=cleanFeedback(draft.feedback)||(state.issues.length?{type:'error',text:'Продолжим с сохранённого места. Здесь остались пункты для проверки.'}:null);}
+ else if(!replay&&state.done[q.id]&&state.done[q.id].model){const past=state.done[q.id];Object.assign(state,cleanModel(past.model,q,{solved:true}));state.phase='play';state.solved=true;state.attempt=startAttempt(q,env);state.attempt.assistance.visual=past.helped;state.attempt.assistance.afterError=past.afterError;state.attempt.firstOutcome=past.afterError?'incorrect':'correct';state.feedback={type:'success',text:'Ты уже справился с этой игровой ситуацией. Можно посмотреть свой план или попробовать заново.'};state.issues=[];}
  else{Object.assign(state,cleanModel({},q));state.phase='intro';state.solved=false;state.attempt=startAttempt(q,env);state.feedback=null;state.issues=[];}
  if(state.phase==='real'&&!state.solved)state.phase='play';if(state.phase==='guide'&&!state.guide)state.phase='play';state.sequence++;saveDraft(state);
 }
 function cleanFeedback(value){return object(value)&&typeof value.text==='string'?{type:['success','error','hint'].includes(value.type)?value.type:'hint',text:value.text.slice(0,900)}:null;}
-function cleanIssues(value,q){return Array.isArray(value)?value.filter(v=>object(v)&&typeof v.code==='string').slice(0,24).map(v=>({code:v.code.slice(0,40),item:ids(q).includes(v.item)?v.item:undefined,step:steps(q).some(s=>s.id===v.step)?v.step:undefined,before:steps(q).some(s=>s.id===v.before)?v.before:undefined})):[];}
+function cleanIssues(value,q){
+ return Array.isArray(value)?value.filter(v=>object(v)&&typeof v.code==='string').slice(0,24).map(v=>{
+  const stage=Array.isArray(q.packingStages)&&q.packingStages.find(s=>s.id===v.stageId),belongs=Array.isArray(q.packingStages)&&q.packingStages.find(s=>s.id===v.belongsTo);
+  return {code:v.code.slice(0,40),item:ids(q).includes(v.item)?v.item:undefined,step:steps(q).some(s=>s.id===v.step)?v.step:undefined,before:steps(q).some(s=>s.id===v.before)?v.before:undefined,stageId:stage?stage.id:undefined,belongsTo:belongs?belongs.id:undefined,targetTitle:(belongs||stage)?.title};
+ }):[];
+}
 // The live engine remains v1. A versioned, lossless storage envelope prevents
 // older clients from treating a compressed future snapshot as an empty menu.
-const STORAGE_VERSION=2,STORAGE_ENCODING='life-dictionary-v1',FORBIDDEN=new Set(['__proto__','constructor','prototype']);
+const STORAGE_VERSION=3,STORAGE_ENCODING='life-dictionary-v1',FORBIDDEN=new Set(['__proto__','constructor','prototype']);
 function snapshot(state){
  const strings=[],lookup=new Map(),source=clone(state);let nodes=0;
+ // A staged model already stores each selected item and its physical order
+ // inside the flow. Omit only this derivable duplicate, never an answer.
+ const packRecord=(record,q,completedModel)=>{const F=packingEngine(q);if(!object(record)||!F||!record.packingFlow)return;const flow=F.restore(record.packingFlow,q,{chosen:record.chosen,solved:record.solved===true});if(!flow||Array.isArray(record.chosen)&&JSON.stringify(F.chosen(q,flow))!==JSON.stringify(record.chosen))return;const answer=F.chosen(q,flow),rebuilt=completedModel&&F.completed(q,flow)?F.create(q,{chosen:answer,solved:true}):null;const exact=rebuilt&&rebuilt.index===flow.index&&JSON.stringify(F.chosen(q,rebuilt))===JSON.stringify(answer)&&q.packingStages.every(stage=>{const a=F.stateFor(q,flow,stage.id),b=F.stateFor(q,rebuilt,stage.id);return a.checked===b.checked&&JSON.stringify(a.selected)===JSON.stringify(b.selected);});if(exact){record.chosen=answer;delete record.packingFlow;}else{record.packingFlow=F.snapshot(flow,q);delete record.chosen;}if(object(record.placements)&&!Object.keys(record.placements).length)delete record.placements;if(Array.isArray(record.order)&&!record.order.length)delete record.order;if(record.ruleId===null)delete record.ruleId;};
+ const active=source.questId&&quest(source.questId);if(active){packRecord(source,active);for(const model of source.undo||[])packRecord(model,active);}
+ for(const q of quests()){packRecord(source.drafts?.[q.id],q);packRecord(source.done?.[q.id]?.model,q,true);}
  const ref=text=>{if(!lookup.has(text)){lookup.set(text,strings.length);strings.push(text);}return lookup.get(text);};
  function encode(value,depth){
   if(++nodes>30000||depth>30)throw Error('Life snapshot exceeds structural bounds');
@@ -88,7 +102,7 @@ function snapshot(state){
  return {version:STORAGE_VERSION,encoding:STORAGE_ENCODING,generation:source.generation,strings,value:encode(source,0)};
 }
 function decodeSnapshot(raw){
- if(!object(raw)||raw.version!==STORAGE_VERSION||raw.encoding!==STORAGE_ENCODING||!Array.isArray(raw.strings)||raw.strings.length>4096)return null;
+ if(!object(raw)||![2,STORAGE_VERSION].includes(raw.version)||raw.encoding!==STORAGE_ENCODING||!Array.isArray(raw.strings)||raw.strings.length>4096)return null;
  try{
   if(byteSize(raw)>48*1024)return null;const pool=raw.strings;if(pool.some(s=>typeof s!=='string'||byteSize(s)>8192))return null;
   let nodes=0,budget=0;const charge=n=>{budget+=n;if(budget>256*1024)throw Error('expanded');};
@@ -106,17 +120,23 @@ function decodeSnapshot(raw){
   const decoded=decode(raw.value,0);if(!object(decoded)||decoded.version!==VERSION||decoded.generation!==raw.generation||byteSize(decoded)>256*1024)return null;return decoded;
  }catch(_){return null;}
 }
+function compatiblePackingRecord(raw,q){
+ if(!object(raw)||raw.packingFlow===undefined||raw.packingFlow===null)return true;const F=packingEngine(q);
+ return !!F&&!!F.restore(raw.packingFlow,q,{chosen:raw.chosen,solved:raw.solved===true});
+}
 function restore(raw,options){
- options=options||{};const encoded=raw?.version===STORAGE_VERSION;if(encoded){raw=decodeSnapshot(raw);if(!raw)return null;}else if(raw?.encoding)return null;if(!object(raw)||raw.version!==VERSION||raw.generation!==generation(options))return null;
+ options=options||{};const encoded=[2,STORAGE_VERSION].includes(raw?.version);if(encoded){raw=decodeSnapshot(raw);if(!raw)return null;}else if(raw?.encoding)return null;if(!object(raw)||raw.version!==VERSION||raw.generation!==generation(options))return null;
  let length;try{length=byteSize(raw);}catch(_){return null;}if(length>(encoded?256:48)*1024)return null;
+ const active=raw.view==='quest'?quest(raw.questId):null;if(active&&(!compatiblePackingRecord(raw,active)||(Array.isArray(raw.undo)&&raw.undo.some(v=>!compatiblePackingRecord(v,active)))))return null;
+ for(const q of quests()){if(!compatiblePackingRecord(raw.drafts?.[q.id],q)||!compatiblePackingRecord(raw.done?.[q.id]?.model,q))return null;}
  const state=create(options);state.school=schoolChoice(raw.school,options);state.motionSeq=Number.isInteger(raw.motionSeq)?Math.max(0,Math.min(100000,raw.motionSeq)):0;if(object(raw.guideSeen))for(const q of quests())if(raw.guideSeen[q.id]===true)state.guideSeen[q.id]=true;if(object(raw.mission)){const m=raw.mission;state.mission.day=validDay(m.day)?m.day:'';state.mission.questId=quest(m.questId)?m.questId:'';state.mission.history=(Array.isArray(m.history)?m.history:[]).filter(v=>object(v)&&validDay(v.day)&&quest(v.questId)).slice(-14).map(v=>({day:v.day,questId:v.questId,source:'child'}));}state.view=raw.view==='quest'?'quest':'menu';state.category=typeof raw.category==='string'&&raw.category.length<50?raw.category:'all';state.sequence=Number.isInteger(raw.sequence)?Math.max(0,Math.min(100000,raw.sequence)):0;
- if(object(raw.done))for(const q of quests()){const value=raw.done[q.id];if(object(value)){state.done[q.id]={count:Number.isInteger(value.count)?Math.max(1,Math.min(999,value.count)):1,helped:value.helped===true,afterError:value.afterError===true,sequence:Number.isInteger(value.sequence)?value.sequence:0};if(object(value.model))state.done[q.id].model=cleanModel(value.model,q);}}
+ if(object(raw.done))for(const q of quests()){const value=raw.done[q.id];if(object(value)){state.done[q.id]={count:Number.isInteger(value.count)?Math.max(1,Math.min(999,value.count)):1,helped:value.helped===true,afterError:value.afterError===true,sequence:Number.isInteger(value.sequence)?value.sequence:0};if(object(value.model)){state.done[q.id].model=cleanModel(value.model,q,{solved:true});const F=packingEngine(q);if(F&&state.done[q.id].model.packingFlow)state.done[q.id].model.packingFlow=F.snapshot(state.done[q.id].model.packingFlow,q);}}}
  if(object(raw.real))for(const q of quests()){const value=raw.real[q.id];if(!object(value))continue;const n=Array.isArray(q.realSteps)?q.realSteps.length:0;state.real[q.id]={checks:Array.from({length:n},(_,i)=>value.checks&&value.checks[i]===true),selfReported:value.selfReported===true,adultReported:value.adultReported===true,microDay:validDay(value.microDay)?value.microDay:''};if(!state.real[q.id].checks.every(Boolean)){state.real[q.id].selfReported=false;state.real[q.id].adultReported=false;}if(!state.real[q.id].selfReported)state.real[q.id].adultReported=false;}
- if(object(raw.drafts))for(const q of quests()){const d=raw.drafts[q.id];if(!object(d))continue;state.drafts[q.id]={...cleanModel(d,q),phase:['intro','play','real','guide','small-real'].includes(d.phase)?d.phase:'play',selected:null,solved:d.solved===true,attempt:attemptClean(d.attempt,q,options),feedback:cleanFeedback(d.feedback),guide:cleanGuide(d.guide),issues:cleanIssues(d.issues,q),sequence:Number.isInteger(d.sequence)?d.sequence:0};}
- const q=state.view==='quest'?quest(raw.questId):null;if(q){state.questId=q.id;Object.assign(state,cleanModel(raw,q));state.phase=['intro','play','real','guide','small-real'].includes(raw.phase)?raw.phase:'play';state.solved=raw.solved===true;state.attempt=attemptClean(raw.attempt,q,options);state.guide=cleanGuide(raw.guide);state.feedback=cleanFeedback(raw.feedback);state.issues=cleanIssues(raw.issues,q);state.undo=Array.isArray(raw.undo)?raw.undo.slice(-MAX_UNDO).filter(object).map(v=>cleanModel(v,q)):[];if(state.phase==='real'&&!state.solved)state.phase='play';if(state.phase==='guide'&&!state.guide)state.phase='play';saveDraft(state);}else{state.view='menu';state.questId=null;}
+ if(object(raw.drafts))for(const q of quests()){const d=raw.drafts[q.id];if(!object(d))continue;state.drafts[q.id]={...cleanModel(d,q,{solved:d.solved===true}),phase:['intro','play','real','guide','small-real'].includes(d.phase)?d.phase:'play',selected:null,solved:d.solved===true,attempt:attemptClean(d.attempt,q,options),feedback:cleanFeedback(d.feedback),guide:cleanGuide(d.guide),issues:cleanIssues(d.issues,q),sequence:Number.isInteger(d.sequence)?d.sequence:0};}
+ const q=state.view==='quest'?quest(raw.questId):null;if(q){state.questId=q.id;Object.assign(state,cleanModel(raw,q,{solved:raw.solved===true}));state.phase=['intro','play','real','guide','small-real'].includes(raw.phase)?raw.phase:'play';state.solved=raw.solved===true;state.attempt=attemptClean(raw.attempt,q,options);state.guide=cleanGuide(raw.guide);state.feedback=cleanFeedback(raw.feedback);state.issues=cleanIssues(raw.issues,q);state.undo=Array.isArray(raw.undo)?raw.undo.slice(-MAX_UNDO).filter(object).map(v=>cleanModel(v,q)):[];if(state.phase==='real'&&!state.solved)state.phase='play';if(state.phase==='guide'&&!state.guide)state.phase='play';saveDraft(state);}else{state.view='menu';state.questId=null;}
  return compact(state);
 }
-function history(state){state.undo.push(model(state));if(state.undo.length>MAX_UNDO)state.undo.shift();}
+function history(state,previous){state.undo.push(previous===undefined?model(state):previous);if(state.undo.length>MAX_UNDO)state.undo.shift();}
 function helped(state,env,kind){if(env&&env.LP)env.LP.help(state.attempt,kind);else{state.attempt.assistance[kind==='error'?'afterError':kind]=true;if(kind==='error'){state.attempt.errors++;state.attempt.firstOutcome='incorrect';}}}
 function announce(env,text){if(env&&typeof env.announce==='function')env.announce(text);}
 function feedback(state,env,text,type){state.feedback={text,type:type||'hint'};announce(env,text);}
@@ -132,14 +152,27 @@ function evaluate(state){
   const alternatives=(q.alternatives||[]).flatMap(g=>g.items||[]);
   for(const id of state.chosen)if(!(q.required||[]).includes(id)&&!(q.optional||[]).includes(id)&&!alternatives.includes(id))issues.push({code:'extra',item:id});
   for(const g of q.alternatives||[]){const count=g.items.filter(id=>state.chosen.includes(id)).length;if(count<g.min)issues.push({code:'alternative-missing',item:g.items[0]});if(count>g.max)issues.push({code:'alternative-extra',item:g.items[g.max]});}
+   const F=packingEngine(q);if(F&&state.packingFlow&&!F.completed(q,state.packingFlow))issues.push({code:'packing-stages'});
  }else if(q.mode==='sequence'){
   for(const s of steps(q))if(!state.order.includes(s.id))issues.push({code:'missing-step',step:s.id});
   for(const pair of q.before||[]){if(state.order.includes(pair[0])&&state.order.includes(pair[1])&&state.order.indexOf(pair[0])>state.order.indexOf(pair[1]))issues.push({code:'order',step:pair[1],before:pair[0]});}
  }else issues.push({code:'unsupported'});
  return {correct:issues.length===0,issues};
 }
-function issueText(issue,q,state){const id=issue.item,label=id?item(id).label:'';const why=id&&q.why&&q.why[id];switch(issue.code){case 'choose-rule':return 'Сначала выбери правило, по которому будешь сортировать.';case 'unplaced':return 'Найди место: '+label+'.';case 'wrong-zone':return label+': '+(why||'Сравни предмет с правилом и описанием места.');case 'missing':return label+': '+(why||'Эта вещь нужна по условию. Найди её среди предметов.');case 'extra':return label+': '+(why||'Для этой ситуации вещь не нужна. Верни её на полку.');case 'alternative-missing':{const g=(q.alternatives||[]).find(g=>g.items.includes(id));return 'Выбери подходящий вариант: '+(g?g.label:label)+'.';}case 'alternative-extra':return 'По условию достаточно меньшего количества вариантов. Проверь памятку.';case 'missing-step':return 'Добавь в план: '+(steps(q).find(s=>s.id===issue.step)||{}).label+'.';case 'order':return 'Подумай, что должно быть раньше: «'+(steps(q).find(s=>s.id===issue.before)||{}).label+'» или «'+(steps(q).find(s=>s.id===issue.step)||{}).label+'».';default:return 'Проверь условие и свой план.';}}
+function issueText(issue,q,state){const id=issue.item,label=id?item(id).label:'';const activeStage=packingCurrent(state,q),why=id&&(activeStage?.why?.[id]||q.why&&q.why[id]);switch(issue.code){case 'packing-stages':return 'Сначала проверь общие вещи и каждый урок по порядку. После этого сверим весь день.';case 'stage-incomplete':return 'Сначала проверь этот этап, потом перейдём дальше.';case 'needed-later':case 'belongs-later':case 'future-item':case 'wrong-stage':return label+': '+(why|| (issue.targetTitle?'эта вещь относится к этапу «'+issue.targetTitle+'». Сейчас готовимся к другому занятию.':'сверься с условием именно этого этапа.'));case 'earlier-stage':return label+': эта вещь относится к предыдущему этапу'+(issue.targetTitle?' «'+issue.targetTitle+'»':'')+'. При необходимости вернись туда.';case 'previous-unconfirmed':case 'reuse-not-ready':return (label?label+': ':'')+'Сначала проверь предыдущий этап'+(issue.targetTitle?' «'+issue.targetTitle+'»':'')+'. Затем используем те же вещи ещё раз.';case 'already-packed':case 'duplicate':return label+': эта вещь уже приготовлена. Вторую такую же брать не нужно.';case 'choose-rule':return 'Сначала выбери правило, по которому будешь сортировать.';case 'unplaced':return 'Найди место: '+label+'.';case 'wrong-zone':return label+': '+(why||'Сравни предмет с правилом и описанием места.');case 'missing':return label+': '+(why||'Эта вещь нужна по условию. Найди её среди предметов.');case 'extra':return label+': '+(why||'Для этой ситуации вещь не нужна. Верни её на полку.');case 'alternative-missing':{const g=(q.alternatives||[]).find(g=>g.items.includes(id));return 'Выбери подходящий вариант: '+(g?g.label:label)+'.';}case 'alternative-extra':return 'По условию достаточно меньшего количества вариантов. Проверь памятку.';case 'missing-step':return 'Добавь в план: '+(steps(q).find(s=>s.id===issue.step)||{}).label+'.';case 'order':return 'Подумай, что должно быть раньше: «'+(steps(q).find(s=>s.id===issue.before)||{}).label+'» или «'+(steps(q).find(s=>s.id===issue.step)||{}).label+'».';default:return 'Проверь условие и свой план.';}}
 function observe(state,env,outcome){const q=current(state);if(!env||typeof env.observe!=='function'||!q)return;if(state.attempt.firstOutcome==='notchecked')state.attempt.firstOutcome=outcome;env.observe({...clone(state.attempt),outcome,subject:'life',mode:q.mode,familyId:'life.'+(q.category||q.mode),variantId:q.id,evidenceKind:'virtual-life-task',materialRevision:1,criteriaRevision:1});}
+function packingStepCheck(state,q,env){
+ const F=packingEngine(q);if(!F||!state.packingFlow||!F.current(q,state.packingFlow))return false;
+ const previous=model(state),result=F.check(q,state.packingFlow);syncPacking(state,q);if(JSON.stringify(previous)!==JSON.stringify(model(state)))history(state,previous);state.issues=result.issues||[];
+ if(result.correct)feedback(state,env,'Этот этап готов. Можно перейти к следующему.','success');
+ else{helped(state,env,'error');observe(state,env,'incorrect');feedback(state,env,'Проверим вещи только для этого этапа. Ты можешь исправить свой выбор.','error');}
+ return true;
+}
+function packingMove(state,q,action,payload,env){
+ const F=packingEngine(q);if(!F||!state.packingFlow)return false;const previous=model(state);
+ const changed=action==='packing-next'?F.next(q,state.packingFlow):action==='packing-back'?F.back(q,state.packingFlow):F.goto(q,state.packingFlow,Number(payload.index));
+ if(!changed)return false;history(state,previous);syncPacking(state,q);state.issues=[];state.feedback=null;state.selected=null;return true;
+}
 function validDay(v){return typeof v==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(v);}
 function localDay(env){if(env&&validDay(env.day))return env.day;const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function realState(state,q){if(!state.real[q.id])state.real[q.id]={checks:(q.realSteps||[]).map(()=>false),selfReported:false,adultReported:false,microDay:''};return state.real[q.id];}
@@ -171,7 +204,7 @@ function handle(state,action,payload,env){
  else if(action==='small-game'){if(state.phase!=='small-real')return false;state.phase=state.solved?'real':'play';state.feedback=null;}
  else if(action==='small-later'||action==='real-later'){if(!['small-real','real'].includes(state.phase))return false;saveDraft(state);state.view='menu';state.questId=null;state.feedback=null;state.selected=null;}
  else if(action==='replay'){loadQuest(state,q,env,true);}
- else if(action==='hint'){helped(state,env,'visual');feedback(state,env,q.hint||'Посмотри на условие. Можно переносить вещи по одной и исправлять свой выбор.');}
+ else if(action==='hint'){helped(state,env,'visual');feedback(state,env,packingCurrent(state,q)?.instruction||q.hint||'Посмотри на условие. Можно переносить вещи по одной и исправлять свой выбор.');}
  else if(action==='speak'){if(typeof env.speak==='function')env.speak(q.instruction||q.title);return true;}
  else if(action==='real'){if(!state.solved)return false;state.phase='real';state.selected=null;state.feedback=null;realState(state,q);}
  else if(action==='back'){state.phase='play';state.adultOpen=false;state.feedback=null;}
@@ -180,17 +213,20 @@ function handle(state,action,payload,env){
  else if(action==='adult-open'){const r=realState(state,q);if(!r.selfReported)return false;state.adultOpen=!state.adultOpen;state.feedback=null;}
  else if(action==='adult-confirm'){const r=realState(state,q);if(!state.adultOpen||!r.selfReported||!r.checks.every(Boolean))return false;r.adultReported=true;state.adultOpen=false;feedback(state,env,'Добавлена отдельная отметка взрослого.','success');}
  else if(state.phase!=='play'||state.solved)return false;
+ else if(['packing-next','packing-back','packing-goto'].includes(action)){if(!packingMove(state,q,action,payload,env))return false;}
+ else if(action==='packing-check'||action==='check'&&packingCurrent(state,q)){if(!packingStepCheck(state,q,env))return false;}
+ else if(action==='packing-reset'){const F=packingEngine(q);if(!F||!state.packingFlow)return false;const selected=F.selection(q,state.packingFlow);if(!selected.length)return false;history(state);for(const id of selected)F.drop(q,state.packingFlow,id,'bank');syncPacking(state,q);state.feedback=null;state.issues=[];state.selected=null;}
  else if(action==='reset'){const a=state.attempt;Object.assign(state,cleanModel({},q));state.attempt=a;state.feedback=null;state.issues=[];state.selected=null;state.undo=[];}
- else if(action==='undo'){if(!state.undo.length)return false;Object.assign(state,state.undo.pop());state.feedback=null;state.issues=[];state.selected=null;}
+ else if(action==='undo'){if(!state.undo.length)return false;Object.assign(state,cleanModel(state.undo.pop(),q));state.feedback=null;state.issues=[];state.selected=null;}
  else if(action==='rule'){const r=(q.ruleChoices||[]).find(x=>x.id===payload.rule);if(!r)return false;history(state);state.ruleId=r.id;state.placements={};state.feedback=null;state.issues=[];state.selected=null;}
  else if(action==='select'){const id=payload.item;if(!ids(q).includes(id))return false;state.selected=state.selected===id?null:id;state.feedback=null;announce(env,state.selected?item(id).label+' выбрано. Теперь выбери место.':'Выбор снят.');}
- else if(action==='toggle'){const id=payload.item;if(q.mode!=='pack'||!ids(q).includes(id))return false;history(state);state.chosen=state.chosen.includes(id)?state.chosen.filter(x=>x!==id):state.chosen.concat(id);state.feedback=null;state.issues=[];state.selected=null;}
+ else if(action==='toggle'){const id=payload.item;if(q.mode!=='pack'||!ids(q).includes(id))return false;const F=packingEngine(q);if(F&&state.packingFlow){const previous=model(state);if(!F.toggle(q,state.packingFlow,id))return false;history(state,previous);syncPacking(state,q);}else{history(state);state.chosen=state.chosen.includes(id)?state.chosen.filter(x=>x!==id):state.chosen.concat(id);}state.feedback=null;state.issues=[];state.selected=null;}
  else if(action==='place'||action==='drop'){
   const id=action==='drop'?payload.item:state.selected,to=payload.zone;
   if(q.mode==='sequence'){
    if(!steps(q).some(s=>s.id===id))return false;const before=String(to||'').replace(/^step:/,'');if(to!=='end'&&to!=='bank'&&!steps(q).some(s=>s.id===before))return false;history(state);state.order=state.order.filter(x=>x!==id);if(to!=='bank'){const i=state.order.indexOf(before);state.order.splice(i<0?state.order.length:i,0,id);}state.selected=null;
   }else if(q.mode==='pack'){
-   if(!ids(q).includes(id)||!['bag','bank'].includes(to))return false;history(state);state.chosen=state.chosen.filter(x=>x!==id);if(to==='bag')state.chosen.push(id);state.selected=null;
+   if(!ids(q).includes(id)||!['bag','bank'].includes(to))return false;const F=packingEngine(q);if(F&&state.packingFlow){const previous=model(state);if(!F.drop(q,state.packingFlow,id,to))return false;history(state,previous);syncPacking(state,q);}else{history(state);state.chosen=state.chosen.filter(x=>x!==id);if(to==='bag')state.chosen.push(id);}state.selected=null;
   }else{if(!ids(q).includes(id)||(!zoneIds(q).includes(to)&&to!=='bank'))return false;if(q.mode==='rule'&&!rule(q,state)){feedback(state,env,'Сначала выбери правило сортировки.');return true;}history(state);if(to==='bank')delete state.placements[id];else state.placements[id]=to;state.selected=null;}
   state.feedback=null;state.issues=[];
  }
@@ -198,7 +234,8 @@ function handle(state,action,payload,env){
  else if(action==='step'){const id=payload.step;if(q.mode!=='sequence'||!steps(q).some(s=>s.id===id)||state.order.includes(id))return false;history(state);state.order.push(id);state.feedback=null;state.issues=[];}
  else if(action==='unstep'){const id=payload.step;if(q.mode!=='sequence'||!state.order.includes(id))return false;history(state);state.order=state.order.filter(x=>x!==id);state.feedback=null;state.issues=[];}
  else if(action==='up'||action==='down'){const id=payload.step,i=state.order.indexOf(id),j=i+(action==='up'?-1:1);if(q.mode!=='sequence'||i<0||j<0||j>=state.order.length)return false;history(state);[state.order[i],state.order[j]]=[state.order[j],state.order[i]];state.feedback=null;state.issues=[];}
- else if(action==='check'){
+ else if(action==='check'||action==='packing-review-check'){
+  if(action==='packing-review-check'&&(!packingEngine(q)||packingCurrent(state,q)))return false;
   const result=evaluate(state);state.issues=result.issues;
   if(result.correct){state.solved=true;setMotion(state,'complete',{});state.selected=null;const a=state.attempt.assistance||{},old=state.done[q.id]||{};state.done[q.id]={count:Math.min(999,(old.count||0)+1),helped:!!(a.visual||a.explanation||a.workedExample),afterError:!!a.afterError,sequence:++state.sequence,model:model(state)};observe(state,env,'correct');feedback(state,env,'В игре получилось! '+(q.success||'Все вещи и шаги подходят к условию. Можно попробовать это в жизни.'),'success');}
   else{helped(state,env,'error');observe(state,env,'incorrect');feedback(state,env,result.issues.length===1?'Осталось проверить один момент. Ты можешь исправить свой выбор.':'Есть несколько мест для проверки. Сохраним то, что уже получилось, и поправим остальное.','error');}
@@ -220,15 +257,16 @@ function prepareSurface(q){return q.prepare===true||Array.isArray(q.bagGroups)&&
 function floorPoint(i,q){return prepareSurface(q)?{x:235+(i%4)*43,y:101+Math.floor(i/4)*33}:{x:205+(i%8)*66,y:291+Math.floor(i/8)*(ids(q).length>16?30:24)};}
 function sceneState(state,q){
  q=q||current(state);if(!q)return null;
+ const F=packingEngine(q),staged=!!(F&&state.packingFlow&&!state.solved&&F.current(q,state.packingFlow)),visible=staged?F.visibleItems(q,state.packingFlow):ids(q),picked=staged?F.selection(q,state.packingFlow):state.chosen;
  const sorting=q.category==='sorting',zs=zoneIds(q).map((id,i)=>({id,x:sorting?230+i*250:235+(i%3)*170,y:80+Math.floor(i/3)*105,width:sorting?221:151,height:sorting?175:84,cols:sorting?4:3}));
- const positions=ids(q).map((id,i)=>{
-  let place=q.mode==='pack'?(state.chosen.includes(id)?'bag':'floor'):state.placements[id]||'floor';
+ const positions=visible.map((id,i)=>{
+  let place=q.mode==='pack'?(picked.includes(id)?'bag':'floor'):state.placements[id]||'floor';
   let {x,y}=floorPoint(i,q);
-  if(q.mode==='pack'&&place==='bag'){const n=state.chosen.indexOf(id);if(prepareSurface(q)){x=440+(n%6)*47;y=139+Math.floor(n/6)*36;}else{x=535+(n%3)*46;y=140+Math.floor(n/3)*43;}}
+  if(q.mode==='pack'&&place==='bag'){const n=picked.indexOf(id);if(prepareSurface(q)){x=440+(n%6)*47;y=139+Math.floor(n/6)*36;}else{x=535+(n%3)*46;y=140+Math.floor(n/3)*43;}}
   else if(place!=='floor'){const z=zs.find(z=>z.id===place),n=ids(q).filter(v=>state.placements[v]===place).indexOf(id);if(z){x=z.x+21+(n%z.cols)*(sorting?47:42);y=z.y+38+Math.floor(n/z.cols)*(sorting?39:29);}}
   return {id,place,x,y};
  });
- return {type:q.scene||'room',mode:q.mode,height:Math.max(338,...positions.map(p=>p.y+15)),zones:zs,items:positions,planned:state.order.slice(),complete:state.solved===true};
+ return {sourceIds:visible.slice(),type:q.scene||'room',mode:q.mode,height:Math.max(338,...positions.map(p=>p.y+15)),zones:zs,items:positions,planned:state.order.slice(),complete:state.solved===true};
 }
 function sceneSymbol(id,x,y,e,attrs){const it=item(id);if(it.illustration?.type==='shape')return '<g '+(attrs||'')+' transform="translate('+x+' '+y+')">'+shapeSvg(it).replace('<svg ','<svg x="-18" y="-29" width="36" height="36" ')+'</g>';return '<text '+(attrs||'')+' x="'+x+'" y="'+y+'" text-anchor="middle" font-size="31" font-family="sans-serif">'+e(it.icon||'□')+'</text>';}
 function planScene(state,q,e){
@@ -283,7 +321,7 @@ function afterRender(container,state,previous){
  }
  if(motion.kind==='item'){
   const m=sceneState(state,q),position=m.items.find(v=>v.id===motion.item),ghost=container.querySelector('[data-lq-flight]'),target=[...container.querySelectorAll('[data-scene-item]')].find(el=>el.getAttribute('data-scene-item')===motion.item);if(!ghost||!position)return {animated:false};
-  const n=ids(q).indexOf(motion.item),zone=m.zones.find(v=>v.id===motion.from);let from=floorPoint(n,q);if(motion.from==='bag')from=prepareSurface(q)?{x:575,y:190}:{x:560,y:175};else if(zone)from={x:zone.x+45,y:zone.y+39};
+  const n=(m.sourceIds||ids(q)).indexOf(motion.item),zone=m.zones.find(v=>v.id===motion.from);let from=floorPoint(n,q);if(motion.from==='bag')from=prepareSurface(q)?{x:575,y:190}:{x:560,y:175};else if(zone)from={x:zone.x+45,y:zone.y+39};
   if(target)target.style.opacity='0';ghost.style.opacity='1';const a=animate(ghost,[{transform:'translate('+from.x+'px,'+from.y+'px)',opacity:1},{transform:'translate('+((from.x+position.x)/2)+'px,'+(Math.min(from.y,position.y)-44)+'px)',opacity:1,offset:.5},{transform:'translate('+position.x+'px,'+position.y+'px)',opacity:1}],{duration:720,easing:'cubic-bezier(.25,.05,.25,1)',fill:'forwards'});
   const settle=()=>{ghost.style.opacity='0';if(target)target.style.opacity='1';};animationCleanups.push(settle);if(a&&a.finished)a.finished.then(settle,settle);else settle();return {animated:!!a,kind:'item',duration:720};
  }
@@ -311,7 +349,7 @@ function renderSchoolPicker(state,e,env){
  const lessons=q.schedule?.lessons||d.lessons||[],labels=q.schedule?.selectedLessons||q.schedule?.subjects||d.subjects||[];
  const lessonLabels=labels.length?labels:lessons.map(x=>typeof x==='string'?x:x.title);
  const dayWords=d.accusative||d.label.toLowerCase();
- return '<section class="lq-school-picker" id="life-school-picker" aria-labelledby="life-school-title"><header><div><span class="lq-eyebrow">ТВОЁ РАСПИСАНИЕ · 2 А КЛАСС</span><h3 id="life-school-title" tabindex="-1">Соберёмся к нужному дню</h3><p>Сначала выбери день. Посмотри уроки и условия, потом приготовь нужные вещи.</p></div><span class="lq-school-icon" aria-hidden="true">🎒</span></header>'+(recommended.weekend?'<p class="lq-weekend-note">Сегодня выходной. Можно спокойно подготовиться к понедельнику или выбрать другой учебный день.</p>':'')+'<div class="lq-weekdays" role="group" aria-label="К какому дню собираемся">'+S.days.map(day=>button('school-day',e(day.label),'data-day="'+e(day.id)+'" aria-pressed="'+(d.id===day.id)+'"',d.id===day.id?'active':'')).join('')+'</div><div class="lq-school-content"><section class="lq-school-lessons"><h4>Уроки: '+e(d.label)+'</h4><ol>'+lessonLabels.map(text=>'<li>'+e(text)+'</li>').join('')+'</ol>'+(d.pool?'<p class="lq-pool-note">🏊 «Золотая рыбка» — занятие в бассейне.</p>':'')+'<p class="lq-school-source">Дни и уроки — по твоему расписанию. Список вещей — по условиям этой игры.</p></section><section class="lq-school-choice"><h4>Какая сегодня ситуация?</h4><div class="lq-school-variants" role="group" aria-label="Условия сборов">'+variants.map(v=>button('school-variant',e(v.label),'data-variant="'+e(v.id)+'" aria-pressed="'+(selected.variantId===v.id)+'"',selected.variantId===v.id?'active':'')).join('')+'</div>'+renderConditions(q,e,true)+'<div class="lq-controls">'+button('school-start','Собраться на '+e(dayWords),'','primary')+button('school-next','Ближайший учебный день','','quiet')+'</div></section></div></section>';
+ return '<section class="lq-school-picker" id="life-school-picker" aria-labelledby="life-school-title"><header><div><span class="lq-eyebrow">ТВОЁ РАСПИСАНИЕ · 2 А КЛАСС</span><h3 id="life-school-title" tabindex="-1">Соберёмся к нужному дню</h3><p>Сначала выбери день. Посмотри уроки и условия, потом приготовь нужные вещи.</p></div><span class="lq-school-icon" aria-hidden="true">🎒</span></header>'+(recommended.weekend?'<p class="lq-weekend-note">Сегодня выходной. Можно спокойно подготовиться к понедельнику или выбрать другой учебный день.</p>':'')+'<div class="lq-weekdays" role="group" aria-label="К какому дню собираемся">'+S.days.map(day=>button('school-day',e(day.label),'data-day="'+e(day.id)+'" aria-pressed="'+(d.id===day.id)+'"',d.id===day.id?'active':'')).join('')+'</div><div class="lq-school-content"><section class="lq-school-lessons"><h4>Уроки: '+e(d.label)+'</h4><ol>'+lessonLabels.map(text=>'<li>'+e(text)+'</li>').join('')+'</ol>'+(d.pool?'<p class="lq-pool-note">🏊 «Золотая рыбка» — занятие в бассейне.</p>':'')+'<p class="lq-school-source">Дни и уроки — по твоему расписанию. Список вещей — по условиям этой игры.</p></section><section class="lq-school-choice"><h4>Какая сегодня ситуация?</h4><div class="lq-school-variants" role="group" aria-label="Условия сборов">'+variants.map(v=>button('school-variant',e(v.label),'data-variant="'+e(v.id)+'" aria-pressed="'+(selected.variantId===v.id)+'"',selected.variantId===v.id?'active':'')).join('')+'</div>'+(packingEngine(q)?renderPackingOverview(q,e):renderConditions(q,e,true))+'<div class="lq-controls">'+button('school-start','Собраться на '+e(dayWords),'','primary')+button('school-next','Ближайший учебный день','','quiet')+'</div></section></div></section>';
 }
 function renderConditions(q,e,compact){
  const conditions=Array.isArray(q.conditions)?q.conditions.filter(x=>typeof x==='string'&&x.trim()):[];
@@ -319,6 +357,33 @@ function renderConditions(q,e,compact){
  const title=q.schedule?'Собираемся: '+(q.schedule.dayLabel||q.title):'Условия этой задачи';
  const provided=Array.isArray(q.schedule?.provided)?q.schedule.provided:[],lessons=q.schedule?.selectedLessons||q.schedule?.subjects||[];
  return '<section class="lq-packing-conditions'+(compact?' is-compact':'')+'" aria-label="Условия задания"><strong>'+e(title)+'</strong>'+(!compact&&lessons.length?'<p class="lq-condition-lessons"><b>Уроки:</b> '+e(lessons.join(' · '))+'</p>':'')+(conditions.length?'<ul>'+conditions.map(c=>'<li>'+e(c)+'</li>').join('')+'</ul>':'')+(provided.length?'<p class="lq-provided"><b>Уже готово:</b> '+e((q.schedule.providedText||provided.map(id=>item(id).label).join(', ')).replace(/^Уже (?:приготовлено|готово):\s*/i,'').replace(/[.。]+$/,''))+'. Эти вещи повторно не выбираем.</p>':'')+'</section>';
+}
+function renderPackingOverview(q,e){
+ return '<section class="lq-packing-overview"><strong>Собираемся по одному занятию</strong><p>Сначала общие вещи, затем каждый урок по расписанию. На экране будут вещи и условия только текущего этапа.</p><p>Уже приготовленное сохраним. Одну вещь для двух уроков не нужно брать дважды.</p></section>';
+}
+function packingProgress(state,q,e){
+ const F=packingEngine(q),flow=state.packingFlow,stages=q.packingStages,index=flow.index;
+ const buttons=stages.map((stage,i)=>{const run=F.stateFor(q,flow,stage.id),status=i===index?'current':run.checked?'complete':'pending';return '<li data-packing-status="'+status+'">'+button('packing-goto','<span aria-hidden="true">'+(run.checked?'✓':i+1)+'</span><span>'+e(stage.title)+'</span>','data-index="'+i+'"'+(i===index?' aria-current="step"':''),'',i>index)+'</li>';}).join('');
+ return '<nav class="lq-packing-progress" aria-label="Этапы сборов"><p>Шаг '+(Math.min(index,stages.length)+1)+' из '+(stages.length+1)+' · '+e(q.schedule?.dayLabel||'Сборы по занятиям')+'</p><details class="lq-packing-roadmap"><summary>Посмотреть этапы дня</summary><ol>'+buttons+'<li data-packing-status="'+(index===stages.length?'current':'pending')+'"><span><span aria-hidden="true">'+(stages.length+1)+'</span> Проверка всего дня</span></li></ol></details></nav>';
+}
+function packingNames(list,e){return list.map(id=>e(item(id).label)).join(', ');}
+function packingEarlier(state,q,e){
+ const F=packingEngine(q),flow=state.packingFlow,earlier=q.packingStages.slice(0,flow.index),ready=[...new Set(earlier.flatMap(stage=>{const run=F.stateFor(q,flow,stage.id);return run.checked?run.selected:[];}))];
+ const later=q.packingStages.slice(flow.index+1).reduce((n,stage)=>n+F.stateFor(q,flow,stage.id).selected.length,0),pending=later?'<p class="lq-packing-pending">На следующих этапах сохранено выбранных вещей: '+later+'. Проверим их по порядку, когда дойдём до соответствующего занятия.</p>':'';
+ if(!ready.length)return pending;
+ return '<details class="lq-packing-ready"><summary>Проверено раньше: '+ready.length+' вещей</summary><p>'+packingNames(ready,e)+'</p><p>Они остаются приготовленными. Чтобы изменить их, вернись к нужному этапу.</p></details>'+pending;
+}
+function renderPackingIntro(state,q,e){
+ return renderPackingOverview(q,e)+'<ol class="lq-mini-steps"><li>Начни с общих обязательных вещей.</li><li>Собирай вещи для одного урока и проверяй этот этап.</li><li>В конце сверь весь день и разложи вещи по сумкам.</li></ol><div class="lq-controls">'+button('begin','Начать с общих вещей','','primary')+button('show-how','Покажи, как выбирать','','quiet')+'</div>';
+}
+function renderPackingReview(state,q,e){
+ const F=packingEngine(q),flow=state.packingFlow,complete=F.completed(q,flow);
+ return '<section class="lq-packing-review" data-packing-stage="review">'+packingProgress(state,q,e)+'<header><span class="lq-eyebrow">ПОСЛЕДНИЙ ШАГ</span><h3>Проверим весь день</h3><p>Мы прошли общие вещи и все занятия. Сверим, всё ли осталось приготовлено.</p></header><div class="lq-packing-review-list">'+q.packingStages.map((stage,i)=>{const run=F.stateFor(q,flow,stage.id);return '<article data-packing-review-step="'+e(stage.id)+'"><h4>'+e(stage.title)+' <span>'+(run.checked?'✓':'Нужно проверить')+'</span></h4>'+(run.selected.length?'<p>'+packingNames(run.selected,e)+'</p>':'<p>Новых вещей на этом этапе не добавляли.</p>')+(stage.provided?.length?'<p class="lq-muted">Было готово заранее: '+packingNames(stage.provided,e)+'.</p>':'')+(stage.reused?.length?'<p class="lq-muted">Используем ещё раз те же вещи: '+packingNames(stage.reused,e)+'.</p>':'')+button('packing-goto','Изменить этот этап','data-index="'+i+'"','quiet')+'</article>';}).join('')+'</div>'+renderFeedback(state,q,e)+'<div class="lq-controls lq-step-controls">'+button('packing-review-check','Проверить весь день','','primary',!complete)+button('packing-back','← К последнему этапу','','quiet')+'</div></section>';
+}
+function renderPackingStep(state,q,e){
+ const F=packingEngine(q),flow=state.packingFlow,stage=F.current(q,flow);if(!stage)return renderPackingReview(state,q,e);
+ const run=F.stateFor(q,flow,stage.id),selected=run.selected,visible=F.visibleItems(q,flow),bank=visible.filter(id=>!selected.includes(id)),local=Object.assign({},state,{chosen:selected}),hasChoices=visible.length>0,nextLabel=flow.index+1===q.packingStages.length?'К проверке всего дня':'Следующий этап →';
+ return '<section class="lq-packing-step" data-packing-stage="'+e(stage.id)+'">'+packingProgress(state,q,e)+'<header class="lq-packing-step-heading"><span class="lq-eyebrow">'+(stage.kind==='common'?'НУЖНО В ЛЮБОЙ УЧЕБНЫЙ ДЕНЬ':stage.kind==='lesson'?'ГОТОВИМСЯ К ОДНОМУ УРОКУ':'ЕЩЁ ОДИН НЕБОЛЬШОЙ ШАГ')+'</span><h3>'+e(stage.title)+'</h3><p>'+e(stage.instruction||'Выбери вещи по условию этого этапа.')+'</p></header><section class="lq-packing-conditions" aria-label="Условия текущего этапа"><strong>Сейчас готовим только это</strong>'+(stage.conditions?.length?'<ul>'+stage.conditions.map(text=>'<li>'+e(text)+'</li>').join('')+'</ul>':'')+(stage.provided?.length?'<p><b>Уже было готово:</b> '+packingNames(stage.provided,e)+'. Повторно не выбираем.</p>':'')+(stage.reused?.length?'<p><b>Уже готовили на предыдущем этапе:</b> '+packingNames(stage.reused,e)+'. Второй комплект не нужен.</p>':'')+'</section>'+packingEarlier(state,q,e)+(hasChoices?renderScene(state,q,e)+'<div class="lq-pack-layout"><section class="lq-bank" data-practice-drop="bank"><div class="lq-area-title"><h4>Выбери для этого этапа</h4><span>'+bank.length+' карточек</span></div><div class="lq-items">'+bank.map(id=>itemCard(id,local,e,'pack',false)).join('')+'</div></section><section class="lq-bag" data-practice-drop="bag" aria-label="Выбранные вещи для этого этапа"><div class="lq-area-title"><h4>Приготовлю сейчас</h4><span>'+selected.length+' вещей</span></div><div class="lq-items">'+selected.map(id=>itemCard(id,local,e,'pack',true)).join('')+(selected.length?'':'<p class="lq-empty">Выбери нужные вещи слева. Можно передумать и вернуть карточку.</p>')+'</div></section></div>':'<div class="lq-packing-no-items"><span aria-hidden="true">↪</span><p>Для этого занятия новые вещи не нужны. Прочитай пояснение и подтверди этот этап.</p></div>')+renderFeedback(state,Object.assign({},q,{why:Object.assign({},q.why,stage.why||{})}),e)+'<div class="lq-controls lq-step-controls">'+button('packing-check',hasChoices?'Проверить этот этап':'Понятно, этап готов','','primary',run.checked)+button('packing-next',nextLabel,'','primary',!run.checked)+button('packing-back','← Назад','','quiet',flow.index===0)+button('undo','Отменить действие','','quiet',!state.undo.length)+(hasChoices?button('packing-reset','Очистить этот этап','','quiet',!selected.length):'')+button('hint','Подсказка','','quiet')+'</div></section>';
 }
 function renderBagPlan(state,q,e){
  if(!state.solved||!Array.isArray(q.bagGroups)||!q.bagGroups.length)return '';
@@ -330,7 +395,7 @@ function renderMenu(state,e,env){
  const all=quests(),shown=all.filter(q=>state.category==='all'||q.category===state.category),cats=[...new Set(all.map(q=>q.category))];const last=Object.entries(state.drafts).filter(([,d])=>!d.solved).sort((a,b)=>b[1].sequence-a[1].sequence)[0];
  return renderSchoolPicker(state,e,env)+missionCards(state,e)+'<header class="lq-heading"><span class="lq-eyebrow">ПРОБУЕМ · ПЛАНИРУЕМ · ДЕЛАЕМ</span><h2>Приключения для жизни</h2><p>Наводи порядок, собирайся в путь и придумывай удобный план. Здесь можно пробовать и исправлять.</p></header>'+(last&&quest(last[0])?'<div class="lq-resume"><div><strong>Продолжим начатое?</strong><span>'+e(quest(last[0]).title)+'</span></div>'+button('open','Продолжить','data-quest="'+e(last[0])+'"','primary')+'</div>':'')+'<div class="lq-menu-summary"><span>'+Object.keys(state.done).length+' из '+all.length+' приключений попробовали в игре</span><span>Каждое можно повторить по-своему</span></div><div class="lq-categories" role="group" aria-label="Темы приключений">'+['all',...cats].map(id=>button('category',e(categories[id]||id),'data-category="'+e(id)+'" aria-pressed="'+(state.category===id)+'"',state.category===id?'active':'')).join('')+'</div><div class="lq-quest-grid">'+shown.map(q=>{const completed=state.done[q.id],real=state.real[q.id];return '<article class="lq-quest-card"><span class="lq-quest-icon" aria-hidden="true">'+e(q.icon||({places:'🧺',sorting:'🔶',school:'🎒',sports:'🏊',planning:'🗓️',home:'🏡'}[q.category])||'🧭')+'</span><span class="lq-card-tag">'+e(categories[q.category]||'Жизненные задачи')+' · '+e(q.mode==='sequence'?'Составь план':q.mode==='pack'?'Собери нужное':q.mode==='rule'?'Придумай правило':'Найди место')+'</span><h3>'+e(q.title)+'</h3><p>'+e(q.story||q.instruction)+'</p><div class="lq-card-status">'+(completed?'<span>✓ В игре получилось'+(completed.helped?' с подсказкой':completed.afterError?' после исправления':'')+'</span>':'<span>Можно попробовать</span>')+(real&&real.adultReported?'<small>Есть отметка взрослого о действии</small>':real&&real.selfReported?'<small>Действие отмечено ребёнком</small>':'')+'</div>'+button('open',completed?'Открыть ещё раз':'Начать','data-quest="'+e(q.id)+'"','primary')+'</article>';}).join('')+'</div>';
 }
-function renderIntro(state,q,e){const actions=q.mode==='sequence'?['Выбирай шаги по порядку.','Меняй местами, если передумал.','Проверь план и попробуй в жизни.']:q.mode==='pack'?['Прочитай, куда и зачем собираемся.','Приготовь нужные вещи по условию.','Проверь, всё ли подходит.']:['Выбери предмет.','Нажми на его место или перетащи.','Проверь и исправь, если нужно.'];return '<div class="lq-story"><span class="lq-story-icon" aria-hidden="true">'+e(q.icon||'🧭')+'</span><p>'+e(q.story||'')+'</p></div><div class="lq-goal"><strong>Твоя задача</strong><p>'+e(q.instruction)+'</p></div><ol class="lq-mini-steps">'+actions.map(s=>'<li>'+e(s)+'</li>').join('')+'</ol>'+(q.adultNote?'<p class="lq-adult-note">'+e(q.adultNote)+'</p>':'')+'<div class="lq-controls">'+button('begin','Начнём','', 'primary')+button('show-how','Покажи, как действовать','','quiet')+button('speak','Послушать задание','','quiet')+'</div>';
+function renderIntro(state,q,e){if(packingEngine(q)&&state.packingFlow)return renderPackingIntro(state,q,e);const actions=q.mode==='sequence'?['Выбирай шаги по порядку.','Меняй местами, если передумал.','Проверь план и попробуй в жизни.']:q.mode==='pack'?['Прочитай, куда и зачем собираемся.','Приготовь нужные вещи по условию.','Проверь, всё ли подходит.']:['Выбери предмет.','Нажми на его место или перетащи.','Проверь и исправь, если нужно.'];return '<div class="lq-story"><span class="lq-story-icon" aria-hidden="true">'+e(q.icon||'🧭')+'</span><p>'+e(q.story||'')+'</p></div><div class="lq-goal"><strong>Твоя задача</strong><p>'+e(q.instruction)+'</p></div><ol class="lq-mini-steps">'+actions.map(s=>'<li>'+e(s)+'</li>').join('')+'</ol>'+(q.adultNote?'<p class="lq-adult-note">'+e(q.adultNote)+'</p>':'')+'<div class="lq-controls">'+button('begin','Начнём','', 'primary')+button('show-how','Покажи, как действовать','','quiet')+button('speak','Послушать задание','','quiet')+'</div>';
 }
 function renderSort(state,q,e){
  const todo=ids(q).filter(id=>!state.placements[id]),selected=state.selected&&item(state.selected);const rules=q.mode==='rule'?'<section class="lq-rule-picker"><h3>Как будем сортировать?</h3><p>Выбери правило, затем раздели предметы на две группы.</p><div>'+q.ruleChoices.map(r=>button('rule',e(r.label),'data-rule="'+e(r.id)+'" aria-pressed="'+(state.ruleId===r.id)+'"',state.ruleId===r.id?'active':'',state.solved)).join('')+'</div>'+(rule(q,state)?'<p class="lq-chosen-rule">'+e(rule(q,state).instruction||rule(q,state).label)+'</p>':'')+'</section>':'';
@@ -351,6 +416,7 @@ function render(state,env){
  else if(state.phase==='guide')content=renderGuide(state,q,e);
  else if(state.phase==='small-real')content=renderSmallReal(state,q,e,env);
  else if(state.phase==='real')content=renderReal(state,q,e);
+ else if(packingEngine(q)&&state.packingFlow&&!state.solved)content=renderPackingStep(state,q,e);
  else{
   content='<div class="lq-condition"><strong>Наша ситуация</strong><p>'+e(q.story||'')+'</p><p class="lq-instruction">'+e(q.instruction)+'</p></div>';
   if(!state.solved)content+='<div class="lq-first-step"><div><strong>Сейчас — один шаг</strong><p>'+e(q.firstMove||'Выбери один предмет.')+'</p></div>'+button('show-how','Покажи, как действовать','','quiet')+'</div>';
@@ -360,7 +426,7 @@ function render(state,env){
    content+=renderBagPlan(state,q,e)+'<div class="lq-finish"><p>'+e(message)+'</p><div class="lq-controls">'+((q.realSteps||[]).length?button('real-small','Попробовать в жизни: один шаг','','primary')+button('real','Весь план для жизни','','quiet'):'')+button('menu','Другие приключения','','quiet')+button('replay','Попробовать ещё раз','','quiet')+'</div></div>';
   }else content+='<div class="lq-controls">'+button('check','Проверить','','primary')+button('hint','Подсказка','','quiet')+button('undo','Отменить действие','','quiet',!state.undo.length)+button('reset','Начать раскладку заново','','quiet')+'</div>';
  }
- return '<div class="lq" data-life-view="'+e(state.phase)+'" data-life-quest="'+e(q.id)+'"><div class="lq-quest-top">'+button('menu','← Все приключения','','quiet')+'<span>'+e(categories[q.category]||'Жизненные задачи')+'</span></div><header class="lq-heading"><h2>'+e(q.title)+'</h2>'+(state.phase==='play'?'<p class="lq-progress">'+(state.solved?'✓ В игре получилось':q.mode==='pack'?'Выбрано вещей: '+placed:'Размещено: '+placed+' из '+total)+'</p>':'')+'</header>'+renderConditions(q,e,false)+content+'</div>';
+ return '<div class="lq" data-life-view="'+e(state.phase)+'" data-life-quest="'+e(q.id)+'"><div class="lq-quest-top">'+button('menu','← Все приключения','','quiet')+'<span>'+e(categories[q.category]||'Жизненные задачи')+'</span></div><header class="lq-heading"><h2>'+e(q.title)+'</h2>'+(state.phase==='play'?'<p class="lq-progress">'+(state.solved?'✓ В игре получилось':packingEngine(q)&&state.packingFlow?'Идём по занятиям · проверяем один этап за раз':q.mode==='pack'?'Выбрано вещей: '+placed:'Размещено: '+placed+' из '+total)+'</p>':'')+'</header>'+(!packingEngine(q)||state.solved||['real','small-real'].includes(state.phase)?renderConditions(q,e,false):'')+content+'</div>';
 }
 
 function capture(){return false;}

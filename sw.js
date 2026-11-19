@@ -4,7 +4,7 @@
  */
 'use strict';
 
-const VERSION = 'stage1-b10c4b53a117';
+const VERSION = 'stage1-824bfc8ae075';
 const ROOT = new URL('./', self.location.href);
 const CACHE_PREFIX = 'trainers:' + ROOT.pathname + ':core:';
 const CACHE_NAME = CACHE_PREFIX + VERSION;
@@ -142,12 +142,13 @@ const CORE = [
   "life/index.html",
   "life/manifest.webmanifest",
   "life/offline.html",
-  "life-quests.css?v=s1-af1c68a2c77a",
+  "life-quests.css?v=s1-6b8c4abf417a",
   "life/style.css?v=s1-a6e8792a8bd0",
   "life-quest-data.js?v=s1-c6a083bea7a8",
-  "life-school-schedule.js?v=s1-c9a72f31bc7a",
-  "life-quests.js?v=s1-e57129111c2a",
-  "life/app.js?v=s1-d81ae49caaeb",
+  "life-school-schedule.js?v=s1-23b2185e80b6",
+  "school-packing-flow.js?v=s1-99a0f56d0ab6",
+  "life-quests.js?v=s1-1524c09a9fe7",
+  "life/app.js?v=s1-3a4601997d3b",
   "otkryt-bez-interneta.html"
 ];
 const CORE_URLS = CORE.map(path => new URL(path, ROOT).href);

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "build": "stage1-b10c4b53a117",
+  "build": "stage1-824bfc8ae075",
   "sourceHashes": {
     "active-breaks.css": "1322b99e5ffba182fa3e105bd656eb16ffa27088c6341e8f0a5fd1b7e4dc8581",
     "active-breaks.js": "c8739f67ecdf446a20356165899696e627a68dac2307949b0675ee923c934e4b",
@@ -28,10 +28,10 @@
     "learning-journey.js": "20263410a7588aba62bfea161b94f00e0d6d6001c428a9416de8446be639462c",
     "learning-progress.js": "5e68799babe33f4b296c3f3a4ced6b3eda64b55118674929f83bd526ba04f45f",
     "life-quest-data.js": "c6a083bea7a8287b26180e3c53da9f6900fed8b20246279b043cf8669f3a0273",
-    "life-quests.css": "af1c68a2c77ac39dba86e3f254d9d70a45890738d5dad1430ac0af24abc85478",
-    "life-quests.js": "e57129111c2ae98f000389c7235b029742bac29d5c91272963d2660509886c7f",
-    "life-school-schedule.js": "c9a72f31bc7a06e80971f0cdb5952fe2adc5fd1fab26c9b5291fbaec20ca5c9f",
-    "life/app.js": "d81ae49caaebf228ab25b85d6bdfdae0404a27f7768bdc34e8e7d5dba54aff50",
+    "life-quests.css": "6b8c4abf417a248fb5c15492fdaeafbdf12a086cecd63c3acbb4478aea1fc57b",
+    "life-quests.js": "1524c09a9fe7d5168b6ef2770f9e9414618372f5864c1c632d14d30da2716424",
+    "life-school-schedule.js": "23b2185e80b68539d55157ac7f33c2862c0369c843694a0cf68cc82cd3da05b0",
+    "life/app.js": "3a4601997d3b8b77c1772e3277bb22f1fccb1d3409999582c83c5125786df16a",
     "life/style.css": "a6e8792a8bd0adebc5370412cf82a16c0268134b716e4bf7111659a2105e8aef",
     "math-check.css": "aa1b2170257c3de1b629792297908b8e4fd8b493451c081cf7379597f7ccc900",
     "math-check.js": "57e1e48685ea9c56b9df26e447eb8633404ea673b074d9b6903f6fca445b7516",
@@ -47,6 +47,7 @@
     "practice-hub.js": "952946a73946db50b8c1c501ec78506dcc6b7f5fccc266058f8aaa6651052208",
     "russian-check.js": "bdca0192478029d4b04518faad20ddbfd5f4014847f097c5ffc00709dd14e565",
     "russian-journey.js": "c959c2f907fcfc09faa175542b68d133a488d338a0df4a6ff8e954fc047d9607",
+    "school-packing-flow.js": "99a0f56d0ab6245e4da8b1c6bf54114c8dad3f435eff6b2bc528685644a386f6",
     "slovograd/app.js": "425ce2d018f7f7a9d3eff0503ef9183a7b93b3c9251427a626ecb88c67f29def",
     "slovograd/core.js": "4195576fdc0bcc20d83a09cbe7ccf28bad276c60a965ca10aa8f1ae929368b61",
     "slovograd/creative.js": "8c71d0de87647cb8c10394bcd34076183e25f8a71af1367f07056e6e8c4a9e34",
@@ -136,7 +137,7 @@
     "kubiki": {
       "schemaVersion": 1,
       "trainer": "kubiki",
-      "build": "stage1-b10c4b53a117",
+      "build": "stage1-824bfc8ae075",
       "styles": [
         {
           "path": "kubiki/style.css",
@@ -704,7 +705,7 @@
     "bricks": {
       "schemaVersion": 1,
       "trainer": "bricks",
-      "build": "stage1-b10c4b53a117",
+      "build": "stage1-824bfc8ae075",
       "styles": [
         {
           "path": "bricks/style.css",
@@ -1278,7 +1279,7 @@
     "slovograd": {
       "schemaVersion": 1,
       "trainer": "slovograd",
-      "build": "stage1-b10c4b53a117",
+      "build": "stage1-824bfc8ae075",
       "styles": [
         {
           "path": "slovograd/style.css",
@@ -1840,7 +1841,7 @@
     "life": {
       "schemaVersion": 1,
       "trainer": "life",
-      "build": "stage1-b10c4b53a117",
+      "build": "stage1-824bfc8ae075",
       "styles": [
         {
           "path": "concepts.css",
@@ -1850,9 +1851,9 @@
         },
         {
           "path": "life-quests.css",
-          "href": "../life-quests.css?v=s1-af1c68a2c77a",
-          "hash": "af1c68a2c77ac39dba86e3f254d9d70a45890738d5dad1430ac0af24abc85478",
-          "checksum": 115526445
+          "href": "../life-quests.css?v=s1-6b8c4abf417a",
+          "hash": "6b8c4abf417a248fb5c15492fdaeafbdf12a086cecd63c3acbb4478aea1fc57b",
+          "checksum": 3501627804
         },
         {
           "path": "active-breaks.css",
@@ -1918,15 +1919,21 @@
         },
         {
           "path": "life-school-schedule.js",
-          "href": "../life-school-schedule.js?v=s1-c9a72f31bc7a",
-          "hash": "c9a72f31bc7a06e80971f0cdb5952fe2adc5fd1fab26c9b5291fbaec20ca5c9f",
-          "checksum": 3198927052
+          "href": "../life-school-schedule.js?v=s1-23b2185e80b6",
+          "hash": "23b2185e80b68539d55157ac7f33c2862c0369c843694a0cf68cc82cd3da05b0",
+          "checksum": 1185032127
+        },
+        {
+          "path": "school-packing-flow.js",
+          "href": "../school-packing-flow.js?v=s1-99a0f56d0ab6",
+          "hash": "99a0f56d0ab6245e4da8b1c6bf54114c8dad3f435eff6b2bc528685644a386f6",
+          "checksum": 2774620440
         },
         {
           "path": "life-quests.js",
-          "href": "../life-quests.js?v=s1-e57129111c2a",
-          "hash": "e57129111c2ae98f000389c7235b029742bac29d5c91272963d2660509886c7f",
-          "checksum": 577718576
+          "href": "../life-quests.js?v=s1-1524c09a9fe7",
+          "hash": "1524c09a9fe7d5168b6ef2770f9e9414618372f5864c1c632d14d30da2716424",
+          "checksum": 3851496483
         },
         {
           "path": "active-breaks.js",
@@ -1948,9 +1955,9 @@
         },
         {
           "path": "life/app.js",
-          "href": "app.js?v=s1-d81ae49caaeb",
-          "hash": "d81ae49caaebf228ab25b85d6bdfdae0404a27f7768bdc34e8e7d5dba54aff50",
-          "checksum": 292080232
+          "href": "app.js?v=s1-3a4601997d3b",
+          "hash": "3a4601997d3b8b77c1772e3277bb22f1fccb1d3409999582c83c5125786df16a",
+          "checksum": 3152011313
         }
       ],
       "media": [
@@ -2340,8 +2347,8 @@
       ]
     }
   },
-  "coreResources": 140,
-  "coreBytes": 13394900,
+  "coreResources": 141,
+  "coreBytes": 13489913,
   "budgetBytes": 16777216,
   "coachClips": 41,
   "coachBytes": 964180

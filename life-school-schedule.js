@@ -94,6 +94,113 @@ function planned(dayData,variant){
  for(const key of Object.keys(groups))groups[key]=unique(groups[key]);
  return {groups,notes,provided,selected};
 }
+// A school day is prepared in order, rather than by one undifferentiated list.
+// These stages are a partition of the already reviewed day memo. They never
+// introduce another required object or ask for a second copy of a shared book.
+function stageBuilder(q){
+ const drafts=[],owned=new Set(),provided=new Set(q.alreadyProvided||[]);
+ function addStage(id,kind,title,wanted,extra){
+  extra=extra||{};wanted=unique(wanted);
+  const given=wanted.filter(x=>provided.has(x)),reused=wanted.filter(x=>!provided.has(x)&&owned.has(x));
+  const required=wanted.filter(x=>!provided.has(x)&&!owned.has(x)&&q.required.includes(x));
+  const optional=(extra.optional||[]).filter(x=>!provided.has(x)&&!owned.has(x)&&q.optional.includes(x));
+  const alternatives=copy(extra.alternatives||[]);
+  const allowed=unique(required.concat(optional,alternatives.flatMap(g=>g.items)));
+  allowed.forEach(x=>owned.add(x));
+  const conditions=[];
+  if(required.length)conditions.push('По памятке этого шага приготовь: '+names(required)+'.');
+  if(given.length)conditions.push('Уже приготовлено: '+names(given)+'. Повторно эти вещи не выбираем.');
+  if(reused.length)conditions.push('Уже выбрано на предыдущем шаге: '+names(reused)+'. Второй комплект не нужен.');
+  if(optional.length)conditions.push('По желанию: '+names(optional)+'. Можно продолжить без этих дополнительных вещей.');
+  if(alternatives.length)conditions.push('Для дороги подойдёт зонт или дождевик. Можно приготовить оба.');
+  if(!allowed.length)conditions.push(given.length||reused.length?'Для этого шага ничего нового добавлять не нужно.':'Для этого занятия по нашей памятке отдельных вещей не нужно. Общие школьные вещи уже подготовлены.');
+  if(kind==='common'&&!extra.partial&&!extra.constituents)conditions.unshift('Эти вещи нужны в школе независимо от уроков. Пенал уже содержит ручку, простой карандаш и ластик.');
+  if(extra.constituents)conditions.unshift('Готовим общий пенал для учебных записей. Сейчас выбираем его принадлежности, а не второй пенал.');
+  if(extra.note)conditions.unshift(extra.note);
+  drafts.push(Object.assign({},extra,{id,kind,title,required,optional,alternatives,provided:given,reused,allowed,itemIds:[],distractors:[],conditions,why:{},instruction:extra.instruction|| (kind==='common'?'Начнём с обязательных общих вещей для школы.':allowed.length?'Выбери вещи только для этого шага. Остальное приготовим по порядку.':'Посмотри, почему новый комплект здесь не нужен, и продолжай.') }));
+ }
+ function finish(){
+ const owner=new Map();drafts.forEach((s,i)=>s.allowed.forEach(id=>owner.set(id,i)));
+ drafts.forEach((s,i)=>{
+  if(s.allowed.length){
+   const later=q.itemIds.filter(id=>owner.has(id)&&owner.get(id)>i),count=q.distractors.length<=5?q.distractors.length:3,wrong=q.distractors.map((_,n)=>q.distractors[(n+i*3)%q.distractors.length]);
+   s.distractors=unique(later.slice(0,2).concat(wrong.slice(0,count))).filter(id=>!s.allowed.includes(id)&&!s.provided.includes(id)&&!s.reused.includes(id));
+   s.itemIds=shuffled(s.allowed.concat(s.distractors),q.id+'.'+s.id);
+  }
+  s.itemIds.forEach(id=>{
+   const later=owner.get(id);
+   s.why[id]=s.allowed.includes(id)?q.why[id]:later>i?(q.optional.includes(id)?'«'+itemLabel(id)+'» можно взять по желанию позже, на шаге «'+drafts[later].title+'».':q.alternatives?.some(g=>g.items.includes(id))?'Защиту от дождя выберем позже, на шаге «'+drafts[later].title+'». Подойдёт зонт или дождевик.':'«'+itemLabel(id)+'» понадобится позже, на шаге «'+drafts[later].title+'».')+' Сейчас готовим «'+s.title+'».':q.why[id]||'Для этого шага эта вещь не нужна. Посмотри памятку текущего занятия.';
+  });
+ });
+ return drafts;
+ }
+ return {addStage,finish,owns:id=>owned.has(id)};
+}
+function packingStages(dayData,variant,p,q){
+ const {addStage,finish,owns}=stageBuilder(q);
+ addStage('common','common','Общие школьные вещи',COMMON,{destination:GROUPS.school});
+ dayData.lessons.forEach((l,i)=>{
+  let wanted=(SUBJECT_ITEMS[l.id]||[]).slice(),note='',optional=[];
+  if(l.id==='conversation')note='На «Разговорах о важном» в этой игре не просили отдельный учебник или тетрадь.';
+  if(l.id==='world'&&variant==='request'&&dayData.id==='tue')wanted.push('observation-sheet');
+  if(l.id==='pe'){wanted=PE.slice();note='Для физкультуры в зале приготовим отдельный спортивный комплект.';}
+  if(l.id==='pool'){
+   wanted=POOL.slice();if(q.required.includes('goggles'))wanted.push('goggles');
+   optional=q.optional.includes('goggles')?['goggles']:[];
+   note='«Золотая рыбка» — бассейн. Этот комплект собираем отдельно от книг и формы для зала.';
+  }
+  if(l.id==='technology'){
+   wanted=variant==='request'?['technology-folder','plasticine','model-board']:TECH.slice();
+   note=variant==='request'?'В этой игре на технологии лепим на доске. Бумагу, клей и ножницы не просили.':'В этой игре на технологии делаем бумажную закладку.';
+  }
+  if(l.id==='music')wanted=variant==='request'?['music-folder','music-notebook']:['music-folder'];
+  if(l.id==='art'){
+   wanted=variant==='request'?['art-album','pencils','ruler']:ART.slice();
+   note=variant==='request'?'На ИЗО в этой игре рисуем узор цветными карандашами с линейкой.':'На ИЗО в этой игре рисуем красками.';
+  }
+  if(l.id==='workshop-or-functional'){
+   wanted=variant==='request'?['project-folder','paper','glue','safe-scissors']:SUBJECT_ITEMS.math.slice();
+   note=variant==='request'?'В этой игре шестое занятие — проектная мастерская: делаем бумажную модель.':'На функциональной грамотности пригодится уже собранный комплект математики.';
+  }
+  if(l.id==='club-or-professions'){
+   wanted=variant==='ready'?['profession-cards']:['reading-book','reader-diary'].concat(variant==='request'?['club-book']:[]);
+   note=variant==='ready'?'В этой игре пятое занятие — «Азбука профессий».':'Для читательского клуба используем ту же книгу, которую приготовили на чтение.';
+  }
+  addStage('lesson.'+l.id,'lesson',p.selected[i],wanted,{lessonId:l.id,lessonIndex:i,destination:l.id==='pe'?GROUPS.sport:l.id==='pool'?GROUPS.pool:GROUPS.school,optional,note});
+ });
+ if(variant==='rain')addStage('weather','weather','Одежда для дороги',[],{alternatives:q.alternatives,destination:GROUPS.weather,note:'До школы идём со взрослым. По дороге дождь: подготовим защиту для выхода.'});
+ const remainingOptional=q.optional.filter(x=>!owns(x));
+ if(remainingOptional.length)addStage('optional','optional','Дополнительные вещи по желанию',[],{optional:remainingOptional,destination:GROUPS.school});
+ return finish();
+}
+
+// Earlier school mini-games are partial preparations, not another full day.
+// Keep their reviewed items and saved IDs, but check covered lessons in order.
+function partialPackingStages(q){
+ const specs={
+  'life.school.math-russian':{dayId:'mon',common:['pencil-case','school-diary'],lessons:[['math',1,'Математика',['math-book','math-notebook']],['russian',2,'Русский язык',['russian-book','russian-notebook']]]},
+  'life.school.reading-world':{dayId:'wed',common:['pencil-case','school-diary'],lessons:[['reading',0,'Литературное чтение',['reading-book']],['world',3,'Окружающий мир',['world-book']],['club-or-professions',4,'Читательский клуб',['reading-book','reader-diary']]]},
+  'life.school.art':{dayId:'fri',common:[],lessons:[['art',4,'ИЗО',['art-album','paints','brush','apron'],['pencils']]]},
+  'life.school.pe':{dayId:'fri',common:['pencil-case'],lessons:[['pe',1,'Физкультура',['sport-uniform','sport-shoes','shoe-bag']],['math',3,'Математика',['math-book','math-notebook']]]},
+  'life.school.rain':{dayId:'wed',common:['pencil-case'],lessons:[['reading',0,'Литературное чтение',['reading-book']],['russian',2,'Русский язык',['russian-book','russian-notebook']]]},
+  'life.pack.pencilcase':{dayId:null,common:['blue-pen','pencil','eraser','ruler'],constituents:true,lessons:[]},
+  'life.pack.thursday-technology':{dayId:'thu',common:[],lessons:[['technology',2,'Технология',['plasticine','model-board','craft-cloth','technology-folder'],['pencil','glue']]]},
+  'life.pack.friday-art':{dayId:'fri',common:[],lessons:[['art',4,'ИЗО',['art-album','paints','brush','art-water-cup','craft-cloth'],['apron','pencil','eraser']]]}
+ };
+ const spec=specs[q.id];if(!spec)return null;
+ const {addStage,finish,owns}=stageBuilder(q),emptyCommon=!spec.common.length;
+ addStage('common','common',spec.constituents?'Пенал для всех уроков':'Общая часть сборов',spec.common,{destination:spec.constituents?'В пенал':GROUPS.school,constituents:spec.constituents===true,partial:emptyCommon,
+  note:spec.constituents?'Это отдельная проверка общего пенала, а не сбор всего школьного дня.':emptyCommon?'Это отдельный набор для одного занятия. Остальные школьные вещи уже готовы; заново их не добавляем.':'Это небольшая досборка. Остальные вещи из расписания уже приготовлены по условию.',
+  instruction:emptyCommon?'Общие школьные вещи уже готовы. Посмотри условие и перейди к отдельному набору.':spec.constituents?'Подготовим общие принадлежности для учебных записей.':'Начнём с общих вещей, которые ещё нужно добавить в этой истории.'});
+ for(const [id,index,title,required,optional]of spec.lessons){
+  addStage('lesson.'+id,'lesson',title,required,{lessonId:id,lessonIndex:index,optional:optional||[],destination:id==='pe'?GROUPS.sport:GROUPS.school,
+   note:id==='pe'?'Здесь мешок нужен именно для спортивной обуви, поэтому готовим его вместе с формой.':id==='club-or-professions'?'Ту же книгу используем для чтения и читательского клуба. Вторая книга не нужна.':'Проверяем только этот набор по условиям маленького задания.'});
+ }
+ if((q.alternatives||[]).length)addStage('weather','weather','Одежда для дороги',[],{alternatives:q.alternatives,destination:GROUPS.weather,note:'После учебных вещей приготовим защиту от дождя для дороги со взрослым.'});
+ const extra=q.optional.filter(id=>!owns(id));if(extra.length)addStage('optional','optional','Дополнительные вещи по желанию',[],{optional:extra,destination:spec.constituents?'В пенал':GROUPS.school});
+ q.packingScope={kind:'partial',dayId:spec.dayId,lessonIds:spec.lessons.map(s=>s[0]),note:spec.constituents?'Отдельная маленькая проверка общего пенала.':'Это часть сборов, а не полный набор на весь учебный день.'};
+ return finish();
+}
 function author(dayData,variant){
  const p=planned(dayData,variant),id=questId(dayData.id,variant),alternatives=variant==='rain'?[{id:'rain-protection',label:'Защита от дождя: зонт или дождевик',items:['umbrella','raincoat'],min:1,max:2}]:[];
  const required=unique(p.groups.school.concat(p.groups.sport,p.groups.pool));
@@ -124,25 +231,28 @@ function author(dayData,variant){
  const groups=[{id:'school',label:GROUPS.school,itemIds:p.groups.school.slice()},{id:'sport',label:GROUPS.sport,itemIds:p.groups.sport.slice()},{id:'pool',label:GROUPS.pool,itemIds:p.groups.pool.slice()}].filter(g=>g.itemIds.length);
  for(const x of optional){const key=x==='goggles'?'pool':'school',g=groups.find(g=>g.id===key);if(g)g.itemIds.push(x);}
  if(variant==='rain')groups.push({id:'weather',label:GROUPS.weather,itemIds:['umbrella','raincoat']});
- return {id,title:dayData.label+' · '+variantInfo.find(x=>x.id===variant).label,category:'school',mode:'pack',level:variant==='base'?1:2,
+ const q={id,title:dayData.label+' · '+variantInfo.find(x=>x.id===variant).label,category:'school',mode:'pack',level:variant==='base'?1:2,
   story:'Готовимся на '+dayData.accusative+' по расписанию 2 А класса. '+(variant==='ready'?'Часть вещей уже приготовлена — выберем оставшееся.':variant==='rain'?'Учтём уроки и дождливую дорогу.':'Выберем вещи по понятной игровой памятке.'),
-  instruction:'Прочитай расписание и памятку. Выбери всё, что ещё нужно приготовить. Сумки для учебников, спорта и бассейна уже есть; после проверки разложим выбранное по группам.',
+  instruction:'Сначала приготовим общие школьные вещи, затем пройдём уроки по порядку расписания. На каждом шаге выбирай вещи только для текущего занятия. Сумки уже есть; готовое повторно не выбираем.',
   itemIds,zoneIds:['bag'],required,optional,distractors,alternatives,why:visibleWhy,conditions,bagGroups:groups,
   schedule:{dayId:dayData.id,dayLabel:dayData.label,variantId:variant,subjects:dayData.subjects.slice(),lessons:copy(dayData.lessons),selectedLessons:p.selected,pool:dayData.pool,source:SOURCE,provided:p.provided.slice(),providedText:p.provided.length?'Уже приготовлено: '+names(p.provided)+'.':'Пока ничего не собрано. Начнём по памятке.',weather:variant==='rain'?'rain':'not-specified'},
   alreadyProvided:p.provided.slice(),
   hint:'Сначала сверь день и уроки. Потом проверь памятку: что ещё нужно, что уже приготовлено и что можно взять по желанию.',
-  firstMove:'Выбери одну вещь, которая ещё нужна по памятке. Начать можно с любого урока.',
+  firstMove:'Начни с общих обязательных вещей. Потом приготовим каждый урок по порядку.',
   microReal:'Посмотри своё настоящее расписание на '+dayData.accusative+' и назови одну вещь, которую надо приготовить.',
   realSteps:['Уточни настоящее расписание и памятку вместе со взрослым.','Проверь, что уже собрано или приготовлено в школе.','Приготовь оставшиеся учебные вещи'+(dayData.pool?', форму и отдельную сумку для бассейна.':'.'),'Сверь готовое с настоящим списком и поставь сумки на привычное место.'],
   adultNote:'Расписание взято с фотографии. Список вещей — условия этой игры, а не новое требование настоящего учителя. Реальные материалы, погоду и принадлежности бассейна уточняют со взрослым.',
   materialRevision:1,criteriaRevision:1};
+ q.packingStages=packingStages(dayData,variant,p,q);return q;
 }
 function register(data){
  if(!data||typeof data.extend!=='function')return false;bank=data;
  data.extend({items:additionalItems});authored=days.flatMap(d=>variantInfo.map(v=>author(d,v.id)));
  data.extend({quests:authored});
  // Reuse the actual normalized bank objects in consumers and tests.
- authored=authored.map(q=>data.quests.find(x=>x.id===q.id)||q);return true;
+ authored=authored.map(q=>data.quests.find(x=>x.id===q.id)||q);
+ for(const q of data.quests){if(q.category!=='school'||q.schedule)continue;const stages=partialPackingStages(q);if(stages){q.packingStages=stages;q.firstMove='Сначала проверим общую часть, затем подготовим занятия по шагам.';}}
+ return true;
 }
 function validate(){
  const errors=[];if(authored.length!==20)errors.push('Twenty weekday scenarios are required.');
@@ -153,6 +263,22 @@ function validate(){
   if(q.schedule.pool!==['tue','thu'].includes(d.id))errors.push(q.id+': pool day');
   if(q.bagGroups.flatMap(g=>g.itemIds).some(id=>!q.itemIds.includes(id)||q.distractors.includes(id)))errors.push(q.id+': invalid bag group');
   if(q.itemIds.some(id=>!bank?.items[id]||!q.why[id]))errors.push(q.id+': item or explanation');
+  const stages=q.packingStages||[],lessons=stages.filter(s=>s.kind==='lesson');
+  if(stages[0]?.id!=='common'||lessons.length!==d.lessons.length||lessons.some((s,i)=>s.lessonId!==d.lessons[i].id||s.lessonIndex!==i))errors.push(q.id+': stage order');
+  for(const field of ['required','optional']){const merged=stages.flatMap(s=>s[field]);if(new Set(merged).size!==merged.length||merged.length!==q[field].length||merged.some(id=>!q[field].includes(id)))errors.push(q.id+': stage '+field+' partition');}
+  if(stages.some(s=>s.itemIds.some(id=>!q.itemIds.includes(id)||!s.why[id])||s.required.some(id=>q.alreadyProvided.includes(id))))errors.push(q.id+': stage card or memo');
+ }
+ for(const q of bank?.quests||[]){
+  if(q.category!=='school'||q.mode!=='pack')continue;
+  const stages=q.packingStages||[],allowed=new Set();
+  if(!stages.length||stages[0].kind!=='common')errors.push(q.id+': school preparation has no common first step');
+  for(const field of ['required','optional']){const values=stages.flatMap(s=>s[field]);if(new Set(values).size!==values.length||values.length!==q[field].length||values.some(id=>!q[field].includes(id)))errors.push(q.id+': staged '+field+' criteria differ');}
+  if(JSON.stringify(stages.flatMap(s=>s.alternatives))!==JSON.stringify(q.alternatives||[]))errors.push(q.id+': staged alternatives differ');
+  for(const s of stages){
+   if(s.reused.some(id=>!allowed.has(id)))errors.push(q.id+': reused object has not appeared earlier');
+   if(s.itemIds.some(id=>!q.itemIds.includes(id)||!s.why[id]||s.reused.includes(id)||s.provided.includes(id))||s.allowed.some(id=>!s.itemIds.includes(id)))errors.push(q.id+': current stage bank is incomplete');
+   s.allowed.forEach(id=>{if(allowed.has(id))errors.push(q.id+': duplicated physical item');allowed.add(id);});
+  }
  }
  return {success:errors.length===0,errors,days:days.length,quests:authored.length,source:SOURCE};
 }
