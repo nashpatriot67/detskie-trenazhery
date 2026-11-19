@@ -36,7 +36,7 @@ async function assertHidden(page,target){
 async function fixture(h,t,mode='play'){
  await h.open();await h.page.evaluate(t=>{const l=COURSE[12];l.title='Числа и действия';l.example={...t};l.exercises[0]={...t,answer:t.result,missing:'result',text:t.a+(t.op==='+'?'+':'−')+t.b+'='};},t);
  await h.page.locator('nav [data-view="course"]').click();await h.page.locator('.course-card[data-lesson="13"]').click();
- if(mode!=='learn'){await prepareLegacyMathMode(h.page,13);await h.page.locator('[data-mode="'+mode+'"]').click();await h.page.locator('[data-practice="0"]').click();}
+ if(mode!=='learn'){await prepareLegacyMathMode(h.page,13);await h.page.locator('[data-mode="'+mode+'"]').click();await h.page.locator('.math-route-disclosure > summary').click();await h.page.locator('[data-practice="0"]').click();}
 }
 async function solve(page,t,{early=false,unitsFirst=false}={}){
  const initial=await quantity(page);

@@ -4,7 +4,7 @@
  */
 'use strict';
 
-const VERSION = 'stage1-824bfc8ae075';
+const VERSION = 'stage1-914f4c0ca28d';
 const ROOT = new URL('./', self.location.href);
 const CACHE_PREFIX = 'trainers:' + ROOT.pathname + ':core:';
 const CACHE_NAME = CACHE_PREFIX + VERSION;
@@ -44,7 +44,9 @@ const CORE = [
   "learning-journey.css?v=s1-c6c457dcb3be",
   "math-check.css?v=s1-aa1b2170257c",
   "active-breaks.css?v=s1-1322b99e5ffb",
-  "practice-hub.css?v=s1-3afec7a0c092",
+  "practice-hub.css?v=s1-7912d72021dd",
+  "workspace-layout.css?v=s1-706102dc108a",
+  "math-workspace.css?v=s1-063fec452d72",
   "math-range.js?v=s1-d28d7a297b9a",
   "learning-progress.js?v=s1-5e68799babe3",
   "concepts.js?v=s1-a0125a7fbfbf",
@@ -54,7 +56,7 @@ const CORE = [
   "coach-audio-manifest.js?v=s1-fd84bc6928ec",
   "audio-coach.js?v=s1-3f127b9878a2",
   "active-breaks.js?v=s1-c8739f67ecdf",
-  "practice-hub.js?v=s1-952946a73946",
+  "practice-hub.js?v=s1-be469c8141b5",
   "kubiki/course.js?v=s1-c13d0497e759",
   "math-journey.js?v=s1-668852334db1",
   "kubiki/engine.js?v=s1-18fc3d8be232",
@@ -65,7 +67,9 @@ const CORE = [
   "place-value-activities.js?v=s1-b302ff223496",
   "math-check.js?v=s1-57e1e48685ea",
   "offline-bundle.js?v=s1-1c9edd500fd7",
-  "kubiki/app.js?v=s1-3aed1f587ea5",
+  "workspace-layout.js?v=s1-b1f0506d1347",
+  "math-workspace.js?v=s1-f4d4f092d16b",
+  "kubiki/app.js?v=s1-6dd8772754e6",
   "audio/coach/count-one.mp3?v=s1-daf6b5b95297",
   "audio/coach/count-three.mp3?v=s1-b53a44b7d6b6",
   "audio/coach/count-two.mp3?v=s1-1aae3662629f",
@@ -119,13 +123,13 @@ const CORE = [
   "bricks/engine.js?v=s1-de16802683f0",
   "bricks/voice-manifest.js?v=s1-247916d9cd8c",
   "bricks/recorded-voice.js?v=s1-cd5f60cad10d",
-  "bricks/app.js?v=s1-3c279673752d",
+  "bricks/app.js?v=s1-3667a9f0d78d",
   "slovograd/",
   "slovograd/index.html",
   "slovograd/manifest.webmanifest",
   "slovograd/offline.html",
-  "slovograd/style.css?v=s1-aff916e7d01d",
-  "slovograd/lessons.css?v=s1-cf8dfdddcf6f",
+  "slovograd/style.css?v=s1-21aedf809382",
+  "slovograd/lessons.css?v=s1-41343b62ec58",
   "slovograd/words.js?v=s1-e8c9aaefe784",
   "slovograd/sentences.js?v=s1-c6736c612a85",
   "slovograd/creative.js?v=s1-8c71d0de8764",
@@ -137,18 +141,20 @@ const CORE = [
   "slovograd/lessons.js?v=s1-83190b3e0a89",
   "russian-journey.js?v=s1-c959c2f907fc",
   "russian-check.js?v=s1-bdca01924780",
-  "slovograd/app.js?v=s1-425ce2d018f7",
+  "slovograd/app.js?v=s1-16baff6101e0",
   "life/",
   "life/index.html",
   "life/manifest.webmanifest",
   "life/offline.html",
-  "life-quests.css?v=s1-6b8c4abf417a",
-  "life/style.css?v=s1-a6e8792a8bd0",
+  "object-art.css?v=s1-df2fc071683b",
+  "life-quests.css?v=s1-80fd3eeb8dbc",
+  "life/style.css?v=s1-8f3fe3b87246",
   "life-quest-data.js?v=s1-c6a083bea7a8",
   "life-school-schedule.js?v=s1-23b2185e80b6",
   "school-packing-flow.js?v=s1-99a0f56d0ab6",
-  "life-quests.js?v=s1-1524c09a9fe7",
-  "life/app.js?v=s1-3a4601997d3b",
+  "object-art.js?v=s1-32c0dd606655",
+  "life-quests.js?v=s1-161e19d5cbc1",
+  "life/app.js?v=s1-4c722d6c95bd",
   "otkryt-bez-interneta.html"
 ];
 const CORE_URLS = CORE.map(path => new URL(path, ROOT).href);

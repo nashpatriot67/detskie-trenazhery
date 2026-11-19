@@ -16,3 +16,31 @@
 .practice-launcher{display:flex}.practice-launcher>button{flex-direction:row;max-width:100%;font-size:13px;padding:11px 15px}
 #practice-content{padding-top:20px}
 @media(max-width:600px){.practice-break-offer{display:block;padding:15px}.practice-break-offer button{margin-top:12px;width:100%}.practice-launcher>button{width:100%;justify-content:center;text-align:left;font-size:12px}.practice-launcher{display:flex}}
+
+/* The same close controls and learning task remain together on a tablet. */
+#practice-root:not(.ph-standalone) .ph-shell{padding:0 20px 20px;max-width:1180px}
+#practice-root:not(.ph-standalone) .ph-header{position:sticky;top:0;z-index:8;padding:9px 0;gap:14px;background:#f8faf6f5;backdrop-filter:blur(8px)}
+#practice-root:not(.ph-standalone) .ph-header h1{font-size:20px;margin:0}
+#practice-root:not(.ph-standalone) .ph-header .ph-eyebrow{display:none}
+#practice-root:not(.ph-standalone) #practice-content{padding-top:12px}
+.ph-compact-workspace .journey-label{margin:0 0 10px}
+.ph-compact-workspace .journey-label>strong{display:none}
+.ph-compact-workspace .journey-label>span{font-size:10px;letter-spacing:.5px}
+.ph-compact-workspace .journey-label>p{margin:4px 0;font-size:13px}
+.ph-compact-workspace .ct-heading{margin-bottom:12px}
+.ph-compact-workspace .ct-heading h2{font-size:22px;margin:3px 0}
+.ph-compact-workspace .ct-toprow{margin-bottom:8px}
+.ph-compact-workspace .ct-progress{margin-bottom:12px}
+.ph-compact-workspace .ct-task,.ph-compact-workspace .ct-rule,.ph-compact-workspace .ct-summary{padding:18px 20px}
+.ph-compact-workspace .ct-task>h3,.ph-compact-workspace .ct-rule>h3{font-size:21px;margin:0 0 12px}
+.ph-compact-workspace .ct-options{margin:14px 0;gap:9px;max-width:none}
+.ph-compact-workspace .ct-options>.ct-btn{min-height:48px;padding:11px 14px}
+.ph-compact-workspace .ct-card-bank,.ph-compact-workspace .ct-match-slots,.ph-compact-workspace .ct-category-zones{margin:12px 0;gap:10px}
+.ph-compact-workspace .ct-slot{padding:12px}
+.ph-compact-workspace .ct-feedback{margin:12px 0;padding:12px 15px}
+.ph-compact-workspace .workspace-actions{position:sticky;bottom:0;z-index:6;background:#fffffff5;border-top:1px solid #dfe9df;padding:10px 0 max(10px,env(safe-area-inset-bottom));margin-top:12px;backdrop-filter:blur(6px)}
+.ph-compact-workspace .ct-attempt-note{margin:8px 0 0}
+.ph-compact-workspace .mc-fields,.ph-compact-workspace .mc-digits,.ph-compact-workspace .mc-model{margin:12px 0}
+.ph-compact-workspace .mc-shell .equation{margin:12px 0;font-size:30px}
+@media(min-width:720px){.ph-compact-workspace .ct-options{grid-template-columns:repeat(2,minmax(0,1fr))}.ph-compact-workspace .ct-options>.ct-btn:only-child{grid-column:1/-1}}
+@media(max-width:700px){#practice-root:not(.ph-standalone) .ph-shell{padding:0 12px 18px}#practice-root:not(.ph-standalone) .ph-header{display:flex;flex-wrap:wrap;gap:8px}#practice-root:not(.ph-standalone) .ph-header>div{flex:1;min-width:120px}#practice-root:not(.ph-standalone) .ph-header h1{font-size:17px}.ph-compact-workspace .ct-task,.ph-compact-workspace .ct-rule,.ph-compact-workspace .ct-summary{padding:15px 12px}.ph-compact-workspace .ct-task>h3{font-size:20px}.ph-compact-workspace .ct-actions>.primary{width:100%;min-width:120px;flex:1 0 100%;min-height:46px}.ph-compact-workspace .ct-actions{align-items:stretch}.ph-compact-workspace .ct-btn.subtle{font-size:13px}}

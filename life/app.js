@@ -43,7 +43,9 @@ doc.addEventListener('click',event=>{
 function updateMenu(){
  const panel=doc.getElementById('life-today');if(!panel)return;
  const current=root.PracticeHub.snapshot?.();
- panel.hidden=!!(current?.kind==='quests'&&current.state?.view==='quest');
+ const working=!!(current?.kind==='quests'&&current.state?.view==='quest');
+ panel.hidden=working;
+ doc.querySelector('.life-app-shell')?.classList.toggle('is-working',working);
 }
 if(typeof root.MutationObserver==='function'){
  const stage=doc.getElementById('life-stage');

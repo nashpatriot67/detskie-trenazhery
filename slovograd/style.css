@@ -118,3 +118,160 @@
 @media(max-width:760px){.resume-card{padding:17px;gap:14px;align-items:flex-start;flex-direction:column}.resume-card .btn{width:100%}.task-progress{padding:14px 17px}.task-progress>div:first-child{align-items:flex-start;flex-direction:column}.practice-end .task-progress{margin-left:-17px;margin-right:-17px}}
 
 .course-history{margin:20px 0;padding:16px;border:1px solid #dce6d6;border-radius:13px;background:#f7f9f3;font-size:13px}.course-history summary{cursor:pointer;font-weight:700;color:#476d50}.course-history h3{margin:18px 0 12px;font-size:16px}.course-history h4{margin:12px 0 8px;font-size:12px;color:#6e806c}.completed-words{display:flex;flex-wrap:wrap;gap:6px}.completed-words span{padding:5px 8px;border-radius:7px;background:#e8f2e0;color:#53734e;font-size:12px}
+
+/* One working area: the prompt, the child's answer and the next action stay together. */
+.rus-learning-layout{display:block;max-width:1080px;margin:0 auto}
+.rus-workspace-card{overflow:visible}
+.rus-workspace-card .exercise-head{padding:12px 20px;border-radius:21px 21px 0 0;background:#f8faf6;min-height:48px}
+.rus-workspace-card .section-tag{font-size:12px;letter-spacing:0;text-transform:none;color:#456b58}
+.rus-workspace-card .task-index{font-size:13px;color:#657c6b}
+.exercise-settings{border-bottom:1px solid var(--line);background:#fcfdfa;border-radius:0}
+.exercise-settings>summary,.workspace-guide>summary,.rus-dialog-history>summary{cursor:pointer;min-height:46px;display:flex;align-items:center;gap:10px;padding:10px 20px;font-size:13px;color:#4c715d;list-style:none;line-height:1.5}
+.exercise-settings>summary::-webkit-details-marker,.workspace-guide>summary::-webkit-details-marker,.rus-dialog-history>summary::-webkit-details-marker{display:none}
+.exercise-settings>summary:after,.workspace-guide>summary:after,.rus-dialog-history>summary:after{content:'+';font-size:22px;font-weight:400;margin-left:auto;flex-shrink:0}
+.exercise-settings[open]>summary:after,.workspace-guide[open]>summary:after,.rus-dialog-history[open]>summary:after{content:'−'}
+.exercise-settings>summary>b{font-size:12px;font-weight:700;background:#e9f1e9;padding:3px 9px;border-radius:7px;white-space:nowrap}
+.exercise-settings-body{padding:12px 20px 16px;border-top:1px solid var(--line)}
+.exercise-settings-body .task-toolbar{padding:0;gap:10px}
+.exercise-settings-body .task-toolbar label{font-size:13px;flex:1 1 210px;max-width:100%;min-width:0}
+.exercise-settings-body select{font-size:13px;min-height:44px;max-width:100%;min-width:0;flex:1}
+.exercise-settings-body .grade-context{margin:0 0 10px}
+.exercise-settings-body .mode-tabs{margin:12px 0 0}
+.exercise-settings-body .mode-tabs button{font-size:13px;min-height:44px}
+.exercise-settings-body .task-progress{margin:12px 0 0;padding:12px;border-radius:10px;border:1px solid var(--line)}
+.exercise-settings-body .learning-stages{margin:12px 0 0}
+.exercise-settings-body .spelling-journey{margin:12px 0 0;padding:12px}
+.exercise-settings-body .journey-note{margin-top:6px}
+.exercise-settings-body .practice-toggle{font-size:13px}
+.exercise-settings-body .topic-rule{margin:10px 0 0}
+.rus-task-body{padding:18px 22px 0}
+.rus-task-body h2{font-size:23px;line-height:1.35;scroll-margin-top:16px;color:#3f5f4c}
+.rus-task-body .task-subtitle{font-size:14px;line-height:1.6;margin-top:7px;color:#637860}
+.rus-task-body .big-word{margin:13px 0 9px;padding:10px 12px;min-height:74px;font-size:35px}
+.rus-task-body .big-word .letter{min-height:48px}
+.rus-task-body .word-slots{margin:12px 0;gap:7px}
+.rus-task-body .letter-bank{margin:10px 0 13px;padding:13px;gap:8px}
+.rus-task-body .letter-tile{width:44px;min-height:46px;font-size:24px}
+.rus-task-body .slot{min-width:42px;min-height:46px}
+.rus-task-body .brushes{margin:12px 0;gap:7px}
+.rus-task-body .brush{min-height:44px;font-size:13px;padding:9px 12px}
+.rus-task-body .morpheme-word{margin:12px 0;min-height:78px;padding:15px 10px}
+.rus-task-body .char{min-width:36px;min-height:48px}
+.rus-task-body .zero-ending{min-height:44px;font-size:14px}
+.rus-task-body .syntax-sentence{margin:12px 0;min-height:90px;padding:15px 12px}
+.rus-task-body .syntax-token{min-height:46px;font-size:23px}
+.rus-task-body .question-card{margin-top:10px;padding:12px 14px;font-size:14px}
+.rus-task-body .reveal-button{min-height:44px;font-size:13px;margin-top:5px}
+.rus-task-body .preposition-pair{padding:14px;margin:12px 0}
+.rus-task-body .sentence-slots{margin:12px 0;min-height:85px;padding:14px}
+.rus-task-body .builder-bank{padding:14px;gap:9px}
+.rus-task-body .sentence-chip{min-height:46px;font-size:17px}
+.rus-task-body .pattern{margin:12px 0;padding:10px 13px;font-size:14px}
+.rus-task-body .task-note{font-size:12px;line-height:1.65;margin:9px 0}
+.rus-task-body .task-actions{position:sticky;bottom:0;z-index:12;margin:12px -22px 0;padding:10px 22px calc(10px + env(safe-area-inset-bottom,0px));background:#fffffff5;border-top:1px solid #e1e9dc;box-shadow:0 -5px 14px #344f4010;backdrop-filter:blur(8px);border-radius:0}
+.rus-task-body .task-actions>.btn{font-size:14px;min-height:46px;flex:0 0 auto}
+.rus-task-body .task-actions>.btn.primary{margin-left:auto}
+.rus-task-body .feedback{margin:10px 0;font-size:14px;line-height:1.65;padding:10px 13px}
+.rus-task-utilities{display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap;padding:4px 20px;border-top:1px solid #edf0e8;background:#fcfdfa}
+.rus-task-utilities>.btn{font-size:13px;min-height:44px}
+.workspace-guide{flex:1 1 240px;min-width:0}
+.workspace-guide>summary{padding:9px 8px}
+.workspace-guide .guide-panel{display:block;padding:0 0 10px}
+.workspace-guide .guide-card{padding:15px;max-width:100%;border-radius:12px}
+.workspace-guide .guide-card p{font-size:14px}
+.workspace-guide .sonya-tip{display:none}
+.rus-workspace-card .task-nav{padding:4px 15px;border-radius:0 0 22px 22px}
+.rus-workspace-card .task-nav .btn{min-height:44px;font-size:13px}
+.rus-workspace-card .task-nav>span{font-size:12px;color:#67816a}
+.rus-task-body .creative-seed{padding:12px 15px;margin:12px 0;font-size:21px}
+.rus-creative-workbench{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start;gap:22px;margin-top:12px}
+.rus-creative-workbench .choice-group{padding:8px 0;border-top:0}
+.rus-creative-workbench .choice-group>h3{font-size:15px;margin-bottom:7px}
+.rus-creative-workbench .choice-btn{font-size:14px;min-height:44px;padding:9px 12px;margin-bottom:7px}
+.rus-creative-editor .writing-input{min-height:112px;font-size:17px;line-height:1.55;padding:11px 13px}
+.rus-creative-editor .voice-panel{padding:10px 12px;margin:10px 0}
+.rus-creative-editor .plan-check{margin-top:12px;padding-top:12px}
+.rus-creative-editor .plan-check .checklist{margin:5px 0}
+.rus-creative-editor .plan-check .checklist label{font-size:13px;min-height:44px;line-height:1.5}
+.rus-creative-editor .voice-panel-heading>small{font-size:11px;max-width:none}
+.rus-creative-editor .voice-footnote{font-size:11px!important;line-height:1.6!important}
+.rus-dialog-history{margin:12px 0;background:#f8faf4;border:1px solid #e4eadb;border-radius:11px}
+.rus-dialog-history>summary{padding:9px 13px}
+.rus-dialog-history .dialog-chat{margin:0;padding:13px;max-height:230px;overflow:auto;overscroll-behavior:contain}
+.rus-task-body .dialog-form .writing-input{min-height:95px;font-size:17px;line-height:1.6}
+.rus-task-body .dialog-form .answer-label{font-size:16px;line-height:1.6}
+.rus-task-body .dialog-hint{margin:9px 0;font-size:13px;padding:10px 12px}
+.rus-task-body .dialog-form .voice-panel{margin:10px 0;padding:12px}
+.rus-task-body .dialog-form .voice-panel-heading>small{max-width:none;font-size:11px}
+.rus-task-body .dialog-form .voice-footnote{font-size:11px!important;line-height:1.6!important}
+.rus-task-body .dialog-form .voice-actions .btn{font-size:13px;min-height:44px}
+.rus-task-body .dialog-form .action-row{margin:10px 0}
+.rus-study-shell .topbar{min-height:66px;margin-bottom:14px}
+.rus-study-shell .top-actions>.icon-btn,.rus-study-shell .grade-select>select{min-width:44px;min-height:44px;height:44px;font-size:13px}
+.rus-study-shell .app-footer{margin-top:16px}
+@media(max-width:1200px){
+ .rus-study-shell{display:block}
+ .rus-study-shell .sidebar{position:relative;inset:auto;width:100%;height:auto;min-height:62px;padding:7px 16px;display:block;border-right:0;border-bottom:1px solid var(--line);overflow:visible}
+ .rus-study-shell .sidebar .brand,.rus-study-shell .sidebar .side-label,.rus-study-shell .sidebar-bottom{display:none}
+ .rus-study-shell .sidebar nav{display:flex;flex-direction:row;gap:5px;overflow-x:auto;overscroll-behavior:contain;scrollbar-width:thin;max-width:1100px;margin:0 auto}
+ .rus-study-shell .nav-btn{display:flex;flex-direction:column;justify-content:center;flex:1 0 64px;width:auto;min-width:64px;min-height:48px;gap:3px;font-size:11px;line-height:1.2;padding:5px 6px;text-align:center;color:#5e7868}
+ .rus-study-shell .nav-btn>.nav-icon,.rus-study-shell .nav-btn>.icon{width:20px;height:20px}
+ .rus-study-shell .main{max-width:1120px;padding:0 20px 20px}
+ .rus-study-shell .topbar{min-height:60px;margin-bottom:10px;padding:7px 0}
+}
+@media(max-width:650px){
+ .rus-study-shell .main{padding:0 10px 16px}
+ .rus-study-shell .sidebar{padding:6px 8px}
+ .rus-study-shell .nav-btn{flex:0 0 65px;font-size:11px}
+ .rus-study-shell .topbar-location>.breadcrumb{display:none}
+ .rus-study-shell .topbar{margin-bottom:8px;min-height:58px}
+ .rus-study-shell .top-actions>.icon-btn{display:inline-flex;width:44px;height:44px;min-width:44px;min-height:44px}
+ .rus-study-shell .grade-select>select{font-size:12px;max-width:108px;padding-left:8px;padding-right:22px}
+ .rus-workspace-card .exercise-head{padding:10px 13px;gap:7px}
+ .rus-workspace-card .section-tag{font-size:12px;line-height:1.4}
+ .exercise-settings>summary{padding:9px 13px;font-size:12px;gap:7px}
+ .exercise-settings>summary>b{font-size:11px;padding:3px 6px}
+ .exercise-settings-body{padding:12px}
+ .rus-task-body{padding:15px 13px 0}
+ .rus-task-body h2{font-size:22px}
+ .rus-task-body .task-subtitle{font-size:14px}
+ .rus-task-body .big-word{font-size:30px;gap:2px;padding:8px 4px}
+ .rus-task-body .big-word .letter{min-width:23px}
+ .rus-task-body .big-word .letter.gap{width:32px}
+ .rus-task-body .word-slots{gap:5px}
+ .rus-task-body .slot{min-width:34px;font-size:22px}
+ .rus-task-body .letter-bank{padding:10px;gap:7px}
+ .rus-task-body .letter-tile{width:44px;min-height:46px}
+ .rus-task-body .brush{font-size:13px;padding:8px 10px}
+ .rus-task-body .morpheme-word{padding:13px 5px;gap:2px}
+ .rus-task-body .char{min-width:31px;font-size:27px}
+ .rus-task-body .syntax-token{font-size:21px}
+ .rus-task-body .task-actions{margin-left:-13px;margin-right:-13px;padding-left:12px;padding-right:12px;gap:7px}
+ .rus-task-body .task-actions>.btn{font-size:13px;padding:10px 11px}
+ .rus-task-body .task-actions>.btn.primary{flex:1 1 110px;margin-left:0}
+ .rus-task-utilities{padding:3px 12px;gap:0}
+ .rus-task-utilities>.btn{font-size:13px}
+ .workspace-guide{flex-basis:100%}
+ .workspace-guide>summary{padding:8px 6px;font-size:13px}
+ .rus-workspace-card .task-nav{padding:4px 7px}
+ .rus-workspace-card .task-nav>span{font-size:11px;text-align:center}
+ .rus-creative-workbench{grid-template-columns:1fr;gap:12px}
+ .rus-creative-workbench .choice-group{padding:5px 0}
+}
+@media(max-width:360px){
+ .exercise-settings>summary>b{display:none}
+ .rus-task-body .task-actions>.btn{padding-left:8px;padding-right:8px;font-size:12px}
+ .rus-workspace-card .task-nav>span{max-width:100px}
+}
+.rus-voice-tools{border:1px solid #dfe8d7;background:#f7faf3;border-radius:10px;margin:9px 0}
+.rus-voice-tools>summary{display:flex;align-items:center;gap:8px;min-height:44px;padding:9px 12px;font-size:13px;color:#57794e;cursor:pointer;list-style:none}
+.rus-voice-tools>summary::-webkit-details-marker{display:none}
+.rus-voice-tools>summary:after{content:'+';margin-left:auto;font-size:20px}
+.rus-voice-tools[open]>summary:after{content:'−'}
+.rus-task-body .rus-voice-tools .voice-panel{border:0;border-top:1px solid #dfe8d7;border-radius:0;margin:0;padding:12px}
+/* Each letter remains a full touch target; long words pan as a single word. */
+.rus-task-body .rus-word-scroll{width:100%;max-width:100%;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;touch-action:pan-x;border:1px solid #e7eddf;border-radius:12px;background:#fbfcf8;margin:12px 0 3px;scrollbar-width:thin}
+.rus-task-body .rus-word-scroll .morpheme-word{display:flex;flex-wrap:nowrap;justify-content:center;gap:3px;width:max-content;min-width:100%;max-width:none;min-height:82px;margin:0;padding:13px 10px;border:0;background:transparent}
+.rus-task-body .rus-word-scroll .char{flex:0 0 44px;min-width:44px;width:44px;min-height:48px;font-size:29px}
+.rus-task-body .rus-word-pan-note{font-size:12px;color:#6c8062;line-height:1.5;margin:4px 0 8px}
+@media(max-width:650px){.rus-task-body .rus-word-scroll .morpheme-word{padding:12px 7px}.rus-task-body .rus-word-scroll .char{min-width:44px;width:44px;font-size:28px}}

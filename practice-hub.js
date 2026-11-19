@@ -87,6 +87,13 @@ function rememberLauncher(opened){
 }
 function capture(){if(current&&!current.conflict&&current.engine.capture)current.engine.capture(current.state,host.querySelector('#practice-content'));}
 function recoveryDraft(){const state=current.engine.snapshot?current.engine.snapshot(current.state):current.state;return {state:clone(state),generation:current.generation,seen:clone(current.seen),pending:clone(current.pending)};}
+function workspaceAttributes(){
+ if(current.kind==='quests')return '';
+ const state=current.state,run=state.active?.run||state,task=current.engine.current?.(state);
+ const taskId=task?.id||task?.task?.id||run.queue?.[run.index]?.id||run.queue?.[run.index]||'';
+ const key=['hub',current.kind,state.active?.config?.id||state.routineId||'',run.phase||'',run.index||0,typeof taskId==='string'?taskId:''].join(':');
+ return ' class="ph-fieldset trainer-workspace ph-compact-workspace" data-workspace-key="'+esc(key)+'"';
+}
 function showStorageWarning(){
  if(!current?.warning||!host)return;
  let note=host.querySelector('.ph-storage-note');if(!note){note=doc.createElement('div');note.className='ph-storage-note';note.setAttribute('role','status');(host.querySelector('.ph-header')||host.querySelector('#practice-clock-slot'))?.after(note);}
@@ -131,7 +138,12 @@ function render(){
  const back=current.kind==='breaks'&&standalone?'К приключениям':gate?'К урокам':'К уроку';
  const header=standalone&&current.kind==='quests'?'':'<header class="ph-header"><button class="ph-back" data-ph-action="close">← '+back+'</button><div><span class="ph-eyebrow">'+(gate?'ПОНЯТЬ → ПРОВЕРИТЬ → ПРИМЕНИТЬ':'УЧИМСЯ В СВОЁМ ТЕМПЕ')+'</span><h1 id="practice-title">'+esc(heading)+'</h1></div><button class="ph-settings-button" data-ph-action="settings" aria-label="Настройки разминок">⚙</button></header>';
  const settings=current.settings?'<section class="ph-settings"><h2>Разминка после 15 минут занятий</h2><p>Считаем время в активной вкладке. Фон, скрытая страница и настоящие дела в комнате не считаются экранным занятием. В конце учебного цикла предложим паузу перед следующим, если прошло не меньше 15 минут.</p><label><input type="checkbox" data-ph-setting="enabled" '+(routine.enabled?'checked':'')+'> Предлагать разминки</label></section>':'';
- host.innerHTML='<div class="ph-shell">'+header+settings+(current.warning?'<div class="ph-storage-note" role="status">'+esc(current.warning)+(current.conflict?'<button data-ph-action="reload">Открыть актуальное</button>':'')+'</div>':'')+'<div id="practice-clock-slot"></div><div id="practice-content"><fieldset class="ph-fieldset" '+(current.conflict?'disabled':'')+'>'+activityContent()+'</fieldset></div><p class="ph-save-note">'+(current.preview?'Предпросмотр · учебный прогресс не меняется':current.warning?'Работа на этой странице':'Сохраняем на этом устройстве')+' · можно остановиться и продолжить позже</p><div id="practice-live" class="ph-sr-only" aria-live="polite"></div></div>';
+ host.innerHTML='<div class="ph-shell">'+header+settings+(current.warning?'<div class="ph-storage-note" role="status">'+esc(current.warning)+(current.conflict?'<button data-ph-action="reload">Открыть актуальное</button>':'')+'</div>':'')+'<div id="practice-clock-slot"></div><div id="practice-content"><fieldset'+(workspaceAttributes()||' class="ph-fieldset"')+' '+(current.conflict?'disabled':'')+'>'+activityContent()+'</fieldset></div><p class="ph-save-note">'+(current.preview?'Предпросмотр · учебный прогресс не меняется':current.warning?'Работа на этой странице':'Сохраняем на этом устройстве')+' · можно остановиться и продолжить позже</p><div id="practice-live" class="ph-sr-only" aria-live="polite"></div></div>';
+ const workspace=host.querySelector('.ph-compact-workspace');
+ if(workspace){
+  workspace.querySelector('.ct-task>h3,.ct-rule>h3,.ct-summary>h3,h2,h3')?.setAttribute('data-workspace-focus','');
+  for(const actions of workspace.querySelectorAll('.ct-actions'))actions.classList.add('workspace-actions');
+ }
  const live=host.querySelector('#practice-live');if(live)live.textContent=current.announcement||'';
  if(current.voiceMessage)voiceNotice(current.voiceMessage);
  if(current.engine.afterRender)current.engine.afterRender(host.querySelector('#practice-content'),current.state,current.previous);
