@@ -100,6 +100,7 @@ const mount=(function(host){
     if(s.alpha<=0)return;ctx.save();ctx.translate(s.x,s.y);ctx.rotate(s.angle);ctx.scale(s.s,s.s);ctx.globalAlpha=s.alpha;
     if(s.grabbed){ctx.shadowColor='#183e3840';ctx.shadowBlur=15;ctx.shadowOffsetY=8;}
     if(s.id==='pillow')AdventureProps.pillow(ctx,{x:0,y:0,width:s.w,height:s.h,angle:0});
+    else if(global.RoomToyArt?.legacy(s.id))global.RoomToyArt.drawItem(ctx,global.RoomToyArt.legacy(s.id),{x:0,y:0,size:s.w});
     else if(images[s.id])ctx.drawImage(images[s.id],-s.w/2,-s.h/2,s.w,s.h);
     else{roundRect(-s.w/2,-s.h/2,s.w,s.h,12,'#b7d4c3');}
     ctx.restore();
@@ -290,5 +291,5 @@ const mount=(function(host){
   setup(displayStage);resize();updateUI();
   Promise.all([image(data.atlas).then(img=>atlas=img),...Object.entries(data.art).map(([id,src])=>image(src).then(img=>images[id]=img))]).then(()=>{loaded=!!atlas;updateUI();draw();if(!loaded){startButton.textContent='Комната не загрузилась';feedbackOverride='Изображение комнаты не загрузилось. Попробуй открыть пример ещё раз.';feedback.textContent=feedbackOverride;}});
 });
-global.RoomGame=Object.freeze({mount,launcher(){return '<a class="room-launch" href="?room=1"><span class="room-launch-picture" aria-hidden="true"><img src="'+ATLAS+'" alt=""></span><span><strong>Приключение с Рэем</strong><small>Наведи порядок, расправь покрывало и собери сумку в бассейн →</small></span></a>';}});
+global.RoomGame=Object.freeze({mount,assets:()=>({atlas:ATLAS}),launcher(){return '<a class="room-launch" href="?room=1"><span class="room-launch-picture" aria-hidden="true"><img src="'+ATLAS+'" alt=""></span><span><strong>Приключение с Рэем</strong><small>Наведи порядок, расправь покрывало и собери сумку в бассейн →</small></span></a>';}});
 })(typeof window==='undefined'?globalThis:window);
