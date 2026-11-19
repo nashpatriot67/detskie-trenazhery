@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "build": "stage1-914f4c0ca28d",
+  "build": "stage1-458c00fde28d",
   "sourceHashes": {
     "active-breaks.css": "1322b99e5ffba182fa3e105bd656eb16ffa27088c6341e8f0a5fd1b7e4dc8581",
     "active-breaks.js": "c8739f67ecdf446a20356165899696e627a68dac2307949b0675ee923c934e4b",
@@ -31,7 +31,7 @@
     "life-quests.css": "80fd3eeb8dbcb94b3f6e99fc2a5a1ccaccf7fddc22113c8a8ec46879be81fc5b",
     "life-quests.js": "161e19d5cbc1edf3ac27583edc1d1e15f813e1a8cd6bd40ec880ca5d24cf04e2",
     "life-school-schedule.js": "23b2185e80b68539d55157ac7f33c2862c0369c843694a0cf68cc82cd3da05b0",
-    "life/app.js": "4c722d6c95bdb32bc202eecf6dc24d83d6ffda0e4587fafb50182510f7f6676c",
+    "life/app.js": "2ef22a3e1120df8dd2eac8cf85433c596b7d3ea9b8682e9b8516684a6e523e9b",
     "life/style.css": "8f3fe3b87246d200de995434557acc02e468963fc4ed6dd5df4ea08a810c44d5",
     "math-check.css": "aa1b2170257c3de1b629792297908b8e4fd8b493451c081cf7379597f7ccc900",
     "math-check.js": "57e1e48685ea9c56b9df26e447eb8633404ea673b074d9b6903f6fca445b7516",
@@ -49,6 +49,12 @@
     "place-value.js": "8e9b59c8d08e9e655522883861e0842553b3c7dba24ff39b6e5c560dcb039b53",
     "practice-hub.css": "7912d72021dd5ea7b0734d98163a04ac529f1e1e195e192e8e87c2047d110e06",
     "practice-hub.js": "be469c8141b55f5e7372513fa2d772979edb9e91a69e1f67147a0b238a72ee3d",
+    "room-actor.js": "cbbb5c3fe81db83c7344a0ac4c1bfca0e058ca3d090728512f45a64b40dc62ca",
+    "room-adventure.js": "eaa7df919b12578b6c9ef01157035cf47f10898d12b621adb318bcf758f435be",
+    "room-game.css": "c94708e524494a594a921775999a6700875d409234ce3c2c5412366bc59f8a4f",
+    "room-game.js": "01c9c06bebfb9055dc624f901d3d9522a921e53ea3eabcfe1b41f94f413d10eb",
+    "room-progress.js": "ffc53b92e21095c44a126bf9ef86d7be86e1a3eecd3d9333ee50c117e2a5de18",
+    "room-props.js": "15eda60b1cf766025ab67bc159163f16cb5cb33ce47b3062ca4afcb4fc0a9ab3",
     "russian-check.js": "bdca0192478029d4b04518faad20ddbfd5f4014847f097c5ffc00709dd14e565",
     "russian-journey.js": "c959c2f907fcfc09faa175542b68d133a488d338a0df4a6ff8e954fc047d9607",
     "school-packing-flow.js": "99a0f56d0ab6245e4da8b1c6bf54114c8dad3f435eff6b2bc528685644a386f6",
@@ -143,7 +149,7 @@
     "kubiki": {
       "schemaVersion": 1,
       "trainer": "kubiki",
-      "build": "stage1-914f4c0ca28d",
+      "build": "stage1-458c00fde28d",
       "styles": [
         {
           "path": "kubiki/style.css",
@@ -735,7 +741,7 @@
     "bricks": {
       "schemaVersion": 1,
       "trainer": "bricks",
-      "build": "stage1-914f4c0ca28d",
+      "build": "stage1-458c00fde28d",
       "styles": [
         {
           "path": "bricks/style.css",
@@ -1333,7 +1339,7 @@
     "slovograd": {
       "schemaVersion": 1,
       "trainer": "slovograd",
-      "build": "stage1-914f4c0ca28d",
+      "build": "stage1-458c00fde28d",
       "styles": [
         {
           "path": "slovograd/style.css",
@@ -1907,7 +1913,7 @@
     "life": {
       "schemaVersion": 1,
       "trainer": "life",
-      "build": "stage1-914f4c0ca28d",
+      "build": "stage1-458c00fde28d",
       "styles": [
         {
           "path": "concepts.css",
@@ -1944,6 +1950,12 @@
           "href": "style.css?v=s1-8f3fe3b87246",
           "hash": "8f3fe3b87246d200de995434557acc02e468963fc4ed6dd5df4ea08a810c44d5",
           "checksum": 4189866448
+        },
+        {
+          "path": "room-game.css",
+          "href": "../room-game.css?v=s1-c94708e52449",
+          "hash": "c94708e524494a594a921775999a6700875d409234ce3c2c5412366bc59f8a4f",
+          "checksum": 3435832153
         },
         {
           "path": "workspace-layout.css",
@@ -2044,10 +2056,40 @@
           "checksum": 4264988014
         },
         {
+          "path": "room-progress.js",
+          "href": "../room-progress.js?v=s1-ffc53b92e210",
+          "hash": "ffc53b92e21095c44a126bf9ef86d7be86e1a3eecd3d9333ee50c117e2a5de18",
+          "checksum": 1710096083
+        },
+        {
+          "path": "room-adventure.js",
+          "href": "../room-adventure.js?v=s1-eaa7df919b12",
+          "hash": "eaa7df919b12578b6c9ef01157035cf47f10898d12b621adb318bcf758f435be",
+          "checksum": 3284496048
+        },
+        {
+          "path": "room-actor.js",
+          "href": "../room-actor.js?v=s1-cbbb5c3fe81d",
+          "hash": "cbbb5c3fe81db83c7344a0ac4c1bfca0e058ca3d090728512f45a64b40dc62ca",
+          "checksum": 4281449932
+        },
+        {
+          "path": "room-props.js",
+          "href": "../room-props.js?v=s1-15eda60b1cf7",
+          "hash": "15eda60b1cf766025ab67bc159163f16cb5cb33ce47b3062ca4afcb4fc0a9ab3",
+          "checksum": 3342835560
+        },
+        {
+          "path": "room-game.js",
+          "href": "../room-game.js?v=s1-01c9c06bebfb",
+          "hash": "01c9c06bebfb9055dc624f901d3d9522a921e53ea3eabcfe1b41f94f413d10eb",
+          "checksum": 339729188
+        },
+        {
           "path": "life/app.js",
-          "href": "app.js?v=s1-4c722d6c95bd",
-          "hash": "4c722d6c95bdb32bc202eecf6dc24d83d6ffda0e4587fafb50182510f7f6676c",
-          "checksum": 1116097395
+          "href": "app.js?v=s1-2ef22a3e1120",
+          "hash": "2ef22a3e1120df8dd2eac8cf85433c596b7d3ea9b8682e9b8516684a6e523e9b",
+          "checksum": 1582032026
         }
       ],
       "media": [
@@ -2437,8 +2479,8 @@
       ]
     }
   },
-  "coreResources": 147,
-  "coreBytes": 13805095,
+  "coreResources": 153,
+  "coreBytes": 14366122,
   "budgetBytes": 16777216,
   "coachClips": 41,
   "coachBytes": 964180
