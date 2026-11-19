@@ -16,7 +16,7 @@
     },
     "life": {
       "styles": ["concepts.css", "life-quests.css", "active-breaks.css", "practice-hub.css", "life/style.css"],
-      "scripts": ["learning-progress.js", "concepts.js", "study-clock.js", "coach-plan.js", "coach-audio-manifest.js", "audio-coach.js", "life-quest-data.js", "life-quests.js", "active-breaks.js", "practice-hub.js", "offline-bundle.js", "life/app.js"]
+      "scripts": ["learning-progress.js", "concepts.js", "study-clock.js", "coach-plan.js", "coach-audio-manifest.js", "audio-coach.js", "life-quest-data.js", "life-school-schedule.js", "life-quests.js", "active-breaks.js", "practice-hub.js", "offline-bundle.js", "life/app.js"]
     }
   }
 }

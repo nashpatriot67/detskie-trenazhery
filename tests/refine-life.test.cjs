@@ -2,9 +2,10 @@
 // Synthetic learners only. This exercises guidance, semantic scenes and tiny
 // real-world self reports without touching browser storage or published data.
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),assert=require('node:assert/strict');
+const {checkLegacyBank}=require('./schedule-build-legacy.cjs');
 const root=path.resolve(__dirname,'..');let storageAccess=0,checks=0;
 function context(reduced=false){const c=vm.createContext({matchMedia:()=>({matches:reduced})});Object.defineProperty(c,'localStorage',{get(){storageAccess++;throw Error('Engine must not access storage');}});for(const f of ['learning-progress.js','life-quest-data.js','life-quests.js'])vm.runInContext(fs.readFileSync(path.join(root,f),'utf8'),c,{filename:f});return c;}
-const c=context(),L=c.LifeQuests,D=c.LifeQuestData,LP=c.LearningProgress,plain=x=>JSON.parse(JSON.stringify(x));let events=[];
+const c=context(),L=c.LifeQuests,D=c.LifeQuestData,LP=c.LearningProgress,plain=x=>JSON.parse(JSON.stringify(x)),stored=s=>L.snapshot?L.snapshot(s):plain(s);let events=[];
 const env={LP,generation:'refine-test',day:'2026-11-19',observe:e=>events.push(plain(e)),announce(){}};
 const eq=(a,b,m)=>{assert.deepEqual(plain(a),plain(b),m);checks++;},ok=(a,m)=>{assert.ok(a,m);checks++;};
 const act=(s,a,p,e=env)=>L.handle(s,a,p||{},e),fresh=id=>{const s=L.create(env);if(id){act(s,'open',{quest:id});act(s,'begin');}return s;};
@@ -13,7 +14,7 @@ function solve(s,q){if(q.mode==='rule')act(s,'rule',{rule:q.ruleChoices[0].id});
 function guide(s){act(s,'show-how');act(s,'guide-next');act(s,'guide-select');act(s,'guide-place',{zone:'demo-target'});}
 
 // All old content is retained. New teaching metadata belongs to the same bank.
-eq(D.validate().success,true);eq(D.quests.length,38);for(const q of D.quests){ok(q.scene);ok(q.firstMove.length>15&&q.firstMove.length<140);ok(q.microReal.length>20&&q.microReal.length<180);ok((q.realSteps||[]).length>1);}
+eq(D.validate().success,true);ok(D.quests.length>=38);checkLegacyBank(D,eq,ok);for(const q of D.quests){ok(q.scene);ok(q.firstMove.length>15&&q.firstMove.length<140);ok(q.microReal.length>20&&q.microReal.length<180);ok((q.realSteps||[]).length>1);}
 const menu=L.render(fresh(),env);for(const id of ['life.places.after-play','life.school.math-russian','life.plan.bedtime'])ok(menu.includes('data-quest="'+id+'"'));ok(!/серия дней|потерял|штраф|привычка сформирована/i.test(menu));
 
 // The example teaches a method. It never moves a real answer, verifies a task,
@@ -32,7 +33,7 @@ for(const q of D.quests){
 
 // Scene layout is a projection of the learner's current choices, even a wrong
 // choice. It never silently sends a thing to the expected destination.
-for(const q of D.quests){const s=fresh(q.id);let scene=L.sceneState(s);eq(scene.type,q.scene);eq(scene.complete,false);eq(scene.items.length,q.itemIds.length);for(const point of scene.items)ok(point.x>=0&&point.x<=800&&point.y>=0&&point.y<=338);
+for(const q of D.quests){const s=fresh(q.id);let scene=L.sceneState(s);eq(scene.type,q.scene);eq(scene.complete,false);eq(scene.items.length,q.itemIds.length);if(scene.height)ok(L.render(s,env).includes('viewBox="0 0 800 '+scene.height+'"'),'Scene bounds match the actual SVG viewBox');for(const point of scene.items)ok(point.x>=0&&point.x<=800&&point.y>=0&&point.y<=(scene.height||338));
  if(q.mode==='sort'){const id=q.itemIds[0],wrong=q.zoneIds.find(z=>!q.accepted[id].includes(z))||q.zoneIds[0];act(s,'drop',{item:id,zone:wrong});scene=L.sceneState(s);eq(scene.items.find(v=>v.id===id).place,wrong);eq(s.motion.kind,'item');eq(s.motion.to,wrong);act(s,'undo');eq(L.sceneState(s).items.find(v=>v.id===id).place,'floor');}
  if(q.mode==='pack'){const id=q.distractors[0]||q.itemIds[0];act(s,'toggle',{item:id});eq(L.sceneState(s).items.find(v=>v.id===id).place,'bag');eq(s.solved,false);act(s,'toggle',{item:id});eq(L.sceneState(s).items.find(v=>v.id===id).place,'floor');}
  if(q.mode==='sequence'){for(const id of topo(q,true))act(s,'step',{step:id});eq(L.sceneState(s).planned,topo(q,true));const html=L.render(s,env);for(const id of s.order)ok(html.includes('data-plan-layer="'+id+'"'),q.id+' has an actual scene layer for '+id);eq(s.solved,false);act(s,'scene-play');eq(s.motion.kind,'preview');eq(s.solved,false,'A plan animation is not completion');}
@@ -62,6 +63,6 @@ const reduced=context(true),RL=reduced.LifeQuests,rs=RL.create(env);RL.handle(rs
 // reports, daily steps and all guided examples inside the existing 48KiB cap.
 let stress=fresh();for(const q of D.quests){act(stress,'open',{quest:q.id});act(stress,'begin');guide(stress);act(stress,'guide-finish');solve(stress,q);act(stress,'check');act(stress,'real');q.realSteps.forEach((_,index)=>act(stress,'real-toggle',{index}));act(stress,'real-report');act(stress,'adult-open');act(stress,'adult-confirm');act(stress,'real-small');act(stress,'small-done');act(stress,'menu');}
 for(const q of D.quests){act(stress,'open',{quest:q.id});act(stress,'replay');act(stress,'begin');solve(stress,q);guide(stress);}
-eq(Object.keys(stress.done).length,38);eq(Object.keys(stress.drafts).length,38);eq(Object.keys(stress.real).length,38);eq(Object.keys(stress.guideSeen).length,38);ok(L.byteSize(stress)<48*1024);const bytes=L.byteSize(stress);stress=L.restore(plain(stress),env);eq(Object.keys(stress.drafts).length,38);for(const q of D.quests){const draft=plain(stress.drafts[q.id]);act(stress,'open',{quest:q.id});eq(stress.phase,'guide');eq(stress.guide.step,2);eq(L.model(stress),{placements:draft.placements||{},chosen:draft.chosen||[],order:draft.order||[],ruleId:draft.ruleId||null});eq(stress.real[q.id].selfReported,true);eq(stress.real[q.id].adultReported,true);eq(stress.real[q.id].microDay,env.day);}
-const progress=LP.setModule(LP.empty(env.generation),'life-quests',stress,{ownerId:'synthetic-test'});ok(LP.getModule(progress,'life-quests'));eq(storageAccess,0);
-console.log(JSON.stringify({success:true,checks,quests:38,guidanceNeverSolvesTask:true,guidedResultsAreAssisted:true,dynamicSceneProjection:true,tinyRealStepsAreSeparate:true,allDraftsRetained:true,stressBytes:bytes,oldVersionOneCompatible:true,noGlobalStorageAccess:true,physicalDevices:false}));
+eq(Object.keys(stress.done).length,D.quests.length);eq(Object.keys(stress.drafts).length,D.quests.length);eq(Object.keys(stress.real).length,D.quests.length);eq(Object.keys(stress.guideSeen).length,D.quests.length);ok(L.byteSize(stored(stress))<48*1024);const bytes=L.byteSize(stored(stress));stress=L.restore(stored(stress),env);eq(Object.keys(stress.drafts).length,D.quests.length);for(const q of D.quests){const draft=plain(stress.drafts[q.id]);act(stress,'open',{quest:q.id});eq(stress.phase,'guide');eq(stress.guide.step,2);eq(L.model(stress),{placements:draft.placements||{},chosen:draft.chosen||[],order:draft.order||[],ruleId:draft.ruleId||null});eq(stress.real[q.id].selfReported,true);eq(stress.real[q.id].adultReported,true);eq(stress.real[q.id].microDay,env.day);}
+const progress=LP.setModule(LP.empty(env.generation),'life-quests',stored(stress),{ownerId:'synthetic-test'});ok(LP.getModule(progress,'life-quests'));eq(storageAccess,0);
+console.log(JSON.stringify({success:true,checks,quests:D.quests.length,guidanceNeverSolvesTask:true,guidedResultsAreAssisted:true,dynamicSceneProjection:true,tinyRealStepsAreSeparate:true,allDraftsRetained:true,stressBytes:bytes,oldVersionOneCompatible:true,noGlobalStorageAccess:true,physicalDevices:false}));

@@ -10,7 +10,7 @@ if(!app)return;
 const TITLE='Дела и приключения',OWNER='kubiki-progress-v1';
 const missions=[
  {id:'life.places.after-play',icon:'🧸',title:'Начну с одной вещи',text:'Поможем игрушкам найти своё место.'},
- {id:'life.school.math-russian',icon:'🎒',title:'Соберусь в школу',text:'Выберем вещи для завтрашних уроков.'},
+ {id:'life.school.math-russian',icon:'🎒',title:'Соберусь в школу',text:'Выберем день в твоём расписании и приготовим нужные вещи.'},
  {id:'life.plan.room',icon:'🧭',title:'Сделаю по шагам',text:'Придумаем небольшой понятный план.'}
 ];
 const esc=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -36,6 +36,7 @@ doc.addEventListener('click',event=>{
  const questId=button.dataset.lifeStart;
  if(!available.has(questId))return;
  event.preventDefault();
+ if(questId==='life.school.math-russian'&&root.LifeSchoolSchedule){const picker=doc.getElementById('life-school-picker');if(picker){picker.scrollIntoView?.({behavior:root.matchMedia?.('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});doc.getElementById('life-school-title')?.focus?.({preventScroll:true});return;}}
  if(typeof root.PracticeHub.startQuest==='function')root.PracticeHub.startQuest(questId);
  else root.PracticeHub.open('quests',{questId});
 });

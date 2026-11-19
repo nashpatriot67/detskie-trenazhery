@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "build": "stage1-37020f326128",
+  "build": "stage1-b10c4b53a117",
   "sourceHashes": {
     "active-breaks.css": "1322b99e5ffba182fa3e105bd656eb16ffa27088c6341e8f0a5fd1b7e4dc8581",
     "active-breaks.js": "c8739f67ecdf446a20356165899696e627a68dac2307949b0675ee923c934e4b",
@@ -27,10 +27,11 @@
     "learning-journey.css": "c6c457dcb3bedab12c6c3ff09a263b7055c6607dfa78fc4f42bb488f77948e36",
     "learning-journey.js": "20263410a7588aba62bfea161b94f00e0d6d6001c428a9416de8446be639462c",
     "learning-progress.js": "5e68799babe33f4b296c3f3a4ced6b3eda64b55118674929f83bd526ba04f45f",
-    "life-quest-data.js": "47bdc37b5d0ed034978442fc547cfc3702a437af8785616203db01149fce8aae",
-    "life-quests.css": "519e45ca59fffcf66285af9404fd592318c7a3e1698dcd881418706ab62a66f0",
-    "life-quests.js": "d08751ee40ee850ff42db8aa1fa173c658afe94eaacb00618db80a1f06338b00",
-    "life/app.js": "5e2c54c20ab8e8efa27060e2cd7a7cebfc7e1ef9c8addbde44733bce799b0a22",
+    "life-quest-data.js": "c6a083bea7a8287b26180e3c53da9f6900fed8b20246279b043cf8669f3a0273",
+    "life-quests.css": "af1c68a2c77ac39dba86e3f254d9d70a45890738d5dad1430ac0af24abc85478",
+    "life-quests.js": "e57129111c2ae98f000389c7235b029742bac29d5c91272963d2660509886c7f",
+    "life-school-schedule.js": "c9a72f31bc7a06e80971f0cdb5952fe2adc5fd1fab26c9b5291fbaec20ca5c9f",
+    "life/app.js": "d81ae49caaebf228ab25b85d6bdfdae0404a27f7768bdc34e8e7d5dba54aff50",
     "life/style.css": "a6e8792a8bd0adebc5370412cf82a16c0268134b716e4bf7111659a2105e8aef",
     "math-check.css": "aa1b2170257c3de1b629792297908b8e4fd8b493451c081cf7379597f7ccc900",
     "math-check.js": "57e1e48685ea9c56b9df26e447eb8633404ea673b074d9b6903f6fca445b7516",
@@ -43,7 +44,7 @@
     "place-value.css": "6ab4b3290d6074db9cf114184b7b57ce9cb0193eba2b8847af11889b2e321b55",
     "place-value.js": "8e9b59c8d08e9e655522883861e0842553b3c7dba24ff39b6e5c560dcb039b53",
     "practice-hub.css": "3afec7a0c092b20ad46cd14726b6f811d7d5bdd0cf5ab1e8c061835c9a669af8",
-    "practice-hub.js": "77959587e56f449856d5cdfd2890f917c8f25751ed282363cf8fc940657592fa",
+    "practice-hub.js": "952946a73946db50b8c1c501ec78506dcc6b7f5fccc266058f8aaa6651052208",
     "russian-check.js": "bdca0192478029d4b04518faad20ddbfd5f4014847f097c5ffc00709dd14e565",
     "russian-journey.js": "c959c2f907fcfc09faa175542b68d133a488d338a0df4a6ff8e954fc047d9607",
     "slovograd/app.js": "425ce2d018f7f7a9d3eff0503ef9183a7b93b3c9251427a626ecb88c67f29def",
@@ -135,7 +136,7 @@
     "kubiki": {
       "schemaVersion": 1,
       "trainer": "kubiki",
-      "build": "stage1-37020f326128",
+      "build": "stage1-b10c4b53a117",
       "styles": [
         {
           "path": "kubiki/style.css",
@@ -243,9 +244,9 @@
         },
         {
           "path": "practice-hub.js",
-          "href": "../practice-hub.js?v=s1-77959587e56f",
-          "hash": "77959587e56f449856d5cdfd2890f917c8f25751ed282363cf8fc940657592fa",
-          "checksum": 2917705025
+          "href": "../practice-hub.js?v=s1-952946a73946",
+          "hash": "952946a73946db50b8c1c501ec78506dcc6b7f5fccc266058f8aaa6651052208",
+          "checksum": 3189869726
         },
         {
           "path": "kubiki/course.js",
@@ -703,7 +704,7 @@
     "bricks": {
       "schemaVersion": 1,
       "trainer": "bricks",
-      "build": "stage1-37020f326128",
+      "build": "stage1-b10c4b53a117",
       "styles": [
         {
           "path": "bricks/style.css",
@@ -817,9 +818,9 @@
         },
         {
           "path": "practice-hub.js",
-          "href": "../practice-hub.js?v=s1-77959587e56f",
-          "hash": "77959587e56f449856d5cdfd2890f917c8f25751ed282363cf8fc940657592fa",
-          "checksum": 2917705025
+          "href": "../practice-hub.js?v=s1-952946a73946",
+          "hash": "952946a73946db50b8c1c501ec78506dcc6b7f5fccc266058f8aaa6651052208",
+          "checksum": 3189869726
         },
         {
           "path": "bricks/course.js",
@@ -1277,7 +1278,7 @@
     "slovograd": {
       "schemaVersion": 1,
       "trainer": "slovograd",
-      "build": "stage1-37020f326128",
+      "build": "stage1-b10c4b53a117",
       "styles": [
         {
           "path": "slovograd/style.css",
@@ -1367,9 +1368,9 @@
         },
         {
           "path": "practice-hub.js",
-          "href": "../practice-hub.js?v=s1-77959587e56f",
-          "hash": "77959587e56f449856d5cdfd2890f917c8f25751ed282363cf8fc940657592fa",
-          "checksum": 2917705025
+          "href": "../practice-hub.js?v=s1-952946a73946",
+          "hash": "952946a73946db50b8c1c501ec78506dcc6b7f5fccc266058f8aaa6651052208",
+          "checksum": 3189869726
         },
         {
           "path": "slovograd/words.js",
@@ -1839,7 +1840,7 @@
     "life": {
       "schemaVersion": 1,
       "trainer": "life",
-      "build": "stage1-37020f326128",
+      "build": "stage1-b10c4b53a117",
       "styles": [
         {
           "path": "concepts.css",
@@ -1849,9 +1850,9 @@
         },
         {
           "path": "life-quests.css",
-          "href": "../life-quests.css?v=s1-519e45ca59ff",
-          "hash": "519e45ca59fffcf66285af9404fd592318c7a3e1698dcd881418706ab62a66f0",
-          "checksum": 3900526593
+          "href": "../life-quests.css?v=s1-af1c68a2c77a",
+          "hash": "af1c68a2c77ac39dba86e3f254d9d70a45890738d5dad1430ac0af24abc85478",
+          "checksum": 115526445
         },
         {
           "path": "active-breaks.css",
@@ -1911,15 +1912,21 @@
         },
         {
           "path": "life-quest-data.js",
-          "href": "../life-quest-data.js?v=s1-47bdc37b5d0e",
-          "hash": "47bdc37b5d0ed034978442fc547cfc3702a437af8785616203db01149fce8aae",
-          "checksum": 2580190577
+          "href": "../life-quest-data.js?v=s1-c6a083bea7a8",
+          "hash": "c6a083bea7a8287b26180e3c53da9f6900fed8b20246279b043cf8669f3a0273",
+          "checksum": 2148630675
+        },
+        {
+          "path": "life-school-schedule.js",
+          "href": "../life-school-schedule.js?v=s1-c9a72f31bc7a",
+          "hash": "c9a72f31bc7a06e80971f0cdb5952fe2adc5fd1fab26c9b5291fbaec20ca5c9f",
+          "checksum": 3198927052
         },
         {
           "path": "life-quests.js",
-          "href": "../life-quests.js?v=s1-d08751ee40ee",
-          "hash": "d08751ee40ee850ff42db8aa1fa173c658afe94eaacb00618db80a1f06338b00",
-          "checksum": 3026318313
+          "href": "../life-quests.js?v=s1-e57129111c2a",
+          "hash": "e57129111c2ae98f000389c7235b029742bac29d5c91272963d2660509886c7f",
+          "checksum": 577718576
         },
         {
           "path": "active-breaks.js",
@@ -1929,9 +1936,9 @@
         },
         {
           "path": "practice-hub.js",
-          "href": "../practice-hub.js?v=s1-77959587e56f",
-          "hash": "77959587e56f449856d5cdfd2890f917c8f25751ed282363cf8fc940657592fa",
-          "checksum": 2917705025
+          "href": "../practice-hub.js?v=s1-952946a73946",
+          "hash": "952946a73946db50b8c1c501ec78506dcc6b7f5fccc266058f8aaa6651052208",
+          "checksum": 3189869726
         },
         {
           "path": "offline-bundle.js",
@@ -1941,9 +1948,9 @@
         },
         {
           "path": "life/app.js",
-          "href": "app.js?v=s1-5e2c54c20ab8",
-          "hash": "5e2c54c20ab8e8efa27060e2cd7a7cebfc7e1ef9c8addbde44733bce799b0a22",
-          "checksum": 4237740018
+          "href": "app.js?v=s1-d81ae49caaeb",
+          "hash": "d81ae49caaebf228ab25b85d6bdfdae0404a27f7768bdc34e8e7d5dba54aff50",
+          "checksum": 292080232
         }
       ],
       "media": [
@@ -2333,8 +2340,8 @@
       ]
     }
   },
-  "coreResources": 139,
-  "coreBytes": 13208959,
+  "coreResources": 140,
+  "coreBytes": 13394900,
   "budgetBytes": 16777216,
   "coachClips": 41,
   "coachBytes": 964180

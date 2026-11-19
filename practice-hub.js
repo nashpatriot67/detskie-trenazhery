@@ -86,7 +86,7 @@ function rememberLauncher(opened){
  if(!options||current?.preview)return;updateNamed(options.storageKey,'launcher',{version:1,trainerId:options.trainerId,open:opened,kind:current?.kind||'assessment',returnTo:returnTo||null});
 }
 function capture(){if(current&&!current.conflict&&current.engine.capture)current.engine.capture(current.state,host.querySelector('#practice-content'));}
-function recoveryDraft(){return {state:clone(current.state),generation:current.generation,seen:clone(current.seen),pending:clone(current.pending)};}
+function recoveryDraft(){const state=current.engine.snapshot?current.engine.snapshot(current.state):current.state;return {state:clone(state),generation:current.generation,seen:clone(current.seen),pending:clone(current.pending)};}
 function showStorageWarning(){
  if(!current?.warning||!host)return;
  let note=host.querySelector('.ph-storage-note');if(!note){note=doc.createElement('div');note.className='ph-storage-note';note.setAttribute('role','status');(host.querySelector('.ph-header')||host.querySelector('#practice-clock-slot'))?.after(note);}

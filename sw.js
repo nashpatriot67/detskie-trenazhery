@@ -4,7 +4,7 @@
  */
 'use strict';
 
-const VERSION = 'stage1-37020f326128';
+const VERSION = 'stage1-b10c4b53a117';
 const ROOT = new URL('./', self.location.href);
 const CACHE_PREFIX = 'trainers:' + ROOT.pathname + ':core:';
 const CACHE_NAME = CACHE_PREFIX + VERSION;
@@ -54,7 +54,7 @@ const CORE = [
   "coach-audio-manifest.js?v=s1-fd84bc6928ec",
   "audio-coach.js?v=s1-3f127b9878a2",
   "active-breaks.js?v=s1-c8739f67ecdf",
-  "practice-hub.js?v=s1-77959587e56f",
+  "practice-hub.js?v=s1-952946a73946",
   "kubiki/course.js?v=s1-c13d0497e759",
   "math-journey.js?v=s1-668852334db1",
   "kubiki/engine.js?v=s1-18fc3d8be232",
@@ -142,11 +142,12 @@ const CORE = [
   "life/index.html",
   "life/manifest.webmanifest",
   "life/offline.html",
-  "life-quests.css?v=s1-519e45ca59ff",
+  "life-quests.css?v=s1-af1c68a2c77a",
   "life/style.css?v=s1-a6e8792a8bd0",
-  "life-quest-data.js?v=s1-47bdc37b5d0e",
-  "life-quests.js?v=s1-d08751ee40ee",
-  "life/app.js?v=s1-5e2c54c20ab8",
+  "life-quest-data.js?v=s1-c6a083bea7a8",
+  "life-school-schedule.js?v=s1-c9a72f31bc7a",
+  "life-quests.js?v=s1-e57129111c2a",
+  "life/app.js?v=s1-d81ae49caaeb",
   "otkryt-bez-interneta.html"
 ];
 const CORE_URLS = CORE.map(path => new URL(path, ROOT).href);
