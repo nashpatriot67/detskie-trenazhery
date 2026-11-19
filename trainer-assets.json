@@ -125,6 +125,7 @@
         "active-breaks.css",
         "practice-hub.css",
         "life/style.css",
+        "room-game.css",
         "workspace-layout.css"
       ],
       "scripts": [
@@ -143,6 +144,11 @@
         "practice-hub.js",
         "offline-bundle.js",
         "workspace-layout.js",
+        "room-progress.js",
+        "room-adventure.js",
+        "room-actor.js",
+        "room-props.js",
+        "room-game.js",
         "life/app.js"
       ]
     }

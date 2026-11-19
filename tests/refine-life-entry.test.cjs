@@ -8,7 +8,7 @@ function fixture(missing){
  let storageAccess=0,observerCallback=null;
  const elements={app:{innerHTML:''},'life-today':{hidden:false},'life-stage':{}};
  const listeners={},opens=[],mounts=[];
- const doc={getElementById:id=>elements[id]||null,addEventListener(name,fn){listeners[name]=fn;}};
+ const doc={getElementById:id=>elements[id]||null,querySelector(){return null;},addEventListener(name,fn){listeners[name]=fn;}};
  const hub={mount(config){mounts.push(config);},snapshot(){return null;},open(...args){opens.push(args);}};
  const window={document:doc,LearningProgress:{},LifeQuests:{},PracticeHub:hub,MutationObserver:function(fn){observerCallback=fn;this.observe=()=>{};}};
  const context=vm.createContext({window,get localStorage(){storageAccess++;throw Error('Entry must not create another storage owner');}});

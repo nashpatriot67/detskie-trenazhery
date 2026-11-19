@@ -1,0 +1,78 @@
+(function(root){
+'use strict';
+// One optional named activity inside the existing progress owner. No awards,
+// real-life confirmations, migrations, or additional localStorage keys.
+const KEY='kubiki-progress-v1',ID='life-room-adventure';
+const object=v=>v!==null&&typeof v==='object'&&!Array.isArray(v);
+const signature=v=>JSON.stringify(v===undefined?null:v);
+function create(){
+ const LP=root.LearningProgress;
+ const writer='room-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);
+ let seen=null,epoch=null,initialized=false,blocked=false,message='';
+ const listeners=new Set();
+ function notify(){for(const listener of listeners)try{listener({error:message});}catch(_){}}
+ function fail(text,permanent=false){message=text;if(permanent)blocked=true;notify();return false;}
+ function record(){
+  if(!LP)throw Error('unsupported');
+  const text=root.localStorage.getItem(KEY),raw=JSON.parse(text===null?'{}':text);
+  if(!object(raw))throw Error('invalid');
+  const generation=typeof raw.resetEpoch==='string'?raw.resetEpoch:'initial';
+  if(!LP.isSupported(raw.learning))throw Error('unsupported');
+  const learning=LP.clean(raw.learning,generation);
+  if(learning.generation!==generation)throw Error('generation');
+  const wrapper=LP.getModule(learning,ID),value=wrapper&&wrapper.state;
+  if(object(raw.learning?.modules)&&Object.prototype.hasOwnProperty.call(raw.learning.modules,ID)&&!wrapper)throw Error('unsupported');
+  if(value!==undefined&&value!==null){
+   if(!object(value)||value.version!==1||!object(value.adventure)||value.adventure.version!==1||value.adventure.kind!=='RoomAdventurePrototype'||!object(value.adventure.state))throw Error('unsupported');
+   if(root.RoomAdventure&&root.LifeQuestData){
+    const pool=root.LifeQuestData.quests.find(q=>q.id==='life.sport.pool');
+    if(!pool||!root.RoomAdventure.create({pool}).restore(value.adventure).accepted)throw Error('unsupported');
+   }
+  }
+  return {text,raw,generation,learning,wrapper,value};
+ }
+ function read(){
+  try{
+   const entry=record();seen=entry.wrapper||null;epoch=entry.generation;initialized=true;blocked=false;message='';
+   return {snapshot:entry.value?JSON.parse(JSON.stringify(entry.value.adventure)):null,sound:entry.value?.sound===true,error:''};
+  }catch(error){
+   initialized=true;blocked=true;message=error.message==='unsupported'?'Это сохранение использует другую версию. Обнови приложение; прежние результаты не изменены.':'Не получилось прочитать сохранение. Можно играть на этой странице; прежние результаты не изменены.';
+   return {snapshot:null,sound:false,error:message};
+  }
+ }
+ function current(){
+  let entry;try{entry=record();}catch(_){fail('Не получилось прочитать сохранение. Прежние результаты не изменены.',true);return null;}
+  if(entry.generation!==epoch){fail('В другой вкладке начали заново. Обнови страницу, чтобы продолжить актуальную игру.',true);return null;}
+  if(signature(entry.wrapper)!==signature(seen)){
+   fail('Эту игру продолжили в другой вкладке. Обнови страницу перед продолжением.',true);return null;
+  }
+  return entry;
+ }
+ function save(snapshot,options={}){
+  if(!initialized)read();if(blocked)return false;
+  // Only the domain's versioned, small snapshot is eligible for this module.
+  if(!object(snapshot)||snapshot.version!==1||snapshot.kind!=='RoomAdventurePrototype')return fail('Не получилось сохранить этот шаг. Прежние результаты остаются на месте.');
+  let state;try{state=JSON.parse(JSON.stringify({version:1,adventure:snapshot,sound:options.sound===true}));}catch(_){return fail('Не получилось сохранить этот шаг.');}
+  const entry=current();if(!entry)return false;
+  const modules=object(entry.raw.learning?.modules)?entry.raw.learning.modules:{};
+  if(!entry.wrapper&&Object.keys(modules).length>=LP.MAX_MODULES)return fail('На устройстве уже сохранено много занятий. Это приключение пока останется на этой странице; прежние результаты не изменены.');
+  const next=LP.setModule(entry.learning,ID,state,{ownerId:writer,generation:epoch});
+  const candidate=LP.getModule(next,ID);
+  if(!candidate||signature(candidate.state)!==signature(state))return fail('На устройстве не удалось сохранить это приключение. Остальные результаты сохранены; пока продолжай на этой странице.');
+  // Use the existing serializer/limits for this module, while preserving every
+  // unrelated field byte-equivalently as parsed data, including unknown modules.
+  const learning=Object.assign({},entry.learning,object(entry.raw.learning)?entry.raw.learning:{},{version:LP.VERSION,generation:epoch,modules:Object.assign({},modules,{[ID]:candidate})});
+  const text=JSON.stringify(Object.assign({},entry.raw,{learning}));
+  try{
+   if(root.localStorage.getItem(KEY)!==entry.text)return fail('Сохранение изменилось в другой вкладке. Обнови страницу перед продолжением.',true);
+   root.localStorage.setItem(KEY,text);
+   if(root.localStorage.getItem(KEY)!==text)return fail('Сохранение изменилось в другой вкладке. Обнови страницу перед продолжением.',true);
+  }catch(_){return fail('Не получилось сохранить на устройстве. Не закрывай страницу, чтобы продолжить эту работу.');}
+  seen=candidate;message='';notify();return true;
+ }
+ function onStorage(event){if(event.key!==KEY&&event.key!==null)return;if(!initialized||blocked)return;current();}
+ root.addEventListener?.('storage',onStorage);
+ return Object.freeze({read,save,warning:()=>message,subscribe(listener){if(typeof listener==='function')listeners.add(listener);return()=>listeners.delete(listener);},destroy(){listeners.clear();root.removeEventListener?.('storage',onStorage);}});
+}
+root.RoomProgress=Object.freeze({create,key:KEY,moduleId:ID});
+})(typeof window==='undefined'?globalThis:window);
