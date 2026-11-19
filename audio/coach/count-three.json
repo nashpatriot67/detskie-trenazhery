@@ -1,0 +1,13 @@
+{
+  "id": "count-three",
+  "src": "audio/coach/count-three.mp3",
+  "text": "Три.",
+  "speech": "Три.",
+  "duration": 1.368,
+  "minDuration": 1.3,
+  "speechDuration": 0.4875,
+  "bytes": 5444,
+  "sha256": "b53a44b7d6b6105571a4d89058867ee18490f869974e02f75b22305a5c110975",
+  "decodedPeak": 0.451122,
+  "fingerprint": "d4da21cf3c7ab000c5c17241a1571fa9f4299bc50dcfca2cb136a71996f3172b"
+}

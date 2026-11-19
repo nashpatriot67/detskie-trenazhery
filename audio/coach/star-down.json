@@ -1,0 +1,13 @@
+{
+  "id": "star-down",
+  "src": "audio/coach/star-down.mp3",
+  "text": "Плавно опусти руку.",
+  "speech": "Плавно опусти руку.",
+  "duration": 2.664,
+  "minDuration": 2.6,
+  "speechDuration": 1.5375,
+  "bytes": 12836,
+  "sha256": "acda0d7fdf0e88605fd38a43f2577657a2d1f2c4b08af6bd6372929e0962387a",
+  "decodedPeak": 0.625563,
+  "fingerprint": "51f3f0bbd5b23c87c76623a4b5a53389995d28444f9131e31bade782e938e352"
+}

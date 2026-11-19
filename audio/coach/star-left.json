@@ -1,0 +1,13 @@
+{
+  "id": "star-left",
+  "src": "audio/coach/star-left.mp3",
+  "text": "Потяни вверх одну руку.",
+  "speech": "Потяни вверх одну руку.",
+  "duration": 3.264,
+  "minDuration": 3.2,
+  "speechDuration": 1.6375,
+  "bytes": 13724,
+  "sha256": "85dd43eb9b112d78bed34b12d28af5de2bf626cfc1c2fe7ccffad9e50b1c72e1",
+  "decodedPeak": 0.464219,
+  "fingerprint": "ce7ab88e21b5258e9adb81ea57a566f205a096807a9010038fd22ed85edefa90"
+}

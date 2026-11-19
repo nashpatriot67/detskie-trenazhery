@@ -1,0 +1,13 @@
+{
+  "id": "prepare-wall",
+  "src": "audio/coach/prepare-wall.mp3",
+  "text": "Поставь ладони на стену на высоте плеч. Немного отойди. Держи тело ровно.",
+  "speech": "Поставь ладони на стену на высоте плеч. Немного отойди. Держи тело ровно.",
+  "duration": 6.048,
+  "minDuration": 6.0,
+  "speechDuration": 5.6625,
+  "bytes": 46460,
+  "sha256": "a38d9c95e7f80a71de0ea1489fba7c59d07cc6d32cbcd04e95283029837b8ce5",
+  "decodedPeak": 0.807939,
+  "fingerprint": "9789ec3b192a52a832e0a0a4b5accb45341ef0b9fc3914a7b436b0d19a85b9c0"
+}

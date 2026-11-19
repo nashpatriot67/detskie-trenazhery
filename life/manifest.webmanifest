@@ -1,0 +1,19 @@
+{
+  "id": "/detskie-trenazhery/life/",
+  "name": "Дела и приключения — самостоятельность по шагам",
+  "short_name": "Дела",
+  "description": "Сортировка, сборы, порядок и небольшие реальные дела в понятных игровых ситуациях.",
+  "lang": "ru",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7faf3",
+  "theme_color": "#387d70",
+  "prefer_related_applications": false,
+  "icons": [
+    {"src":"../icons/life-192.png","sizes":"192x192","type":"image/png","purpose":"any"},
+    {"src":"../icons/life-512.png","sizes":"512x512","type":"image/png","purpose":"any"},
+    {"src":"../icons/life-maskable-512.png","sizes":"512x512","type":"image/png","purpose":"maskable"}
+  ]
+}

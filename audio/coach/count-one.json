@@ -1,0 +1,13 @@
+{
+  "id": "count-one",
+  "src": "audio/coach/count-one.mp3",
+  "text": "Один.",
+  "speech": "Один.",
+  "duration": 1.368,
+  "minDuration": 1.3,
+  "speechDuration": 0.7375,
+  "bytes": 5708,
+  "sha256": "daf6b5b95297ed33b4843aef3ab664b16271432b57bb8e95f0c054896d505c7f",
+  "decodedPeak": 0.69087,
+  "fingerprint": "50d4e971b6f6715a3f5b9e6704bd3b7f1d621212d7c2789ec981997c6571601b"
+}

@@ -1,0 +1,13 @@
+{
+  "id": "prepare-walk",
+  "src": "audio/coach/prepare-walk.mp3",
+  "text": "Освободи немного места перед собой. Спокойно шагаем на месте.",
+  "speech": "Освободи немного места перед собой. Спокойно шагаем на месте.",
+  "duration": 5.064,
+  "minDuration": 5.0,
+  "speechDuration": 4.4125,
+  "bytes": 38348,
+  "sha256": "de598f3a343d24abcbac88505f8f98f31c9a397a2b495f3e3ee3a0a4f30de152",
+  "decodedPeak": 0.61088,
+  "fingerprint": "77efb846b628d11c9355a7d8d224d6638354ec963fba7d9753f2ac7c848151ff"
+}

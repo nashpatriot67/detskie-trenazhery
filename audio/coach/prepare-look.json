@@ -1,0 +1,13 @@
+{
+  "id": "prepare-look",
+  "src": "audio/coach/prepare-look.mp3",
+  "text": "Встань и отойди от экрана на пару шагов. Найди взглядом далёкий предмет.",
+  "speech": "Встань и отойди от экрана на пару шагов. Найди взглядом далёкий предмет.",
+  "duration": 6.048,
+  "minDuration": 6.0,
+  "speechDuration": 4.95,
+  "bytes": 41900,
+  "sha256": "d6994311e1891218c75fe66e7833146af988775c4a1ea0a3a98e2d73eb88a9f3",
+  "decodedPeak": 0.848393,
+  "fingerprint": "7470be52de47d8187cffbfa21b8d9427a39b10dc038c7a7dbb3e9cfd6e4d43fd"
+}

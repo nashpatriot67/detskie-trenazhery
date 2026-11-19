@@ -184,5 +184,22 @@ function render(s,env){const esc=env&&env.esc||escDefault,t=current(s),topic=byT
  return '<section class="concept-trainer" data-concept-subject="'+s.subject+'">'+header+body+'</section>';
 }
 function validate(){const errors=[],ids=new Set();for(const t of TASKS){if(ids.has(t.id))errors.push('duplicate:'+t.id);ids.add(t.id);if(!byTopic[t.topic])errors.push('topic:'+t.id);if(t.kind==='choice'&&!t.options.some(o=>o.id===t.answer))errors.push('answer:'+t.id);if(t.kind==='number'&&(!Number.isInteger(t.answer)||t.answer<0||t.answer>1000))errors.push('number:'+t.id);if(t.kind==='match'){if(t.slots.length!==t.items.length||Object.keys(t.answer).length!==t.slots.length)errors.push('match-size:'+t.id);for(const [slot,item]of Object.entries(t.answer))if(!t.slots.some(x=>x.id===slot)||!t.items.some(x=>x.id===item))errors.push('match-answer:'+t.id);}if(t.kind==='classify')for(const [item,cat]of Object.entries(t.answer))if(!t.items.some(x=>x.id===item)||!t.categories.some(x=>x.id===cat))errors.push('classify-answer:'+t.id);if(t.expression){const e=t.expression,result=e.op==='+'?e.a+e.b:e.op==='-'?e.a-e.b:e.op==='*'?e.a*e.b:e.a/e.b;if(result!==e.result)errors.push('arithmetic:'+t.id);}if(t.bar&&t.bar.left+t.bar.right!==t.bar.whole)errors.push('bar:'+t.id);if(!t.explanation)errors.push('explanation:'+t.id);}return {success:!errors.length,errors,tasks:TASKS.length,topics:TOPICS.length};}
-root.ConceptTrainer={TOPICS,TASKS,create,restore,render,handle,capture,current,correct,validate};
+// Lesson adapters add reviewed subject-specific microcards to this same
+// renderer and checker. IDs remain stable; loading a bank twice is harmless.
+function register(bank){
+ if(!plain(bank)||!Array.isArray(bank.topics)||!Array.isArray(bank.tasks))throw new TypeError('A reviewed topics/tasks bank is required');
+ const idOK=id=>typeof id==='string'&&/^[A-Za-z][A-Za-z0-9_.:/-]{0,159}$/.test(id);
+ const topics=bank.topics.map(raw=>Object.assign({icon:'?',lead:'',example:'',steps:[]},copy(raw)));
+ const tasks=bank.tasks.map(raw=>Object.assign({title:'Карточка понятия',version:1},copy(raw)));
+ const proposed=new Map(TOPICS.map(t=>[t.id,t]));
+ for(const t of topics){if(!idOK(t.id)||!['math','russian'].includes(t.subject)||![1,2].includes(t.grade)||!t.title||!t.rule||!Array.isArray(t.steps))throw new TypeError('Invalid concept topic');if(proposed.has(t.id)&&JSON.stringify(proposed.get(t.id))!==JSON.stringify(t))throw new TypeError('Conflicting concept topic: '+t.id);proposed.set(t.id,t);}
+ const ids=new Map(TASKS.map(t=>[t.id,t]));
+ for(const t of tasks){const topic=proposed.get(t.topic);if(!idOK(t.id)||!topic||t.subject!==topic.subject||![1,2].includes(t.grade)||t.grade<topic.grade||!['choice','number','word','match','classify'].includes(t.kind)||typeof t.prompt!=='string'||!t.prompt||typeof t.explanation!=='string'||!t.explanation||!Array.isArray(t.skillIds)||!t.skillIds.length||!t.skillIds.every(idOK))throw new TypeError('Invalid concept task: '+t.id);if(ids.has(t.id)&&JSON.stringify(ids.get(t.id))!==JSON.stringify(t))throw new TypeError('Conflicting concept task: '+t.id);ids.set(t.id,t);}
+ const newTopics=topics.filter(t=>!byTopic[t.id]),newTasks=tasks.filter(t=>!byId[t.id]);
+ for(const t of newTopics){TOPICS.push(t);byTopic[t.id]=t;}for(const t of newTasks){TASKS.push(t);byId[t.id]=t;}
+ try{const result=validate();if(!result.success)throw new TypeError('Invalid concept bank: '+result.errors.join(', '));}
+ catch(error){for(const t of newTasks){TASKS.splice(TASKS.indexOf(t),1);delete byId[t.id];}for(const t of newTopics){TOPICS.splice(TOPICS.indexOf(t),1);delete byTopic[t.id];}throw error;}
+ return {topicsAdded:newTopics.length,tasksAdded:newTasks.length};
+}
+root.ConceptTrainer={TOPICS,TASKS,create,restore,render,handle,capture,current,correct,validate,register};
 })(typeof window==='undefined'?globalThis:window);

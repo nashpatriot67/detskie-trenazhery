@@ -292,6 +292,23 @@
     [['list','check'],['check','close'],['close','meet'],['shoes','meet']],
     ['Сверься со своей памяткой.','Закрой сумку.','Оденься по погоде.','Встреться со взрослым в условленном месте.'],'Сумку закрывают после проверки. Обувь можно подготовить раньше или позже.');
 
+  // Every adventure has a genuinely small real action. It is deliberately
+  // separate from the full checklist: one returned toy never means that the
+  // entire room or the whole first checklist step has been completed.
+  quests.forEach(q=>{
+    q.scene=q.mode==='pack'?'bag':q.category==='sorting'?'sorting':q.id.includes('.pet')?'pet':q.id.includes('.bed')?'bed':q.id.includes('.desk')?'desk':q.id.includes('pool-return')?'laundry':'room';
+    q.firstMove=q.mode==='sequence'?'Выбери один шаг, с которого удобно начать.':q.mode==='pack'?'Прочитай цель. Выбери одну вещь, которая для неё нужна.':q.mode==='rule'?'Выбери правило. Потом посмотри на один предмет.':'Выбери одну вещь. Потом нажми на её место.';
+    q.microReal=q.category==='sorting'?'Возьми одну свою игрушку и назови её цвет, форму или размер.':q.mode==='pack'?'Посмотри памятку своего занятия и назови одну нужную вещь.':'Положи одну знакомую вещь на её привычное место.';
+    if(q.id==='life.plan.bed')q.microReal='Убери одну игрушку с постели на её привычное место.';
+    if(q.id==='life.plan.desk'||q.id==='life.places.desk')q.microReal='Убери со своего стола одну вещь, которая сейчас не нужна.';
+    if(q.id==='life.plan.bedtime')q.microReal='Выбери одну вещь из одежды, которую приготовишь на завтра.';
+    if(q.id==='life.plan.pet')q.microReal='Спроси взрослого, какое одно дело для питомца ты можешь сделать вместе с ним.';
+    if(q.id==='life.plan.pool-return')q.microReal='Покажи взрослому мокрое полотенце и договорись, где его повесить.';
+    if(q.id==='life.places.clothes')q.microReal='Найди одну вещь для стирки и положи её в корзину для белья.';
+    if(q.id==='life.places.shopping')q.microReal='Спроси взрослого, куда можно убрать один принесённый продукт.';
+    if(q.id==='life.plan.room')q.microReal='Выбери совсем маленький участок: например, один угол стола.';
+  });
+
   // Data checks are exposed for the independent engine/tests; no storage or
   // global progress is touched while loading this bank.
   function validate() {
@@ -305,6 +322,7 @@
       if(ids.has(q.id))fail(q,'duplicate quest');ids.add(q.id);
       if(!['sort','pack','sequence','rule'].includes(q.mode))fail(q,'unknown mode');
       if(!q.title||!q.story||!q.instruction||!q.hint)fail(q,'missing child-facing text');
+      if(!q.scene||!q.firstMove||!q.microReal)fail(q,'missing small-step teaching');
       if(q.realSteps.length<3||q.realSteps.length>5)fail(q,'real plan must have3-5steps');
       if(new Set(q.itemIds).size!==q.itemIds.length)fail(q,'duplicate item');
       q.itemIds.forEach(id=>{if(!items[id])fail(q,'unknown item '+id);});q.zoneIds.forEach(id=>{if(!zones[id])fail(q,'unknown zone '+id);});

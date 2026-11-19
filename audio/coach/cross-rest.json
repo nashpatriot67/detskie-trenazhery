@@ -1,0 +1,13 @@
+{
+  "id": "cross-rest",
+  "src": "audio/coach/cross-rest.mp3",
+  "text": "Опусти ногу и руку.",
+  "speech": "Опусти ногу и руку.",
+  "duration": 2.448,
+  "minDuration": 2.4,
+  "speechDuration": 1.7125,
+  "bytes": 13940,
+  "sha256": "f4984c8683ecc18a8b87ae77c1457321f6a416d7ee2bc559beca0209e210330b",
+  "decodedPeak": 0.387145,
+  "fingerprint": "e5aeef32b24ddc6ec376724619ec7e9a4382bb2702ac58d0393c1e9c023239ee"
+}

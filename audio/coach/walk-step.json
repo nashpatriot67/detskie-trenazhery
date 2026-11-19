@@ -1,0 +1,13 @@
+{
+  "id": "walk-step",
+  "src": "audio/coach/walk-step.mp3",
+  "text": "Шаг.",
+  "speech": "Шаг.",
+  "duration": 1.752,
+  "minDuration": 1.7,
+  "speechDuration": 0.6375,
+  "bytes": 6356,
+  "sha256": "349f9f98b0a3517cfb897d4658fa13e7f9cf205c4594afd917affb7dddd1452a",
+  "decodedPeak": 0.69993,
+  "fingerprint": "62e7dbb8b9074cea70db7003fdcd3444ce400f11972f5611690db90052b37cc1"
+}

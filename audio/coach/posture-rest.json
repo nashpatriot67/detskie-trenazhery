@@ -1,0 +1,13 @@
+{
+  "id": "posture-rest",
+  "src": "audio/coach/posture-rest.mp3",
+  "text": "Вернись в удобное положение.",
+  "speech": "Вернись в удобное положение.",
+  "duration": 3.048,
+  "minDuration": 3.0,
+  "speechDuration": 2.0375,
+  "bytes": 17132,
+  "sha256": "60f4c29c2a4221faccc0c4cb3fc537c9bde360c76c027be1c5da8899a4fd9402",
+  "decodedPeak": 0.470262,
+  "fingerprint": "97077c3ceca074ba97d76ae7e5f424beecad6d1935ad0e60ef1f447bd8a30d0d"
+}

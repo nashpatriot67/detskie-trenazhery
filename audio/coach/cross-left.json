@@ -1,0 +1,13 @@
+{
+  "id": "cross-left",
+  "src": "audio/coach/cross-left.mp3",
+  "text": "Коснись колена противоположной ладонью.",
+  "speech": "Коснись колена противоположной ладонью.",
+  "duration": 3.648,
+  "minDuration": 3.6,
+  "speechDuration": 2.5875,
+  "bytes": 23348,
+  "sha256": "c54ddcade6db3286ceecc6da3fa45848cba93ede884f13a83bbd394490cd0dfa",
+  "decodedPeak": 0.67837,
+  "fingerprint": "5ce6c17444a9b31517b3e301144d2bb3cccaab5c23e30e4c09d96dbce7e37a85"
+}

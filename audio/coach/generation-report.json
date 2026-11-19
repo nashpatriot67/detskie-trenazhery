@@ -1,0 +1,19 @@
+{
+  "success": true,
+  "clips": 41,
+  "seconds": 157.872,
+  "bytes": 964180,
+  "elapsedSeconds": 10.794,
+  "modelSHA256": "04cc9b1d08ce38bcaa9d02c488d80d3e6806d17f7eaa7c95982f36a3cbf50b2e",
+  "settings": {
+    "model": "Silero v5_6_ru",
+    "speaker": "kseniya",
+    "sampleRate": 24000,
+    "putAccent": true,
+    "putStressHomo": true,
+    "putYo": true,
+    "putYoHomo": true,
+    "mp3Quality": 3,
+    "revision": 1
+  }
+}

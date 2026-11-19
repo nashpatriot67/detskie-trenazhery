@@ -1,0 +1,13 @@
+{
+  "id": "side-back",
+  "src": "audio/coach/side-back.mp3",
+  "text": "Два шага обратно.",
+  "speech": "Два шага обратно.",
+  "duration": 4.248,
+  "minDuration": 4.2,
+  "speechDuration": 1.5625,
+  "bytes": 14348,
+  "sha256": "b97e3c9529753dca4e95ac858d2d486d4ab54b739c058336ed1ed86e26b1274f",
+  "decodedPeak": 0.674212,
+  "fingerprint": "0dec8a003679e98330905cba321f9f9b0cd054be0eb2838c261740d43e9bcf96"
+}

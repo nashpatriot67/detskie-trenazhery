@@ -1,0 +1,13 @@
+{
+  "id": "prepare-heel",
+  "src": "audio/coach/prepare-heel.mp3",
+  "text": "Встань возле стены. Если нужно, слегка придерживайся рукой.",
+  "speech": "Встань возле стены. Если нужно, слегка придерживайся рукой.",
+  "duration": 5.064,
+  "minDuration": 5.0,
+  "speechDuration": 4.2125,
+  "bytes": 35108,
+  "sha256": "e19c86d76e2a8fd068f43ba1075b1e2b0f31802b31db7459f0368bb6ef5fe1bb",
+  "decodedPeak": 0.910375,
+  "fingerprint": "56eb2c9511a0371b33e105020bae801e0f2171d7c3620f2397928383c26b0a34"
+}

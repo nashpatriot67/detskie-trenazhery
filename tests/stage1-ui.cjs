@@ -3,6 +3,7 @@
 // fixtures. No production/child data, deployment, or source modifications.
 const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),crypto=require('node:crypto'),assert=require('node:assert/strict');
 const {chromium}=require('playwright');
+const {installLegacyConceptFixture,prepareLegacyMathMode}=require('./legacy-concept-fixture.cjs');
 const root=path.resolve(__dirname,'..'),out=path.resolve(process.env.STAGE1_ARTIFACTS||'/workspace/scratch/stage1-review');
 const prefix='/detskie-trenazhery/',mime={'.html':'text/html','.js':'text/javascript','.css':'text/css','.png':'image/png','.webmanifest':'application/manifest+json','.mp3':'audio/mpeg'};
 const examples=[[95,8,'+',103],[180,35,'+',215],[270,45,'+',315],[198,7,'+',205],[302,8,'-',294],[300,18,'-',282],[405,27,'-',378],[500,176,'-',324]].map(([a,b,op,result])=>({a,b,op,result}));
@@ -14,6 +15,7 @@ const plain=x=>JSON.parse(JSON.stringify(x));
 async function test(name,folder,fn,options={}){
  if(process.argv[2]&&!new RegExp(process.argv[2]).test(name))return;
  const ctx=await browser.newContext({viewport:{width:options.width||1280,height:options.height||1000},hasTouch:!!options.touch,isMobile:!!options.touch,serviceWorkers:'block',reducedMotion:options.motion||'reduce'});ctx.setDefaultTimeout(8000);
+ await installLegacyConceptFixture(ctx);
  await ctx.route('**/*',route=>new URL(route.request().url()).origin===origin?route.continue():route.abort());
  let page=await ctx.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
  const h={ctx,get page(){return page;},async open(){await page.goto(base+folder+'/');await page.locator('.app-shell').waitFor();},async reopen(){await page.close();page=await ctx.newPage();page.on('pageerror',e=>errors.push(e.message));await h.open();},async saveShot(name){await page.screenshot({path:path.join(out,name+'.png'),fullPage:true});}};
@@ -34,7 +36,7 @@ async function assertHidden(page,target){
 async function fixture(h,t,mode='play'){
  await h.open();await h.page.evaluate(t=>{const l=COURSE[12];l.title='Числа и действия';l.example={...t};l.exercises[0]={...t,answer:t.result,missing:'result',text:t.a+(t.op==='+'?'+':'−')+t.b+'='};},t);
  await h.page.locator('nav [data-view="course"]').click();await h.page.locator('.course-card[data-lesson="13"]').click();
- if(mode!=='learn'){await h.page.locator('[data-mode="'+mode+'"]').click();await h.page.locator('[data-practice="0"]').click();}
+ if(mode!=='learn'){await prepareLegacyMathMode(h.page,13);await h.page.locator('[data-mode="'+mode+'"]').click();await h.page.locator('[data-practice="0"]').click();}
 }
 async function solve(page,t,{early=false,unitsFirst=false}={}){
  const initial=await quantity(page);

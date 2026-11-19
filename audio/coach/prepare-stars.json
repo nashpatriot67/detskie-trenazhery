@@ -1,0 +1,13 @@
+{
+  "id": "prepare-stars",
+  "src": "audio/coach/prepare-stars.mp3",
+  "text": "Встань удобно. По очереди потянемся к двум звёздочкам над головой.",
+  "speech": "Встань удобно. По очереди потянемся к двум звёздочкам над головой.",
+  "duration": 5.064,
+  "minDuration": 5.0,
+  "speechDuration": 4.325,
+  "bytes": 38684,
+  "sha256": "21b088df94292396e2c7b8bf63d93ba0695c6e1729edf7e58e02694c15ae5123",
+  "decodedPeak": 0.806092,
+  "fingerprint": "7fa1bfc73b464874ffc1a0f56c0fa98a8bf1e74398d12ae0fc00ccfc64e7d81b"
+}

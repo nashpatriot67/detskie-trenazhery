@@ -1,0 +1,13 @@
+{
+  "id": "posture-open",
+  "src": "audio/coach/posture-open.mp3",
+  "text": "Мягко отведи локти назад. Расправь плечи.",
+  "speech": "Мягко отведи локти назад. Расправь плечи.",
+  "duration": 3.648,
+  "minDuration": 3.6,
+  "speechDuration": 3.3875,
+  "bytes": 27956,
+  "sha256": "0676bff1f7059c4fc4c73cea3a2e8f11fb6782d6f26418c47938aa3381ccbbc5",
+  "decodedPeak": 0.616598,
+  "fingerprint": "5f55e84450d68c6f6d1f30761d4ad4ee0e15f47c9b460b90e0baf6da5b1e3c0a"
+}

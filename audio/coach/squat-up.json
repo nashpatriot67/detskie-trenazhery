@@ -1,0 +1,13 @@
+{
+  "id": "squat-up",
+  "src": "audio/coach/squat-up.mp3",
+  "text": "Спокойно встань.",
+  "speech": "Спокойно встань.",
+  "duration": 2.856,
+  "minDuration": 2.8,
+  "speechDuration": 1.25,
+  "bytes": 12284,
+  "sha256": "7a00093c0bf09b0796b090acfd8ae36237b3ffe8848ce2741f3e0693c21c1d2a",
+  "decodedPeak": 0.654434,
+  "fingerprint": "63c8a65b864216dab2e9098f6d2522109f6528c4378621b599aa8ed58b00dabd"
+}

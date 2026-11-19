@@ -1,0 +1,13 @@
+{
+  "id": "prepare-shoulders",
+  "src": "audio/coach/prepare-shoulders.mp3",
+  "text": "Встань или сядь удобно. Руки свободно опущены. Разбудим плечи.",
+  "speech": "Встань или сядь удобно. Руки свободно опущены. Разбудим плечи.",
+  "duration": 5.088,
+  "minDuration": 5.0,
+  "speechDuration": 5.0375,
+  "bytes": 40700,
+  "sha256": "3372de89cdc9f0f73e1071b2a747272253738ac2b471a135becb010260f0f6d7",
+  "decodedPeak": 0.878649,
+  "fingerprint": "917d7741d6fd9327cf7e8760f9ac1f8afc580fcbfdb8a9a290b747a4502a06db"
+}

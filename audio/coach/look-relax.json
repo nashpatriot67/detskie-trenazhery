@@ -1,0 +1,13 @@
+{
+  "id": "look-relax",
+  "src": "audio/coach/look-relax.mp3",
+  "text": "Расслабь плечи. Дыши спокойно.",
+  "speech": "Расслабь плечи. Дыши спокойно.",
+  "duration": 6.048,
+  "minDuration": 6.0,
+  "speechDuration": 2.675,
+  "bytes": 24044,
+  "sha256": "93bd44715783d333a7f33f99af53221ee448120c64a1a00450f13eaf06758642",
+  "decodedPeak": 0.780471,
+  "fingerprint": "650f6d3a5bcdfd87183d149b3add661233d21d8d262f3cb8888ed4e51dbf1b8b"
+}

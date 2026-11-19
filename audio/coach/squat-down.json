@@ -1,0 +1,13 @@
+{
+  "id": "squat-down",
+  "src": "audio/coach/squat-down.mp3",
+  "text": "Плавно присядь.",
+  "speech": "Плавно присядь.",
+  "duration": 2.856,
+  "minDuration": 2.8,
+  "speechDuration": 1.2375,
+  "bytes": 11468,
+  "sha256": "08b3849e0d1378ffc92d6a9e036527cc8ec38ba0869039d3738f3b4411546dfd",
+  "decodedPeak": 0.722675,
+  "fingerprint": "24dc602198319278f32d6f69d8d10b6a32b8d8ca8dc23d3d6261a7e9e69e80d2"
+}

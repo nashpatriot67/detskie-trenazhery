@@ -1,10 +1,10 @@
-/* Offline written practice for the four trainer entry points.
- * Audio is deliberately not downloaded or cached here: it stays on demand.
- * Update this core list and VERSION when application entry points change.
+/* Offline practice for the four trainer entry points.
+ * Only the 41 reviewed coach clips are precached. Legacy word audio stays on
+ * demand. The local builder owns VERSION and CORE; partial ranges are not saved.
  */
 'use strict';
 
-const VERSION = 'stage1-f8b5512dd867';
+const VERSION = 'stage1-37020f326128';
 const ROOT = new URL('./', self.location.href);
 const CACHE_PREFIX = 'trainers:' + ROOT.pathname + ':core:';
 const CACHE_NAME = CACHE_PREFIX + VERSION;
@@ -29,6 +29,10 @@ const CORE = [
   "icons/slovograd-192.png",
   "icons/slovograd-512.png",
   "icons/slovograd-maskable-512.png",
+  "icons/life-180.png",
+  "icons/life-192.png",
+  "icons/life-512.png",
+  "icons/life-maskable-512.png",
   "kubiki/",
   "kubiki/index.html",
   "kubiki/manifest.webmanifest",
@@ -37,25 +41,74 @@ const CORE = [
   "place-value.css?v=s1-6ab4b3290d60",
   "place-value-activities.css?v=s1-e1e9e551c71f",
   "concepts.css?v=s1-d91965c0780c",
-  "life-quests.css?v=s1-097549463ae5",
-  "active-breaks.css?v=s1-9979bca8127f",
-  "practice-hub.css?v=s1-c31811a62d05",
+  "learning-journey.css?v=s1-c6c457dcb3be",
+  "math-check.css?v=s1-aa1b2170257c",
+  "active-breaks.css?v=s1-1322b99e5ffb",
+  "practice-hub.css?v=s1-3afec7a0c092",
   "math-range.js?v=s1-d28d7a297b9a",
   "learning-progress.js?v=s1-5e68799babe3",
-  "concepts.js?v=s1-96c8e962aeef",
-  "life-quest-data.js?v=s1-3164635a0abf",
-  "life-quests.js?v=s1-424632ee5d60",
-  "active-breaks.js?v=s1-68e4000c954c",
-  "practice-hub.js?v=s1-ab6076c9bdb8",
+  "concepts.js?v=s1-a0125a7fbfbf",
+  "learning-journey.js?v=s1-20263410a758",
+  "study-clock.js?v=s1-34b8003284d5",
+  "coach-plan.js?v=s1-76215d01f7a0",
+  "coach-audio-manifest.js?v=s1-fd84bc6928ec",
+  "audio-coach.js?v=s1-3f127b9878a2",
+  "active-breaks.js?v=s1-c8739f67ecdf",
+  "practice-hub.js?v=s1-77959587e56f",
   "kubiki/course.js?v=s1-c13d0497e759",
+  "math-journey.js?v=s1-668852334db1",
   "kubiki/engine.js?v=s1-18fc3d8be232",
   "kubiki/voice-manifest.js?v=s1-ce17c4f55cbb",
   "kubiki/recorded-voice.js?v=s1-cd5f60cad10d",
   "place-value.js?v=s1-8e9b59c8d08e",
   "place-value-motion.js?v=s1-07576297e173",
   "place-value-activities.js?v=s1-b302ff223496",
-  "offline-bundle.js?v=s1-2021a0866611",
-  "kubiki/app.js?v=s1-240e74e978a1",
+  "math-check.js?v=s1-57e1e48685ea",
+  "offline-bundle.js?v=s1-1c9edd500fd7",
+  "kubiki/app.js?v=s1-3aed1f587ea5",
+  "audio/coach/count-one.mp3?v=s1-daf6b5b95297",
+  "audio/coach/count-three.mp3?v=s1-b53a44b7d6b6",
+  "audio/coach/count-two.mp3?v=s1-1aae3662629f",
+  "audio/coach/cross-left.mp3?v=s1-c54ddcade6db",
+  "audio/coach/cross-rest.mp3?v=s1-f4984c8683ec",
+  "audio/coach/cross-right.mp3?v=s1-cc5be94397fe",
+  "audio/coach/hands-close.mp3?v=s1-aa793fc67966",
+  "audio/coach/hands-open.mp3?v=s1-5abf531b8f50",
+  "audio/coach/heel-down.mp3?v=s1-4c258510a111",
+  "audio/coach/heel-up.mp3?v=s1-9a7dc17f3617",
+  "audio/coach/look-far.mp3?v=s1-f7404c806320",
+  "audio/coach/look-relax.mp3?v=s1-93bd44715783",
+  "audio/coach/posture-open.mp3?v=s1-0676bff1f705",
+  "audio/coach/posture-rest.mp3?v=s1-60f4c29c2a42",
+  "audio/coach/prepare-cross.mp3?v=s1-61f4fee1db1c",
+  "audio/coach/prepare-general.mp3?v=s1-ab1751db0454",
+  "audio/coach/prepare-hands.mp3?v=s1-9a8ba24e4db8",
+  "audio/coach/prepare-heel.mp3?v=s1-e19c86d76e2a",
+  "audio/coach/prepare-look.mp3?v=s1-d6994311e189",
+  "audio/coach/prepare-posture.mp3?v=s1-6a6eab5d2ebd",
+  "audio/coach/prepare-shoulders.mp3?v=s1-3372de89cdc9",
+  "audio/coach/prepare-side.mp3?v=s1-40efc7bba671",
+  "audio/coach/prepare-squat.mp3?v=s1-392acfb339dc",
+  "audio/coach/prepare-stars.mp3?v=s1-21b088df9429",
+  "audio/coach/prepare-walk.mp3?v=s1-de598f3a343d",
+  "audio/coach/prepare-wall.mp3?v=s1-a38d9c95e7f8",
+  "audio/coach/reach-down.mp3?v=s1-2554074cc726",
+  "audio/coach/reach-up.mp3?v=s1-3d46bd0641a6",
+  "audio/coach/rest.mp3?v=s1-28dcaa5ce186",
+  "audio/coach/shoulder-down.mp3?v=s1-b6329d831acb",
+  "audio/coach/shoulder-up.mp3?v=s1-be696bc750a2",
+  "audio/coach/side-back.mp3?v=s1-b97e3c952975",
+  "audio/coach/side-out.mp3?v=s1-528294c9d096",
+  "audio/coach/squat-down.mp3?v=s1-08b3849e0d13",
+  "audio/coach/squat-up.mp3?v=s1-7a00093c0bf0",
+  "audio/coach/star-down.mp3?v=s1-acda0d7fdf0e",
+  "audio/coach/star-left.mp3?v=s1-85dd43eb9b11",
+  "audio/coach/star-right.mp3?v=s1-3b157f04a9cc",
+  "audio/coach/walk-step.mp3?v=s1-349f9f98b0a3",
+  "audio/coach/wall-bend.mp3?v=s1-50dc12fc4ee8",
+  "audio/coach/wall-push.mp3?v=s1-3dd5e9d80a04",
+  "audio/coach/credits.txt?v=s1-bab9d0a08cdb",
+  "audio/coach/license.txt?v=s1-1349a4b61484",
   "bricks/",
   "bricks/index.html",
   "bricks/manifest.webmanifest",
@@ -66,7 +119,7 @@ const CORE = [
   "bricks/engine.js?v=s1-de16802683f0",
   "bricks/voice-manifest.js?v=s1-247916d9cd8c",
   "bricks/recorded-voice.js?v=s1-cd5f60cad10d",
-  "bricks/app.js?v=s1-3576a94353a2",
+  "bricks/app.js?v=s1-3c279673752d",
   "slovograd/",
   "slovograd/index.html",
   "slovograd/manifest.webmanifest",
@@ -82,7 +135,18 @@ const CORE = [
   "slovograd/recorded-voice.js?v=s1-cd5f60cad10d",
   "slovograd/voice.js?v=s1-3010a8c6bfdf",
   "slovograd/lessons.js?v=s1-83190b3e0a89",
-  "slovograd/app.js?v=s1-08702e0f8c1e",
+  "russian-journey.js?v=s1-c959c2f907fc",
+  "russian-check.js?v=s1-bdca01924780",
+  "slovograd/app.js?v=s1-425ce2d018f7",
+  "life/",
+  "life/index.html",
+  "life/manifest.webmanifest",
+  "life/offline.html",
+  "life-quests.css?v=s1-519e45ca59ff",
+  "life/style.css?v=s1-a6e8792a8bd0",
+  "life-quest-data.js?v=s1-47bdc37b5d0e",
+  "life-quests.js?v=s1-d08751ee40ee",
+  "life/app.js?v=s1-5e2c54c20ab8",
   "otkryt-bez-interneta.html"
 ];
 const CORE_URLS = CORE.map(path => new URL(path, ROOT).href);
@@ -140,13 +204,49 @@ function networkFirst(request, key) {
   }));
 }
 
+// Audio elements (especially Safari) request byte ranges even offline. Serve a
+// slice of the complete, versioned coach resource without caching a 206 response.
+async function coachResponse(request, key) {
+  let response = await saved(key);
+  if (!response) {
+    response = await fetch(new Request(key, { cache: 'reload' }));
+    if (!response.ok || response.status !== 200) return response;
+    await store(key, response);
+  }
+  const range = request.headers.get('range');
+  if (!range) return response;
+  const bytes = await response.arrayBuffer(), length = bytes.byteLength;
+  const match = /^bytes=(\d*)-(\d*)$/.exec(range);
+  let start, end;
+  if (match && (match[1] || match[2])) {
+    if (!match[1]) { const suffix = Number(match[2]); start = Math.max(0, length - suffix); end = length - 1; if (!suffix) start = length; }
+    else { start = Number(match[1]); end = match[2] ? Math.min(Number(match[2]), length - 1) : length - 1; }
+  }
+  const headers = new Headers(response.headers);
+  headers.set('Accept-Ranges', 'bytes');
+  headers.delete('Content-Encoding');
+  if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end) || start < 0 || start >= length || end < start) {
+    headers.set('Content-Range', 'bytes */' + length);
+    headers.set('Content-Length', '0');
+    return new Response(null, { status: 416, headers });
+  }
+  headers.set('Content-Type', 'audio/mpeg');
+  headers.set('Content-Range', 'bytes ' + start + '-' + end + '/' + length);
+  headers.set('Content-Length', String(end - start + 1));
+  return new Response(bytes.slice(start, end + 1), { status: 206, headers });
+}
+
 self.addEventListener('fetch', event => {
   const request = event.request;
-  if (request.method !== 'GET' || request.headers.get('range')) return;
+  if (request.method !== 'GET') return;
   let url;
   try { url = new URL(request.url); } catch (_) { return; }
   if (url.origin !== ROOT.origin || url.pathname.indexOf(ROOT.pathname) !== 0) return;
-  if (url.pathname.indexOf('/audio/') !== -1 || /\.mp3$/i.test(url.pathname)) return;
+  if (/\/audio\/coach\/[a-z0-9-]+\.mp3$/.test(url.pathname) && owns(CORE_KEYS, url.pathname)) {
+    event.respondWith(coachResponse(request, CORE_KEYS[url.pathname]));
+    return;
+  }
+  if (request.headers.get('range') || url.pathname.indexOf('/audio/') !== -1 || /\.mp3$/i.test(url.pathname)) return;
   if (owns(CORE_KEYS, url.pathname)) {
     // Stable keys prevent tracking/cache-busting queries from growing storage.
     event.respondWith(networkFirst(request, CORE_KEYS[url.pathname]));

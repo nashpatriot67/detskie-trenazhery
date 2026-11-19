@@ -1,0 +1,13 @@
+{
+  "id": "hands-close",
+  "src": "audio/coach/hands-close.mp3",
+  "text": "Мягко собери пальцы в кулачки.",
+  "speech": "Мягко собери пальцы в кулачки.",
+  "duration": 3.264,
+  "minDuration": 3.2,
+  "speechDuration": 2.1,
+  "bytes": 18500,
+  "sha256": "aa793fc6796659504e2fa14578ce8eea0088776193cf95573d28f0ae0d029781",
+  "decodedPeak": 0.607227,
+  "fingerprint": "80583f7824665887206498a2d05cf85f68580c61181c8bed437c543282da7d64"
+}

@@ -6,3 +6,13 @@
 
 .ph-tabs button span,.practice-launcher button span{min-width:0;max-width:100%;overflow-wrap:anywhere}.ph-header>div{min-width:0}.ph-header h1{overflow-wrap:anywhere}
 @media(max-width:700px){.ph-header{display:grid;grid-template-columns:minmax(0,1fr) auto}.ph-header>.ph-back{grid-column:1;grid-row:1;justify-self:start}.ph-header>.ph-settings-button{grid-column:2;grid-row:1}.ph-header>div{grid-column:1/-1;grid-row:2}.ph-header h1{font-size:24px}.ph-tabs button span{overflow-wrap:normal}}
+
+/* The life trainer is a complete page. Only academic activities use a modal. */
+#practice-root.ph-standalone{position:relative;inset:auto;z-index:auto;overflow:visible;overscroll-behavior:auto;background:transparent;min-height:0}
+#practice-root.ph-standalone .ph-shell{max-width:none;padding:0}
+#practice-root.ph-standalone .ph-header{padding-top:8px}
+.practice-break-offer{display:flex;align-items:center;gap:20px;padding:16px 20px;margin:16px 0;border:1px solid #bed9ce;border-radius:16px;background:#eaf5ec;color:#2d5a4e;width:100%;box-sizing:border-box}
+.practice-break-offer div{min-width:0;flex:1}.practice-break-offer strong{font-size:16px}.practice-break-offer p{font-size:13px;line-height:1.5;margin:4px 0 0}.practice-break-offer button{min-height:46px;white-space:nowrap}
+.practice-launcher{display:flex}.practice-launcher>button{flex-direction:row;max-width:100%;font-size:13px;padding:11px 15px}
+#practice-content{padding-top:20px}
+@media(max-width:600px){.practice-break-offer{display:block;padding:15px}.practice-break-offer button{margin-top:12px;width:100%}.practice-launcher>button{width:100%;justify-content:center;text-align:left;font-size:12px}.practice-launcher{display:flex}}

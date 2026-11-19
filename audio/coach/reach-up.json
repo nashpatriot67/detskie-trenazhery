@@ -1,0 +1,13 @@
+{
+  "id": "reach-up",
+  "src": "audio/coach/reach-up.mp3",
+  "text": "Подними руки и мягко потянись вверх.",
+  "speech": "Подними руки и мягко потянись вверх.",
+  "duration": 3.648,
+  "minDuration": 3.6,
+  "speechDuration": 2.5125,
+  "bytes": 22172,
+  "sha256": "3d46bd0641a6d7ac2bfd4fbdedf7b054df1033f876fc01401506875a87085ad0",
+  "decodedPeak": 0.500223,
+  "fingerprint": "f22f435f1f1d0e974a6bdfe05274a7ffad04865dae3a218404912b2f8a1ff0ee"
+}

@@ -1,0 +1,13 @@
+{
+  "id": "hands-open",
+  "src": "audio/coach/hands-open.mp3",
+  "text": "Раскрой ладони. Разведи пальцы.",
+  "speech": "Раскрой ладони. Разведи пальцы.",
+  "duration": 3.264,
+  "minDuration": 3.2,
+  "speechDuration": 2.7625,
+  "bytes": 23420,
+  "sha256": "5abf531b8f508cf283cecdae6c3fae0dfa772e3b97aea00a45bd2c50f147de75",
+  "decodedPeak": 0.812234,
+  "fingerprint": "fb524abac3a3599e71486c802219ea7a9cff6017fa2c8621219b41afe7ab55fc"
+}

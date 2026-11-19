@@ -1,0 +1,13 @@
+{
+  "id": "count-two",
+  "src": "audio/coach/count-two.mp3",
+  "text": "Два.",
+  "speech": "Два.",
+  "duration": 1.368,
+  "minDuration": 1.3,
+  "speechDuration": 0.55,
+  "bytes": 5516,
+  "sha256": "1aae3662629f1c7676c5eca989ac61a1f0f19803057be59ab12dc3b09b1e6c26",
+  "decodedPeak": 0.657133,
+  "fingerprint": "f403e5a964f3423324e56ead978f807f2d64e5be08c3ede3c3502a2140bd13d6"
+}

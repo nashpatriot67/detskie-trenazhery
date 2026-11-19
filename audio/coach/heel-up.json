@@ -1,0 +1,13 @@
+{
+  "id": "heel-up",
+  "src": "audio/coach/heel-up.mp3",
+  "text": "Поднимись на носки.",
+  "speech": "Подним+ись на носк+и.",
+  "duration": 2.856,
+  "minDuration": 2.8,
+  "speechDuration": 1.325,
+  "bytes": 11828,
+  "sha256": "9a7dc17f3617a42088f1af5809cd4268ffd407e3a7c6251b52745e383842e84b",
+  "decodedPeak": 0.538939,
+  "fingerprint": "ac185acb5c527928120ad254265e4791dfd7482a1c779ffb58756ef277cad54d"
+}

@@ -1,0 +1,13 @@
+{
+  "id": "prepare-general",
+  "src": "audio/coach/prepare-general.mp3",
+  "text": "Встань удобно. Дыши свободно. Повторяй со мной, сколько удобно.",
+  "speech": "Встань удобно. Дыши свободно. Повторяй со мной, сколько удобно.",
+  "duration": 6.048,
+  "minDuration": 6.0,
+  "speechDuration": 4.6625,
+  "bytes": 40244,
+  "sha256": "ab1751db045467ba5800c53dced787fb0a521462a600e1340a91b3bad1f83eda",
+  "decodedPeak": 0.75121,
+  "fingerprint": "1d5fb7d218828f09eaae00942ca49eb56e87036b9c28cfbde24007db1ae77d27"
+}

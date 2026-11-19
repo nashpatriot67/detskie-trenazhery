@@ -1,0 +1,13 @@
+{
+  "id": "rest",
+  "src": "audio/coach/rest.mp3",
+  "text": "Хорошо. Расслабь руки и отдохни. Можно вернуться к заданиям.",
+  "speech": "Хорошо. Расслабь руки и отдохни. Можно вернуться к заданиям.",
+  "duration": 5.064,
+  "minDuration": 5.0,
+  "speechDuration": 4.875,
+  "bytes": 37292,
+  "sha256": "28dcaa5ce186fee1800074a63b04d167b290bbf21e0ccb1806b08b04a9348541",
+  "decodedPeak": 0.626459,
+  "fingerprint": "015e1556bb9cffb52a029e23e2997b4bd8217983c531a7959318705d9a3387b7"
+}

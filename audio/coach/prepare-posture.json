@@ -1,0 +1,13 @@
+{
+  "id": "prepare-posture",
+  "src": "audio/coach/prepare-posture.mp3",
+  "text": "Встань удобно. Поставь ладони на пояс. Спина остаётся в удобном положении.",
+  "speech": "Встань удобно. Поставь ладони на пояс. Спина остаётся в удобном положении.",
+  "duration": 5.616,
+  "minDuration": 5.0,
+  "speechDuration": 5.5625,
+  "bytes": 45620,
+  "sha256": "6a6eab5d2ebd94d7f0fb3952709ed7d7bedb0ccd361e8332ebb8b7e58d312164",
+  "decodedPeak": 0.762433,
+  "fingerprint": "1c22ddc676b2a391c09b2c90dde165f8d06868e4673b80cedf560ede465fdb55"
+}

@@ -1,0 +1,13 @@
+{
+  "id": "star-right",
+  "src": "audio/coach/star-right.mp3",
+  "text": "Теперь потянись другой рукой.",
+  "speech": "Теперь потянись другой рукой.",
+  "duration": 3.264,
+  "minDuration": 3.2,
+  "speechDuration": 1.8125,
+  "bytes": 16316,
+  "sha256": "3b157f04a9cc079d65c35c7057a43904bb16ce7ee25e70e8183e4e52bbb76e27",
+  "decodedPeak": 0.460911,
+  "fingerprint": "0b15f6e86af9bd133587d98dc4cf61efd5801e5545f385dab628150b0bde46aa"
+}

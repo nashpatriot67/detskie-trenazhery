@@ -1,0 +1,13 @@
+{
+  "id": "shoulder-up",
+  "src": "audio/coach/shoulder-up.mp3",
+  "text": "Медленно подними плечи.",
+  "speech": "Медленно подними плечи.",
+  "duration": 2.856,
+  "minDuration": 2.8,
+  "speechDuration": 1.7,
+  "bytes": 14420,
+  "sha256": "be696bc750a222bbdc383f5bbe59edd658ce18f394eec89049a0437ccc8a2854",
+  "decodedPeak": 0.494072,
+  "fingerprint": "15443766f51155bfe3d8b7c3051050ec0d73f5246e9ce56383a856ca7391e76c"
+}

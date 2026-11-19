@@ -1,0 +1,13 @@
+{
+  "id": "prepare-side",
+  "src": "audio/coach/prepare-side.mp3",
+  "text": "Проверь, что рядом свободно. Делаем два маленьких шага в сторону.",
+  "speech": "Проверь, что рядом свободно. Делаем два маленьких шага в сторону.",
+  "duration": 5.064,
+  "minDuration": 5.0,
+  "speechDuration": 4.375,
+  "bytes": 35540,
+  "sha256": "40efc7bba671e92468d584b511e9611ec8bd3d89e4556700cb8897df3aebeec6",
+  "decodedPeak": 0.873283,
+  "fingerprint": "5c7348851898062e17a1d36896fc8c68761c6d2bf43bf9d13b30770a7cc62be9"
+}

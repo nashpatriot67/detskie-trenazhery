@@ -1,0 +1,13 @@
+{
+  "id": "side-out",
+  "src": "audio/coach/side-out.mp3",
+  "text": "Два маленьких шага в одну сторону.",
+  "speech": "Два маленьких шага в одну сторону.",
+  "duration": 4.248,
+  "minDuration": 4.2,
+  "speechDuration": 2.35,
+  "bytes": 20132,
+  "sha256": "528294c9d0961841a16be9643d92c50dfe4791f6c114238bac96de11c9e004bf",
+  "decodedPeak": 0.658151,
+  "fingerprint": "6d10669c6ae70642e40f88f5e44133a22153894b8d15d620d9c65ffb327ffdde"
+}

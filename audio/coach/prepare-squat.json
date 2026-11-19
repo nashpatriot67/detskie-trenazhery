@@ -1,0 +1,13 @@
+{
+  "id": "prepare-squat",
+  "src": "audio/coach/prepare-squat.mp3",
+  "text": "Встань устойчиво. Стопы остаются на полу. Приседаем неглубоко, без спешки.",
+  "speech": "Встань устойчиво. Стопы остаются на полу. Приседаем неглубоко, без спешки.",
+  "duration": 6.048,
+  "minDuration": 6.0,
+  "speechDuration": 5.575,
+  "bytes": 47420,
+  "sha256": "392acfb339dc4fc968f1daad5ec0e5f93b348c76bb7a969ebcfccb356fd48176",
+  "decodedPeak": 0.818893,
+  "fingerprint": "6458824be6b1a2fb3a9709903556197ee6eca98396454140da523a3600553111"
+}

@@ -1,0 +1,13 @@
+{
+  "id": "reach-down",
+  "src": "audio/coach/reach-down.mp3",
+  "text": "Плавно опусти руки.",
+  "speech": "Плавно опусти руки.",
+  "duration": 2.856,
+  "minDuration": 2.8,
+  "speechDuration": 1.5375,
+  "bytes": 13172,
+  "sha256": "2554074cc7265cc1b132de4fca38dd5ec0479e3497073f626c780f277647ff93",
+  "decodedPeak": 0.683036,
+  "fingerprint": "fdd4a916f492ef059c09fbe29fac64fdbe0a20b535929f2e56b81c7b2fae0de5"
+}

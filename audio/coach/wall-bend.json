@@ -1,0 +1,13 @@
+{
+  "id": "wall-bend",
+  "src": "audio/coach/wall-bend.mp3",
+  "text": "Мягко согни руки.",
+  "speech": "М+ягко согн+и р+уки.",
+  "duration": 2.856,
+  "minDuration": 2.8,
+  "speechDuration": 1.4625,
+  "bytes": 12116,
+  "sha256": "50dc12fc4ee85b4a68bee363f3f7066aa379a1fbc61c34c30b7e18f4542a32a4",
+  "decodedPeak": 0.706285,
+  "fingerprint": "a899ca2749878a3a8146533c2488ab2dcfd0a1d3d118808a14fb3b436869b64a"
+}

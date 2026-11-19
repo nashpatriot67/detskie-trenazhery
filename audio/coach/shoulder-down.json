@@ -1,0 +1,13 @@
+{
+  "id": "shoulder-down",
+  "src": "audio/coach/shoulder-down.mp3",
+  "text": "Опусти и расслабь.",
+  "speech": "Опуст+и и рассл+абь.",
+  "duration": 2.856,
+  "minDuration": 2.8,
+  "speechDuration": 1.4625,
+  "bytes": 14300,
+  "sha256": "b6329d831acb5fd5844a9749bf508312802aa4359a8d9d8e231b282ec8657071",
+  "decodedPeak": 0.459622,
+  "fingerprint": "775ed3cf0b2e657e6e61c710fbc618e19bc8b2b1af05f61c166fec03ba19f9e7"
+}

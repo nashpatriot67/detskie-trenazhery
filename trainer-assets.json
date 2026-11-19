@@ -1,17 +1,22 @@
 {
   "schemaVersion": 1,
+  "coachMedia": "coach-audio-manifest.js",
   "trainers": {
     "kubiki": {
-      "styles": ["kubiki/style.css", "place-value.css", "place-value-activities.css", "concepts.css", "life-quests.css", "active-breaks.css", "practice-hub.css"],
-      "scripts": ["math-range.js", "learning-progress.js", "concepts.js", "life-quest-data.js", "life-quests.js", "active-breaks.js", "practice-hub.js", "kubiki/course.js", "kubiki/engine.js", "kubiki/voice-manifest.js", "kubiki/recorded-voice.js", "place-value.js", "place-value-motion.js", "place-value-activities.js", "offline-bundle.js", "kubiki/app.js"]
+      "styles": ["kubiki/style.css", "place-value.css", "place-value-activities.css", "concepts.css", "learning-journey.css", "math-check.css", "active-breaks.css", "practice-hub.css"],
+      "scripts": ["math-range.js", "learning-progress.js", "concepts.js", "learning-journey.js", "study-clock.js", "coach-plan.js", "coach-audio-manifest.js", "audio-coach.js", "active-breaks.js", "practice-hub.js", "kubiki/course.js", "math-journey.js", "kubiki/engine.js", "kubiki/voice-manifest.js", "kubiki/recorded-voice.js", "place-value.js", "place-value-motion.js", "place-value-activities.js", "math-check.js", "offline-bundle.js", "kubiki/app.js"]
     },
     "bricks": {
-      "styles": ["bricks/style.css", "bricks/bricks.css", "place-value.css", "place-value-activities.css", "concepts.css", "life-quests.css", "active-breaks.css", "practice-hub.css"],
-      "scripts": ["math-range.js", "learning-progress.js", "concepts.js", "life-quest-data.js", "life-quests.js", "active-breaks.js", "practice-hub.js", "bricks/course.js", "bricks/engine.js", "bricks/voice-manifest.js", "bricks/recorded-voice.js", "place-value.js", "place-value-motion.js", "place-value-activities.js", "offline-bundle.js", "bricks/app.js"]
+      "styles": ["bricks/style.css", "bricks/bricks.css", "place-value.css", "place-value-activities.css", "concepts.css", "learning-journey.css", "math-check.css", "active-breaks.css", "practice-hub.css"],
+      "scripts": ["math-range.js", "learning-progress.js", "concepts.js", "learning-journey.js", "study-clock.js", "coach-plan.js", "coach-audio-manifest.js", "audio-coach.js", "active-breaks.js", "practice-hub.js", "bricks/course.js", "math-journey.js", "bricks/engine.js", "bricks/voice-manifest.js", "bricks/recorded-voice.js", "place-value.js", "place-value-motion.js", "place-value-activities.js", "math-check.js", "offline-bundle.js", "bricks/app.js"]
     },
     "slovograd": {
-      "styles": ["slovograd/style.css", "slovograd/lessons.css", "concepts.css", "life-quests.css", "active-breaks.css", "practice-hub.css"],
-      "scripts": ["learning-progress.js", "concepts.js", "life-quest-data.js", "life-quests.js", "active-breaks.js", "practice-hub.js", "slovograd/words.js", "slovograd/sentences.js", "slovograd/creative.js", "slovograd/illustrations.js", "slovograd/core.js", "slovograd/voice-manifest.js", "slovograd/recorded-voice.js", "slovograd/voice.js", "slovograd/lessons.js", "offline-bundle.js", "slovograd/app.js"]
+      "styles": ["slovograd/style.css", "slovograd/lessons.css", "concepts.css", "learning-journey.css", "active-breaks.css", "practice-hub.css"],
+      "scripts": ["learning-progress.js", "concepts.js", "learning-journey.js", "study-clock.js", "coach-plan.js", "coach-audio-manifest.js", "audio-coach.js", "active-breaks.js", "practice-hub.js", "slovograd/words.js", "slovograd/sentences.js", "slovograd/creative.js", "slovograd/illustrations.js", "slovograd/core.js", "slovograd/voice-manifest.js", "slovograd/recorded-voice.js", "slovograd/voice.js", "slovograd/lessons.js", "russian-journey.js", "russian-check.js", "offline-bundle.js", "slovograd/app.js"]
+    },
+    "life": {
+      "styles": ["concepts.css", "life-quests.css", "active-breaks.css", "practice-hub.css", "life/style.css"],
+      "scripts": ["learning-progress.js", "concepts.js", "study-clock.js", "coach-plan.js", "coach-audio-manifest.js", "audio-coach.js", "life-quest-data.js", "life-quests.js", "active-breaks.js", "practice-hub.js", "offline-bundle.js", "life/app.js"]
     }
   }
 }

@@ -1,0 +1,13 @@
+{
+  "id": "cross-right",
+  "src": "audio/coach/cross-right.mp3",
+  "text": "Теперь другая сторона.",
+  "speech": "Теперь другая сторона.",
+  "duration": 3.264,
+  "minDuration": 3.2,
+  "speechDuration": 1.4375,
+  "bytes": 13076,
+  "sha256": "cc5be94397fe2ebbae40ab8120aa0d2f6a285b9eb33c6bfb1bf50e885b9f405e",
+  "decodedPeak": 0.585882,
+  "fingerprint": "a7510b59cd385f09f77607f32a040881f596d9d78cafd05d7ff7d5e2606db9c0"
+}

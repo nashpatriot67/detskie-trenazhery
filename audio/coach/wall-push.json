@@ -1,0 +1,13 @@
+{
+  "id": "wall-push",
+  "src": "audio/coach/wall-push.mp3",
+  "text": "Плавно оттолкнись от стены.",
+  "speech": "Пл+авно оттолкн+ись от стен+ы.",
+  "duration": 3.264,
+  "minDuration": 3.2,
+  "speechDuration": 1.7375,
+  "bytes": 15596,
+  "sha256": "3dd5e9d80a04f2f61f2fc2bbcdc0ca075f83f25a699e62e69bbe8f60ac8cc03c",
+  "decodedPeak": 0.698703,
+  "fingerprint": "b89069fbc4d727b22debda2461857552c458730c565af8875aa644ae80e93bd9"
+}

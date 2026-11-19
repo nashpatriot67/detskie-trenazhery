@@ -1,0 +1,13 @@
+{
+  "id": "look-far",
+  "src": "audio/coach/look-far.mp3",
+  "text": "Посмотри на далёкий предмет.",
+  "speech": "Посмотри на далёкий предмет.",
+  "duration": 3.552,
+  "minDuration": 3.5,
+  "speechDuration": 1.8875,
+  "bytes": 17636,
+  "sha256": "f7404c80632073e34bf4050e4fcb6ac8324dc6aa145ad17173da89b3696b44a5",
+  "decodedPeak": 0.631897,
+  "fingerprint": "dd0855bd8872f5d1aefe897ecf16bba4258f3774a054e62c6b489a1990c01884"
+}

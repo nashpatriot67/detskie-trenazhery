@@ -1,0 +1,13 @@
+{
+  "id": "prepare-hands",
+  "src": "audio/coach/prepare-hands.mp3",
+  "text": "Отложи мышку или планшет. Согни руки и подними ладони перед собой.",
+  "speech": "Отложи мышку или планшет. Согни руки и подними ладони перед собой.",
+  "duration": 5.112,
+  "minDuration": 5.0,
+  "speechDuration": 5.05,
+  "bytes": 40988,
+  "sha256": "9a8ba24e4db819fbf6993db4d84506c484727691f02d1ec79045131ba8422fa8",
+  "decodedPeak": 0.652101,
+  "fingerprint": "36bb98494b6e91a529da31880329e4b5447c5c0d28e000e2f60a710ed796486b"
+}

@@ -2,6 +2,9 @@
 const K=window.Kubiki, $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 let P=window.PlaceValue, M=window.PlaceValueMotion;
 const LP=window.LearningProgress,A=window.PlaceValueActivities,R=window.MathRange||{MAX:1000,draft:v=>typeof v==='string'?v.replace(/[^0-9]/g,'').slice(0,4):''};
+const J=window.MathJourney;
+let mathHubReady=false,mathAdvance=null;
+const MATH_AUTO_MS=2200;
 const writerId='math-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);
 let storageBlocked=false,userIntent=false,pvDirty=false,pvSeenRevision=0;
 const icons={cube:'<path d="m12 3 9 5v9l-9 5-9-5V8Z"/><path d="m3 8 9 5 9-5M12 13v9M7.5 5.5l9 5"/>',play:'<path d="m9 5 11 7-11 7Z"/>',grid:'<rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/>',build:'<path d="m12 3 8 4-8 4-8-4ZM4 12l8 4 8-4M4 17l8 4 8-4"/>',chart:'<path d="M4 3v17h17M8 15v-4M13 15V7M18 15V4"/>',help:'<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 4 2c-1 .5-1.5 1-1.5 2M12 16h.01"/>',arrow:'<path d="M5 12h14m-5-5 5 5-5 5"/>',left:'<path d="m14 6-6 6 6 6"/>',check:'<path d="m5 12 4 4L19 6"/>',reset:'<path d="M4 10a8 8 0 1 1 1 7M4 4v6h6"/>',bulb:'<path d="M9 18h6m-5 3h4M8 14a6 6 0 1 1 8 0c-1 1-1 2-1 2H9s0-1-1-2Z"/>',star:'<path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3l-5.6 2.9 1.1-6.2L3 9.6l6.2-.9Z"/>',sound:'<path d="m11 4-6 5H2v6h3l6 5ZM15 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/>',close:'<path d="m6 6 12 12M6 18 18 6"/>',download:'<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>'};
@@ -97,7 +100,7 @@ function openPlaceValue(track='practice',id){
  const wrapper=progress.learning.activity,current=wrapper&&A.restore(wrapper.state,K,LP);
  if(!id&&current&&current.pv.track===track&&!current.pv.finished)adoptPv(wrapper);
  else{A.start(state,track,K,LP,progress.learning,id);if(state.pv.attempt)state.pv.attempt.generation=progress.resetEpoch;pvSeenRevision=wrapper?.revision||0;pvDirty=true;}
- userIntent=true;renderFresh();
+ userIntent=true;renderFresh();requirePvConcepts();
 }
 function reloadPlaceValue(){
  let raw,latest;try{raw=localStorage.getItem(STORAGE_KEY);latest=JSON.parse(raw||'{}');if(!record(latest))throw Error('invalid');}catch(_){storageBlocked=true;memory=true;return;}
@@ -155,11 +158,74 @@ function restoreStage(id,mode){
  if(mode==='worksheet'&&value.worksheetTask&&modeDone('worksheet',id,value.index))return false;
  state.view='trainer';Object.assign(state,value);state.feedback=null;state.selected=null;return true;
 }
+// Concept gates augment the existing route; original lesson IDs, marks and
+// draft sessions stay in their original ledgers. The host owns gate completion.
+function requireMathConcepts(id,context){
+ if(!mathHubReady||!J||!progress.read.includes(id)||!window.PracticeHub?.requireConcepts)return false;
+ const gate=J.gate(id,COURSE);if(!gate)return false;
+ save();return window.PracticeHub.requireConcepts({...gate,context});
+}
+function ensureCurrentMathConcepts(){
+ if(state.view==='placevalue')return requirePvConcepts();
+ if(!mathHubReady||state.view!=='trainer'||state.mode==='learn')return false;
+ if(!progress.read.includes(state.lesson)){save();startLearn(state.lesson);renderFresh();return true;}
+ return requireMathConcepts(state.lesson,{kind:'math-resume',lesson:state.lesson,session:sessionSnapshot()});
+}
+function pauseMathAdvance(){if(mathAdvance?.timer){clearTimeout(mathAdvance.timer);mathAdvance.timer=null;}}
+function clearMathAdvance(){pauseMathAdvance();mathAdvance=null;}
+function armMathAdvance(){
+ if(!mathAdvance||mathAdvance.timer||document.visibilityState==='hidden'||window.PracticeHub?.isOpen?.())return;
+ const pending=mathAdvance;pending.timer=setTimeout(()=>{
+  pending.timer=null;if(mathAdvance!==pending||contextKey()!==pending.key||!state.solved){if(mathAdvance===pending)mathAdvance=null;return;}
+  if(document.visibilityState==='hidden'||window.PracticeHub?.isOpen?.())return;
+  if(state.view==='placevalue')nextPlaceValue();else nextTask();
+ },MATH_AUTO_MS);
+}
+function queueMathAdvance(){if(!mathHubReady)return;clearMathAdvance();mathAdvance={key:contextKey(),timer:null};armMathAdvance();}
+function restoreMathContext(context){
+ if(!context||!validLesson(context.lesson))return false;
+ if(context.session){const value=readSession(context.session);if(!value||value.lesson!==context.lesson)return false;state.view='trainer';Object.assign(state,value);state.feedback=null;state.selected=null;return true;}
+ return false;
+}
+function requirePvConcepts(){
+ if(!mathHubReady||state.view!=='placevalue'||!state.pv||state.pv.track!=='practice'||state.pv.finished||state.pvConflict||!J?.pvGate||!window.PracticeHub?.requireConcepts)return false;
+ const gate=J.pvGate(A.current(state.pv));if(!gate)return false;
+ save();return window.PracticeHub.requireConcepts({...gate,context:{kind:'math-pv-resume',lesson:state.lesson,snapshot:A.snapshot(state)}});
+}
+function restorePvContext(context){
+ if(!context?.snapshot||!adoptPv({state:context.snapshot,revision:pvSeenRevision}))return false;
+ userIntent=true;pvDirty=true;return true;
+}
+function nextPlaceValue(afterBreak=false){
+ clearMathAdvance();if(state.view!=='placevalue'||!state.pv||!state.solved||state.pvConflict)return;
+ if(state.pv.track==='practice'&&!afterBreak&&window.PracticeHub?.cycleBoundary){save();const t=A.current(state.pv);if(window.PracticeHub.cycleBoundary({id:t.id+'.next',context:{kind:'math-pv-next',snapshot:A.snapshot(state)}}))return;}
+ userIntent=true;A.handle(state,'next',{},pvEnv());pvDirty=true;renderFresh();requirePvConcepts();
+}
+function handlePlaceValue(action,data){
+ if(requirePvConcepts())return;
+ userIntent=true;
+ if(action==='next'){if(mathHubReady)nextPlaceValue();else if(A.handle(state,action,data,pvEnv())){pvDirty=true;renderFresh();}return;}
+ clearMathAdvance();A.capture(state,document);
+ if(A.handle(state,action,data,pvEnv())){
+  pvDirty=true;if(action==='reset')$('#app').dataset.context='';render();
+  if(mathHubReady&&state.pv.track==='practice'&&state.solved&&!state.pv.skipped&&!state.pv.teaching&&(!state.pv.meaningActive||state.pv.meaningDone)&&state.feedback?.type!=='error')queueMathAdvance();
+ }
+}
+function resumeMathGate(context){
+ if(context?.kind==='math-pv-resume'){clearMathAdvance();if(restorePvContext(context))renderFresh();return;}
+ if(!context||!['math-route','math-resume'].includes(context.kind))return;
+ clearMathAdvance();if(context.kind==='math-resume'&&restoreMathContext(context))renderFresh();else{continueRoute(context.lesson);renderFresh();}
+}
+function resumeMathCycle(context){
+ if(context?.kind==='math-pv-next'){if(restorePvContext(context))nextPlaceValue(true);return;}
+ if(!context||!['math-next','math-cycle'].includes(context.kind))return;
+ clearMathAdvance();if(restoreMathContext(context))nextTask(true);else{continueRoute(context.lesson);renderFresh();}
+}
 function continueRoute(id=state.lesson){
  for(let current=id;current<=COURSE.length;current++){
   if(!progress.read.includes(current)){if(!restoreStage(current,'learn'))startLearn(current);return;}
-  if(modeCount(current,'play')<18){if(!restoreStage(current,'play'))startTask(current,firstModeTask(current,'play'));return;}
-  if(modeCount(current,'worksheet')<18){if(!restoreStage(current,'worksheet'))startWorksheet(current);return;}
+  if(modeCount(current,'play')<18){if(requireMathConcepts(current,{kind:'math-route',lesson:current}))return;if(!restoreStage(current,'play'))startTask(current,firstModeTask(current,'play'));return;}
+  if(modeCount(current,'worksheet')<18){if(requireMathConcepts(current,{kind:'math-route',lesson:current}))return;if(!restoreStage(current,'worksheet'))startWorksheet(current);return;}
  }
  state.view='progress';state.solved=false;state.repeating=false;
 }
@@ -174,19 +240,20 @@ function resumeTraining(advance=true){
 }
 function selectMode(mode){
  if(!['learn','play','worksheet'].includes(mode))return;
+ clearMathAdvance();if(mathHubReady&&mode!=='learn'&&!progress.read.includes(state.lesson)){save();startLearn(state.lesson);renderFresh();return;}
  if(mode==='learn')legacyHelp('explanation');save();state.learnFrame=0;const stored=readSession(progress.modeSessions[`${state.lesson}:${mode}`]);
  if(stored&&!stored.solved){state.view='trainer';Object.assign(state,stored);state.feedback=null;state.selected=null;}
  else if(mode==='learn')startLearn(state.lesson,progress.read.includes(state.lesson));
  else if(mode==='worksheet'){startWorksheet(state.lesson);state.repeating=modeCount(state.lesson,'worksheet')===18;}
  else{const index=firstModeTask(state.lesson,'play');startTask(state.lesson,index<0?0:index);state.repeating=index<0;}
- renderFresh();
+ renderFresh();if(mode!=='learn')ensureCurrentMathConcepts();
 }
 function openPractice(index,mode=activeTaskMode()){
  if(!Number.isInteger(index)||index<0||index>=18)return;
- save();const id=state.lesson;startTask(id,index,false,mode);state.repeating=modeDone(mode,id,index);renderFresh();
+ save();const id=state.lesson;startTask(id,index,false,mode);state.repeating=modeDone(mode,id,index);renderFresh();ensureCurrentMathConcepts();
 }
 function backToWorksheet(){save();state.worksheetTask=false;state.solved=false;state.repeating=false;state.feedback=null;state.answer='';$('#app').dataset.context='';renderFresh();}
-function modeTabs(){return `<div class="mode-tabs" role="tablist" aria-label="Этапы урока">${[['learn','Разберёмся'],['play','Поиграем'],['worksheet','Тетрадь']].map(([mode,label],i)=>{const complete=mode==='learn'?progress.read.includes(state.lesson):modeCount(state.lesson,mode)===18;return `<button role="tab" aria-selected="${state.mode===mode}" class="${state.mode===mode?'active':''} ${complete?'stage-complete':''}" data-mode="${mode}"><span class="tab-num">${complete?'✓':'0'+(i+1)}</span><span>${label}<small>${mode==='learn'?(complete?'Понятно':'3 шага'):modeCount(state.lesson,mode)+' / 18'}</small></span></button>`;}).join('')}</div><p class="stage-sequence">Разберёмся → Поиграем → Тетрадь → следующий урок</p>`;}
+function modeTabs(){return `<div class="mode-tabs" role="tablist" aria-label="Этапы урока">${[['learn','Разберёмся'],['play','Поиграем'],['worksheet','Тетрадь']].map(([mode,label],i)=>{const complete=mode==='learn'?progress.read.includes(state.lesson):modeCount(state.lesson,mode)===18;return `<button role="tab" aria-selected="${state.mode===mode}" class="${state.mode===mode?'active':''} ${complete?'stage-complete':''}" data-mode="${mode}"><span class="tab-num">${complete?'✓':'0'+(i+1)}</span><span>${label}<small>${mode==='learn'?(complete?'Понятно':'3 шага'):modeCount(state.lesson,mode)+' / 18'}</small></span></button>`;}).join('')}</div><p class="stage-sequence">Разберёмся и проверим понятия → Поиграем → Тетрадь → следующий урок</p>`;}
 function openWorkshop(){
  state.view='workshop';state.solved=false;state.feedback=null;state.selected=null;state.undo=[];
  const saved=record(progress.workshop)?progress.workshop:{};state.zones=cleanZones(saved.zones)||{a:K.empty(),b:K.empty(),removed:K.empty()};
@@ -204,7 +271,7 @@ const allSolved=()=>COURSE.reduce((sum,l)=>sum+solvedCount(l.id),0);
 function announce(s){$('#live').textContent=s;}
 function isBuild(){if(state.view==='placevalue')return A.current(state.pv)?.kind==='build';return state.view==='workshop'||(!state.demo&&(state.index>=16||task().missing!=='result'));}
 function setup(){
- stopVoice();
+ clearMathAdvance();stopVoice();
  const t=task();state.zones={a:K.empty(),b:K.empty(),removed:K.empty()};
  if(!isBuild()){state.zones.a=modelParts(t.a);if(t.op==='+')state.zones.b=modelParts(t.b);}
  state.feedback=null;state.solved=false;state.selected=null;state.undo=[];state.answer='';state.learnFrame=0;state.legacyAttempt=startLegacyAttempt();$('#app').dataset.context='';
@@ -261,7 +328,7 @@ function exchangeTools(){const p=state.zones.a,composite=K.values.double!==undef
 function bank(){return `<div class="toolbox" data-zone="bank" role="group" aria-label="Коробка — верни сюда лишние кубики"><div class="tool-copy"><strong>Коробка с кубиками</strong><span>Нажми, чтобы добавить. Верни лишнее сюда</span></div><div class="bank-pieces"><div>${piece('unit','bank')}<small>1</small></div><div>${piece('ten','bank')}<small>10</small></div><div>${piece('hundred','bank')}<small>100</small></div></div></div>`;}
 function playView(){const t=task(),build=isBuild();let instruction=build?(t.missing!=='result'?'Найди пропущенное число и собери его из кубиков.':'Реши пример и собери ответ из кубиков.'):(t.op==='+'?'Перенеси кубики справа налево. Собери десяток, если нужно.':`Убери ${t.b} в правую область. Размени десяток, если единиц не хватает.`);return `<div class="activity-wrap"><div class="activity-top"><span class="step-tag">${state.demo?'ПРОБНЫЙ ПРИМЕР':state.index>=16?'СОБИРАЕМ ОТВЕТ':'ТВОЯ ОЧЕРЕДЬ'}</span><span class="muted">${state.demo?'Учимся без спешки':`Задание ${state.index+1} из 18`}</span></div>${!state.demo&&modeDone(activeTaskMode(),state.lesson,state.index)?'<p class="task-completed-note">✓ Это задание уже решено в этом режиме. Сейчас можно повторить.</p>':''}${equation(t,state.solved)}<p class="activity-instruction">${instruction}</p><div class="interaction-note">${icon('build')} Перетаскивай мышкой или пальцем. Можно нажать на кубик, затем на область.</div><div class="board ${build?'single-board':''} ${hasHundred(state.zones)?'has-hundred':''}">${zone('a',build?'Твоя сборка':t.op==='+'?'Собираем вместе':'Что осталось',build?'Собери пропущенное число':t.op==='+'?'Переноси сюда →':'Оставь ответ на поле')}${!build?zone(t.op==='+'?'b':'removed',t.op==='+'?'Добавляем':'Убираем',t.op==='+'?`Вторая группа: ${t.b}`:`Нужно убрать: ${t.b}`):''}</div>${build?bank():''}${exchangeTools()}<div class="board-actions"><div class="action-buttons"><button class="btn ghost" data-action="reset" title="Начать пример заново">${icon('reset')} Заново</button><button class="btn ghost" data-action="undo" ${!state.undo.length||state.solved?'disabled':''}>Отменить</button></div>${!build&&t.op==='+'?`<button class="btn secondary" data-action="combine" ${K.total(state.zones.b)===0||state.solved?'disabled':''}>Соединить всё ${icon('arrow')}</button>`:''}<button class="btn ghost hint-button" data-action="hint">${icon('bulb')} Подсказка</button></div><div class="answer-row"><label for="answer">${t.missing!=='result'?'Пропущенное число':'Мой ответ'}<input id="answer" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" placeholder="?" value="${state.solved?t.answer:esc(state.answer)}" ${state.solved?'disabled':''}></label><button class="btn primary" data-action="${state.solved?'next-task':'check'}">${state.solved?(state.repeating?'Продолжить маршрут':'Дальше'): 'Проверить'} ${icon(state.solved?'arrow':'check')}</button></div>${feedbackView()}</div>`;}
 function feedbackView(){return state.feedback?`<div class="feedback ${state.feedback.type}" role="status">${icon(state.feedback.type==='success'?'check':'bulb')}<span>${esc(state.feedback.text)}</span></div>`:'';}
-function worksheet(){let ts=tasks();return `<div class="activity-wrap"><div class="activity-top"><span class="step-tag">РАБОЧАЯ ТЕТРАДЬ</span><span class="muted">16 примеров + 2 сборки</span></div><p class="worksheet-intro">Впиши пропущенные числа. Если трудно — открой пример с кубиками.</p><div class="worksheet-grid">${ts.slice(0,16).map((t,i)=>{let solved=modeDone('worksheet',state.lesson,i);return `<div class="worksheet-item ${solved?'solved':''}" data-ws="${i}"><small>${i+1}.</small><div class="ws-equation">${t.missing==='a'?wsInput(i,t,solved):t.a} ${t.op==='-'?'−':'+'} ${t.missing==='b'?wsInput(i,t,solved):t.b} = ${t.missing==='result'?wsInput(i,t,solved):t.result}</div><button class="icon-btn" data-practice="${i}" data-owner="worksheet" aria-label="Пример ${i+1}: решить с кубиками">${icon('cube')}</button></div>`;}).join('')}</div><div class="board-actions"><button class="btn ghost" data-action="hint">${icon('bulb')} Помощь</button><button class="btn primary" data-action="check-worksheet">Проверить ответы ${icon('check')}</button></div>${feedbackView()}<div class="draw-tasks"><h3>А теперь собери ответ</h3><p class="muted">Вместо рисунка в тетради — настоящая сборка из кубиков.</p>${ts.slice(16).map((t,i)=>`<button class="draw-task ${modeDone('worksheet',state.lesson,i+16)?'done':''}" data-practice="${i+16}" data-owner="worksheet"><span class="list-number">${i+17}</span><strong>${t.a} ${t.op==='-'?'−':'+'} ${t.b} = ?</strong><span>${modeDone('worksheet',state.lesson,i+16)?'✓ Решено · повторить':'Собрать'} ${icon('arrow')}</span></button>`).join('')}</div></div>`;}
+function worksheet(){let ts=tasks();return `<div class="activity-wrap"><div class="activity-top"><span class="step-tag">РАБОЧАЯ ТЕТРАДЬ</span><span class="muted">16 примеров + 2 сборки</span></div><p class="worksheet-intro">Впиши пропущенные числа. Если трудно — открой пример с кубиками.</p><div class="worksheet-grid">${ts.slice(0,16).map((t,i)=>{let solved=modeDone('worksheet',state.lesson,i);return `<div class="worksheet-item ${solved?'solved':''}" data-ws="${i}"><small>${i+1}.</small><div class="ws-equation">${t.missing==='a'?wsInput(i,t,solved):t.a} ${t.op==='-'?'−':'+'} ${t.missing==='b'?wsInput(i,t,solved):t.b} = ${t.missing==='result'?wsInput(i,t,solved):t.result}</div><button class="icon-btn" data-practice="${i}" data-owner="worksheet" aria-label="Пример ${i+1}: решить с кубиками">${icon('cube')}</button></div>`;}).join('')}</div><div class="board-actions"><button class="btn ghost" data-action="hint">${icon('bulb')} Помощь</button><button class="btn primary" data-action="${state.solved?'next-task':'check-worksheet'}">${state.solved?'Продолжить маршрут':'Проверить ответы'} ${icon(state.solved?'arrow':'check')}</button></div>${feedbackView()}<div class="draw-tasks"><h3>А теперь собери ответ</h3><p class="muted">Вместо рисунка в тетради — настоящая сборка из кубиков.</p>${ts.slice(16).map((t,i)=>`<button class="draw-task ${modeDone('worksheet',state.lesson,i+16)?'done':''}" data-practice="${i+16}" data-owner="worksheet"><span class="list-number">${i+17}</span><strong>${t.a} ${t.op==='-'?'−':'+'} ${t.b} = ?</strong><span>${modeDone('worksheet',state.lesson,i+16)?'✓ Решено · повторить':'Собрать'} ${icon('arrow')}</span></button>`).join('')}</div></div>`;}
 function wsInput(i,t,solved){return `<input type="text" inputmode="numeric" maxlength="4" autocomplete="off" data-ws-input="${i}" aria-label="Пропущенное число в примере ${i+1}: ${esc(t.text)}" value="${solved?t.answer:esc(progress.worksheet[state.lesson]?.[i]||'')}" ${solved?'disabled':''}>`;}
 function courseView(){const sections=[...new Set(COURSE.map(l=>l.section))];return intro('ОТ ПЕРВОГО КУБИКА ДО СОТНИ','Твой маршрут открытий','Все уроки открыты. Начни с первого или выбери то, что хочется потренировать.')+sections.map(s=>`<section class="course-section"><div class="section-heading"><h2>${esc(s.split('•')[1].trim())}</h2><span>${COURSE.filter(l=>l.section===s).length} уроков</span></div><div class="course-grid">${COURSE.filter(l=>l.section===s).map(l=>`<button class="course-card ${state.lesson===l.id?'selected':''} ${lessonComplete(l.id)?'done':''}" data-lesson="${l.id}"><div class="course-card-top"><span class="course-card-number">${String(l.id).padStart(2,'0')}</span><span class="muted">${solvedCount(l.id)}/18 ${lessonComplete(l.id)?'✓':''}</span></div><h3>${esc(lessonName(l))}</h3><p>${l.example.a} ${l.example.op==='-'?'−':'+'} ${l.example.b} = ?</p><div class="progress-bar"><i style="width:${lessonPercent(l.id)}%"></i></div><small class="lesson-stage-status">${stageStatus(l.id)}</small><span class="course-card-link">Открыть урок ${icon('arrow')}</span></button>`).join('')}</div></section>`).join('');}
 function workshop(){return intro('МЕСТО ДЛЯ ЭКСПЕРИМЕНТОВ','Мастерская чисел','Собери любое число, разбери десяток и посмотри, как всё устроено.')+`<section class="lesson-panel workshop-panel"><div class="lesson-heading"><span class="lesson-number">${icon('build')}</span><div><h2 class="lesson-title">Что построим сегодня?</h2><p class="lesson-subtitle">У каждой палочки десять кубиков. У квадрата — сто.</p></div></div><div class="activity-wrap"><div class="free-controls"><label for="free-target">Собери число <input id="free-target" type="number" min="0" max="1000" value="${state.freeTarget}"></label><button class="btn secondary" data-action="random-target">Другое число ↻</button></div><div class="board single-board ${hasHundred(state.zones)?'has-hundred':''}">${zone('a','Твоя мастерская','Нажми на кубик на поле, чтобы вернуть его в коробку')}</div>${bank()}${exchangeTools()}<div class="board-actions"><div class="action-buttons"><button class="btn ghost" data-action="reset">${icon('reset')} Очистить</button><button class="btn ghost" data-action="undo" ${!state.undo.length?'disabled':''}>Отменить</button></div><button class="btn primary" data-action="check-free">Проверить сборку ${icon('check')}</button></div>${feedbackView()}<div class="tip-inline">${icon('bulb')} Количество при обмене не меняется: 10 единиц = 1 десяток.</div></div></section>`;}
@@ -282,7 +349,7 @@ function render(){
  save();
 }
 function renderFresh(){$('#app').dataset.context='';render();}
-function mutate(fn){if(state.solved||state.view==='placevalue'&&(state.pvConflict||A.current(state.pv)?.kind==='predict'&&!state.pv.predictionConfirmed))return;userIntent=true;history();if(fn()===false){state.undo.pop();return;}state.selected=null;state.feedback=null;if(state.view==='placevalue')pvDirty=true;render();}
+function mutate(fn){if(ensureCurrentMathConcepts())return;if(state.solved||state.view==='placevalue'&&(state.pvConflict||A.current(state.pv)?.kind==='predict'&&!state.pv.predictionConfirmed))return;userIntent=true;history();if(fn()===false){state.undo.pop();return;}state.selected=null;state.feedback=null;if(state.view==='placevalue')pvDirty=true;render();}
 function movePiece(from,to,type){mutate(()=>K.move(state.zones,from,to,type));$(`[data-zone="${to}"]`)?.focus({preventScroll:true});}
 function hint(){
  legacyHelp('visual');
@@ -291,15 +358,17 @@ function hint(){
  let text=isBuild()?`Собери число на месте вопроса: ${esc(t.text||`${t.a} ${t.op} ${t.b} = ?`)}. Палочка — 10, кубик — 1.`:t.op==='+'?(K.total(state.zones.b)>0?'Перенеси кубики из правой группы в левую. Можно нажать «Соединить всё».':p.unit>=10?'На поле 10 или больше единиц. Нажми «10 единиц → десяток».':p.ten>=10?'Десять десятков — это сотня. Собери её кнопкой обмена.':'Посчитай десятки и единицы на левом поле, затем запиши ответ.'):(K.total(state.zones.removed)>t.b?'Ты убрал больше, чем нужно. Верни лишние кубики или отмени последнее действие.':p.unit<t.b%10-(state.zones.removed.unit%10)&&p.ten>0?'Не хватает отдельных единиц? Нажми «Десяток → 10 единиц».':p.hundred>0&&t.b>0?'Разбери сотню на 10 десятков, затем убирай нужные палочки и кубики.':`Справа должно оказаться ровно ${t.b}. Остальное останется слева — это ответ.`);
  feedback(text);render();
 }
-function checkAnswer(){const t=task(),raw=$('#answer').value.trim();if(!/^\d{1,4}$/.test(raw)){feedback('Впиши пропущенное число в окошко ответа.','error');render();$('#answer').focus();return;}
+function checkAnswer(){if(ensureCurrentMathConcepts())return;const t=task(),raw=$('#answer').value.trim();if(!/^\d{1,4}$/.test(raw)){feedback('Впиши пропущенное число в окошко ответа.','error');render();$('#answer').focus();return;}
  if(Number(raw)!==t.answer){observeLegacy('incorrect');feedback('Пока не сходится. Посчитай кубики ещё раз. Можно воспользоваться подсказкой.','error');render();return;}
  if(!K.check(t,state.zones,isBuild())){observeLegacy('incorrect');feedback(isBuild()?'Число верное! Теперь собери его на поле. Единиц должно быть меньше 10 — собирай их в десятки.':t.op==='+'?'Ответ верный! Осталось перенести все кубики влево и собрать полные десятки.':'Ответ верный! Теперь покажи вычитание: убери нужное количество вправо, а ответ оставь слева.','hint');render();return;}
  const mode=activeTaskMode(),repeating=state.repeating;
  observeLegacy('correct');state.solved=true;state.selected=null;if(!state.demo)markModeDone(mode,state.lesson,state.index);save();
- if(!state.demo&&!repeating&&modeCount(state.lesson,mode)===18){const completed=mode;continueRoute(state.lesson);feedback(completed==='play'&&state.mode==='worksheet'?'Игра пройдена! Теперь решим задания тетради самостоятельно.':state.mode==='learn'?'Этап завершён. Сначала разберём правило урока.':'Этап завершён. Продолжаем маршрут.','success');render();celebrate();return;}
- feedback(state.demo?'Всё получилось! Теперь попробуй задания урока.':repeating?'Повторение получилось. Можно продолжить маршрут.':'Здорово! И ответ, и кубики на своих местах.','success');render();celebrate();}
-function nextTask(){
- stopVoice();
+ if(!state.demo&&!repeating&&modeCount(state.lesson,mode)===18){if(mathHubReady){feedback(mode==='play'?'Игра пройдена! Дальше — самостоятельные задания тетради.':'Тетрадь пройдена! Дальше — следующий непройденный этап.','success');render();celebrate();queueMathAdvance();return;}const completed=mode;continueRoute(state.lesson);feedback(completed==='play'&&state.mode==='worksheet'?'Игра пройдена! Теперь решим задания тетради самостоятельно.':state.mode==='learn'?'Этап завершён. Сначала разберём правило урока.':'Этап завершён. Продолжаем маршрут.','success');render();celebrate();return;}
+ feedback(state.demo?'Всё получилось! Теперь попробуй задания урока.':repeating?'Повторение получилось. Можно продолжить маршрут.':'Здорово! И ответ, и кубики на своих местах.','success');render();celebrate();queueMathAdvance();}
+function nextTask(afterBreak=false){
+ clearMathAdvance();stopVoice();
+ if(mathHubReady&&!state.solved)return;
+ if(mathHubReady&&!afterBreak&&window.PracticeHub?.cycleBoundary){save();const mode=activeTaskMode(),cycle=modeCount(state.lesson,mode)===18;const context={kind:cycle?'math-cycle':'math-next',lesson:state.lesson,session:sessionSnapshot()};if(window.PracticeHub.cycleBoundary({id:'math.'+state.lesson+'.'+mode+'.'+(cycle?'cycle':state.index),context}))return;}
  if(state.repeating){continueRoute(state.lesson);renderFresh();return;}
  const mode=activeTaskMode(),next=firstModeTask(state.lesson,mode,state.demo?-1:state.index);
  if(next<0||!progress.read.includes(state.lesson))continueRoute(state.lesson);
@@ -307,15 +376,15 @@ function nextTask(){
  else startTask(state.lesson,next);
  renderFresh();
 }
-function checkWorksheet(){let answered=0,correct=0,wrong=0;$$('[data-ws-input]:not(:disabled)').forEach(input=>{let v=input.value.trim();if(!v)return;answered++;const idx=+input.dataset.wsInput,t=tasks()[idx];if(/^\d{1,4}$/.test(v)&&Number(v)===t.answer){markModeDone('worksheet',state.lesson,idx);correct++;}else{wrong++;input.setAttribute('aria-invalid','true');input.closest('.worksheet-item').classList.add('wrong');}});save();
- if(modeCount(state.lesson,'worksheet')===18&&!state.repeating){continueRoute(state.lesson);feedback('Тетрадь пройдена! Продолжаем со следующего непройденного этапа.','success');render();celebrate();return;}
+function checkWorksheet(){if(ensureCurrentMathConcepts())return;let answered=0,correct=0,wrong=0;$$('[data-ws-input]:not(:disabled)').forEach(input=>{let v=input.value.trim();if(!v)return;answered++;const idx=+input.dataset.wsInput,t=tasks()[idx];if(/^\d{1,4}$/.test(v)&&Number(v)===t.answer){markModeDone('worksheet',state.lesson,idx);correct++;}else{wrong++;input.setAttribute('aria-invalid','true');input.closest('.worksheet-item').classList.add('wrong');}});save();
+ if(modeCount(state.lesson,'worksheet')===18&&!state.repeating){if(mathHubReady){state.solved=true;feedback('Тетрадь пройдена! Дальше — следующий непройденный этап.','success');render();celebrate();queueMathAdvance();return;}continueRoute(state.lesson);feedback('Тетрадь пройдена! Продолжаем со следующего непройденного этапа.','success');render();celebrate();return;}
  const text=!answered?'Впиши ответы хотя бы в один пример.':wrong?`Верно: ${correct}. Ещё подумай над ${wrong} — они отмечены розовым.`:`Отлично! Проверено верных ответов: ${correct}. Осталось решить задания без галочки.`;state.feedback={text,type:wrong?'error':correct?'success':'hint'};render();announce(text);if(correct&&!wrong)celebrate();}
 
 function celebrate(){if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;const div=document.createElement('div');div.className='confetti';div.setAttribute('aria-hidden','true');div.innerHTML=Array.from({length:22},(_,i)=>`<i style="--x:${Math.random()*100}vw;--r:${Math.random()*600}deg;--delay:${Math.random()*.3}s;background:${['#64b9e5','#f6ce60','#93c7b6','#b8a4e3'][i%4]}"></i>`).join('');document.body.append(div);setTimeout(()=>div.remove(),1800);}
 function modal(content){lastModalFocus=document.activeElement;$('#overlay').innerHTML=`<div class="modal-backdrop"><section class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><button class="icon-btn modal-close" data-action="close-modal" aria-label="Закрыть">${icon('close')}</button>${content}</section></div>`;$('.modal-close').focus();}
 let lastModalFocus=null;
 function closeModal(){$('#overlay').innerHTML='';lastModalFocus?.focus();}
-function help(){stopVoice();modal(`<span class="tip-icon">${icon('cube')}</span><h2 id="modal-title">Знакомься, это кубики</h2><p>Синий кубик — <b>1 единица</b>. Жёлтая палочка — <b>10 единиц</b>. Фиолетовый квадрат — <b>100</b>.</p><ol class="help-list"><li><b>Передвигай.</b> Перетаскивай кубик мышкой или пальцем. Или нажми на него, затем на нужную область. Клавиатурой: выбери кубик через Tab и Enter, затем перейди Tab к области и нажми Enter.</li><li><b>Меняй.</b> Десять кубиков можно собрать в палочку. Палочку можно разменять обратно. Количество остаётся прежним.</li><li><b>Проверяй.</b> Покажи действие на поле и впиши ответ. Если ошибёшься, подсказка поможет.</li></ol><p><b>Каждый урок идёт по шагам:</b> разбор правила → 18 задач в игре → 18 задач в тетради → следующий урок. Игра и тетрадь отмечаются отдельно.</p><p class="muted">В мастерской можно свободно собирать числа. Прогресс хранится в этом браузере. Задания в скачанном HTML работают без интернета. Для женской озвучки нужен интернет.</p><p class="muted"><a href="voice-credits.txt" target="_blank" rel="noopener">Об озвучке</a></p><button class="btn primary" data-action="download">${icon('download')} Скачать для занятий офлайн</button>`);}
+function help(){stopVoice();modal(`<span class="tip-icon">${icon('cube')}</span><h2 id="modal-title">Знакомься, это кубики</h2><p>Синий кубик — <b>1 единица</b>. Жёлтая палочка — <b>10 единиц</b>. Фиолетовый квадрат — <b>100</b>.</p><ol class="help-list"><li><b>Передвигай.</b> Перетаскивай кубик мышкой или пальцем. Или нажми на него, затем на нужную область. Клавиатурой: выбери кубик через Tab и Enter, затем перейди Tab к области и нажми Enter.</li><li><b>Меняй.</b> Десять кубиков можно собрать в палочку. Палочку можно разменять обратно. Количество остаётся прежним.</li><li><b>Проверяй.</b> Покажи действие на поле и впиши ответ. Если ошибёшься, подсказка поможет.</li></ol><p><b>Каждый урок идёт по шагам:</b> разбор правила и 3 карточки понятий → 18 задач в игре → 18 задач в тетради → следующий урок. Игра и тетрадь отмечаются отдельно.</p><p class="muted">В мастерской можно свободно собирать числа. Прогресс хранится в этом браузере. Задания в скачанном HTML работают без интернета. Для женской озвучки нужен интернет.</p><p class="muted"><a href="voice-credits.txt" target="_blank" rel="noopener">Об озвучке</a></p><button class="btn primary" data-action="download">${icon('download')} Скачать для занятий офлайн</button>`);}
 async function download(){await window.TrainerBundle.download($('[data-action="download"]'));}
 // Recorded lessons keep the same voice on every device. Unknown operands stay unknown.
 let voiceSession=0,voicePlaying=false;
@@ -335,10 +404,10 @@ function speak(){
 document.addEventListener('click',event=>{
  if(booting)return;const el=event.target.closest('button,a');if(!el||el.disabled)return;userIntent=true;if((el.dataset.exchange||el.dataset.action==='learn-next')&&M.isBusy())return;if(!el.dataset.exchange)M.cancel();
  if(el.dataset.pvOpen){openPlaceValue(el.dataset.pvOpen);return;}
- if(el.dataset.pvAction){if(suppressPvClick){suppressPvClick=false;return;}if(el.dataset.pvAction==='reload'){reloadPlaceValue();return;}A.capture(state,document);if(A.handle(state,el.dataset.pvAction,el.dataset,pvEnv())){pvDirty=true;if(['next','reset'].includes(el.dataset.pvAction))$('#app').dataset.context='';render();}return;}
+ if(el.dataset.pvAction){if(suppressPvClick){suppressPvClick=false;return;}if(el.dataset.pvAction==='reload'){reloadPlaceValue();return;}handlePlaceValue(el.dataset.pvAction,el.dataset);return;}
  if(state.view==='placevalue'&&state.pvConflict&&el.dataset.view===undefined&&el.dataset.lesson===undefined)return;
  if(el.dataset.lesson){chooseLesson(+el.dataset.lesson);return;}
- if(el.dataset.view){save();stopVoice();if(el.dataset.view==='trainer')resumeTraining(true);else if(el.dataset.view==='workshop')openWorkshop();else{state.view=el.dataset.view;state.feedback=null;state.selected=null;}renderFresh();window.scrollTo(0,0);return;}
+ if(el.dataset.view){clearMathAdvance();save();stopVoice();if(el.dataset.view==='trainer')resumeTraining(true);else if(el.dataset.view==='workshop')openWorkshop();else{state.view=el.dataset.view;state.feedback=null;state.selected=null;}renderFresh();window.scrollTo(0,0);return;}
  if(el.dataset.mode){stopVoice();selectMode(el.dataset.mode);return;}
  if(el.dataset.practice){openPractice(+el.dataset.practice,el.dataset.owner==='worksheet'?'worksheet':activeTaskMode());return;}
  if(el.dataset.exchange){exchangeOnBoard(el.dataset.exchange);return;}
@@ -382,6 +451,7 @@ const observer=new MutationObserver(()=>{$$('[data-zone]').forEach(z=>{z.tabInde
 // The generated canonical loader restores all version-checked dependencies
 // before this app runs. A stale HTML/new app combination must never write data.
 function startTrainer(){resumeTraining(true);if(progress.lastView==='workshop')openWorkshop();else if(progress.lastView==='placevalue'&&learningReady()&&!adoptPv(progress.learning.activity)){storageBlocked=true;memory=true;}render();booting=false;}
+if(J&&window.ConceptTrainer)J.register(window.ConceptTrainer,COURSE);
 if(K&&P&&M&&LP&&A&&window.MathRange)startTrainer();
 else{$('#app').innerHTML='<main style="max-width:36em;margin:12vh auto;padding:24px;font:18px/1.6 sans-serif"><h1>Завершим обновление</h1><p>Подключись к интернету и открой тренажёр ещё раз. Сохранённые результаты останутся на устройстве.</p><a href="../">Все игры</a></main>';}
 if(typeof window.addEventListener==='function')window.addEventListener('pagehide',()=>{if(!booting)save(true);});
@@ -391,7 +461,7 @@ document.addEventListener('visibilitychange',()=>{if(!booting&&document.visibili
 let pvDigitDrag=null,suppressPvClick=false;
 document.addEventListener('pointerdown',e=>{const el=e.target.closest('[data-pv-action="digit"]');if(!el||state.view!=='placevalue'||state.solved||state.pvConflict||e.button!==0)return;pvDigitDrag={id:e.pointerId,digit:Number(el.dataset.digit),x:e.clientX,y:e.clientY,active:false};el.setPointerCapture?.(e.pointerId);});
 document.addEventListener('pointermove',e=>{if(!pvDigitDrag||pvDigitDrag.id!==e.pointerId)return;if(Math.hypot(e.clientX-pvDigitDrag.x,e.clientY-pvDigitDrag.y)>7)pvDigitDrag.active=true;if(pvDigitDrag.active)e.preventDefault();},{passive:false});
-document.addEventListener('pointerup',e=>{if(!pvDigitDrag||pvDigitDrag.id!==e.pointerId)return;const drag=pvDigitDrag;pvDigitDrag=null;if(!drag.active)return;const slot=document.elementFromPoint(e.clientX,e.clientY)?.closest('[data-pv-action="place"]');if(slot){state.pv.selectedDigit=drag.digit;userIntent=true;A.handle(state,'place',slot.dataset,pvEnv());pvDirty=true;suppressPvClick=true;render();setTimeout(()=>{suppressPvClick=false;},100);}});
+document.addEventListener('pointerup',e=>{if(!pvDigitDrag||pvDigitDrag.id!==e.pointerId)return;const drag=pvDigitDrag;pvDigitDrag=null;if(!drag.active)return;const slot=document.elementFromPoint(e.clientX,e.clientY)?.closest('[data-pv-action="place"]');if(slot){if(requirePvConcepts())return;state.pv.selectedDigit=drag.digit;userIntent=true;A.handle(state,'place',slot.dataset,pvEnv());pvDirty=true;suppressPvClick=true;render();setTimeout(()=>{suppressPvClick=false;},100);}});
 document.addEventListener('pointercancel',()=>{pvDigitDrag=null;});
 document.addEventListener('dragstart',e=>{if(e.target.closest('[data-pv-action="digit"]'))e.preventDefault();});
 if(typeof window.addEventListener==='function')window.addEventListener('storage',event=>{
@@ -401,11 +471,18 @@ if(typeof window.addEventListener==='function')window.addEventListener('storage'
 });
 // Shared activities keep their snapshots inside this trainer's existing owner.
 // The host stays outside #app, so opening it leaves the lesson DOM and draft intact.
-if(!booting&&window.PracticeHub&&typeof window.PracticeHub.mount==='function')window.PracticeHub.mount({
- subject:'math',storageKey:STORAGE_KEY,
- beforeOpen(){save(true);stopVoice();M.cancel();},
- atBoundary(){return state.solved===true;},
+if(!booting&&window.PracticeHub&&typeof window.PracticeHub.mount==='function'){
+mathHubReady=!!J;window.PracticeHub.mount({
+ subject:'math',storageKey:STORAGE_KEY,trainerId:'kubiki',assessment:window.MathCheck,
+ assessmentEnv:{K,P,model(parts){return '<div class="mini-pieces">'+pieces(parts,'',true)+'</div>';}},
+ onConceptGateComplete:resumeMathGate,onCycleContinue:resumeMathCycle,
+ beforeOpen(){pauseMathAdvance();save(true);stopVoice();M.cancel();},
+ atBoundary(){return state.solved===true&&!mathAdvance;},
  // Do not acknowledge raw here: it may also contain another tab's lesson
  // changes. The existing save path must reconcile the complete owner record.
  syncLearning(learning){progress.learning=LP.merge(progress.learning,learning,{generation:progress.resetEpoch});}
 });
+if(!window.PracticeHub.isOpen?.())ensureCurrentMathConcepts();
+}
+document.addEventListener('practice:closed',()=>{armMathAdvance();});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')pauseMathAdvance();else armMathAdvance();});

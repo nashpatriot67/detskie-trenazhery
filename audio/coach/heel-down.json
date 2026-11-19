@@ -1,0 +1,13 @@
+{
+  "id": "heel-down",
+  "src": "audio/coach/heel-down.mp3",
+  "text": "Плавно опусти пятки.",
+  "speech": "Пл+авно опуст+и п+ятки.",
+  "duration": 2.856,
+  "minDuration": 2.8,
+  "speechDuration": 1.675,
+  "bytes": 14324,
+  "sha256": "4c258510a111279c2344f2e26ba27d9deff1b018b974f9fce200c564b74f5931",
+  "decodedPeak": 0.552483,
+  "fingerprint": "dc23bf4b88ec6c08c6d928f9348ed77806f97512b4782cdaabfd7cab27312cb3"
+}
