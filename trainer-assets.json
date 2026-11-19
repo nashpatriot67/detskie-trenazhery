@@ -126,6 +126,7 @@
         "practice-hub.css",
         "life/style.css",
         "room-game.css",
+        "room-tidy-game.css",
         "workspace-layout.css"
       ],
       "scripts": [
@@ -145,10 +146,19 @@
         "offline-bundle.js",
         "workspace-layout.js",
         "room-progress.js",
+        "room-tidy-data.js",
+        "room-tidy-logic.js",
         "room-adventure.js",
         "room-actor.js",
         "room-props.js",
+        "room-toy-art.js",
+        "room-input.js",
         "room-game.js",
+        "room-tidy-scene.js",
+        "room-tidy-layout.js",
+        "room-tidy-artwork.js",
+        "room-tidy-motion.js",
+        "room-tidy-game.js",
         "life/app.js"
       ]
     }

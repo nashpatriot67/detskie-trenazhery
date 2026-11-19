@@ -15,7 +15,13 @@ const missions=[
 ];
 const esc=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const brand='<svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><rect width="64" height="64" rx="17" fill="#387d70"/><path d="M22 22v-5a10 10 0 0 1 20 0v5" stroke="#fff9e9" stroke-width="5"/><rect x="15" y="19" width="34" height="36" rx="10" fill="#fff9e9"/><rect x="21" y="33" width="22" height="15" rx="5" fill="#b8d7bd"/><path d="m27 40 4 4 7-8" stroke="#387d70" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-if(root.location&&typeof root.URLSearchParams==='function'&&new root.URLSearchParams(root.location.search).get('room')==='1'){
+const roomEpisode=root.location&&typeof root.URLSearchParams==='function'?new root.URLSearchParams(root.location.search).get('room'):null;
+if(roomEpisode==='tidy'){
+ if(root.RoomTidyGame&&root.RoomProgress){root.RoomTidyGame.mount(app);root.LifeTrainer=Object.freeze({title:TITLE,storageKey:OWNER,moduleId:'life-room-tidy',missions:missions.map(m=>m.id)});}
+ else app.innerHTML='<main class="life-update"><h1>Завершим обновление</h1><p>Подключись к интернету и открой приключение ещё раз. Прежние результаты останутся на устройстве.</p><a href="./">Все приключения</a></main>';
+ return;
+}
+if(roomEpisode==='1'){
  if(root.RoomGame&&root.RoomProgress&&root.LifeQuestData&&root.ObjectArt){root.RoomGame.mount(app);root.LifeTrainer=Object.freeze({title:TITLE,storageKey:OWNER,moduleId:'life-room-adventure',missions:missions.map(m=>m.id)});}
  else app.innerHTML='<main class="life-update"><h1>Завершим обновление</h1><p>Подключись к интернету и открой приключение ещё раз. Прежние результаты останутся на устройстве.</p><a href="./">Все приключения</a></main>';
  return;
@@ -29,6 +35,7 @@ app.innerHTML='<div class="life-app-shell"><header class="life-topbar"><a class=
 
 if(root.RoomGame){
  doc.getElementById('life-today').insertAdjacentHTML('beforebegin',root.RoomGame.launcher());
+ if(root.RoomTidyGame)doc.getElementById('life-today').insertAdjacentHTML('beforebegin','<a class="room-launch" href="?room=tidy"><span style="font-size:56px;text-align:center" aria-hidden="true">🏎️</span><span><strong>Большая уборка с Рэем</strong><small>Найди машинку, заполни гараж и разбери LEGO и одежду →</small></span></a>');
 }
 
 root.PracticeHub.mount({

@@ -26,6 +26,7 @@
   function own(object, key) { return Object.prototype.hasOwnProperty.call(object, key); }
 
   function create(data, emit) {
+    if (data && data.episode === 'tidy') return root.RoomTidyLogic.create(data, emit);
     data = data || {};
     const sourcePool = data.pool || data.poolQuest ||
       (Array.isArray(data.quests) && data.quests.find(q => q.id === 'life.sport.pool'));
