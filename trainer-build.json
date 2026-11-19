@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
-  "build": "stage1-0353fd61a1da",
+  "build": "stage1-5d6ee6177258",
   "sourceHashes": {
-    "active-breaks.css": "1322b99e5ffba182fa3e105bd656eb16ffa27088c6341e8f0a5fd1b7e4dc8581",
-    "active-breaks.js": "c8739f67ecdf446a20356165899696e627a68dac2307949b0675ee923c934e4b",
+    "active-breaks.css": "7de1e74797c30242d1699a2965065fbb4ce1fac91449458897a22668725f37a4",
+    "active-breaks.js": "15a0108c4ce2bdaa476b9df769d6fec40bfe6e0e5b806fa4202423521f70e5ee",
     "audio-coach.js": "3f127b9878a29ddcc17071954751bea360ed81805de3764b05849cb66fe0b646",
     "audio/coach/credits.txt": "bab9d0a08cdbf12515cb2723e0e261b02fe0dfa4a736ad249763b63b216238cd",
     "audio/coach/license.txt": "1349a4b6148492b44f629e64eed676612e234fe9a839e4f3b277c1482c8849f1",
-    "bricks/app.js": "3667a9f0d78dde40cdb4f91841c26f57b39351c7b331e6a94b1e80a9fe960186",
+    "bricks/app.js": "7622ac09142eaf0cb21ef457485bc2981c9bfdd6c7228f2b1f934401e4494bf6",
     "bricks/bricks.css": "465fa53a5f12f63f476b4145668a6038c447e8beb1a9758158154aa3154ef4f1",
     "bricks/course.js": "3159849bc65cd51403c01e143d3638c852b34e96ea1a8658dfba006edb468c47",
     "bricks/engine.js": "de16802683f061ac0076dab1c85dc3fb2085e880eeb1a309bc4055e496d54a03",
@@ -18,7 +18,7 @@
     "coach-plan.js": "76215d01f7a05e40055d5b794999fb1468a797ce784d80be8dd3258cc903e558",
     "concepts.css": "d91965c0780c095f957a7825d211cc896c65a50931ae42262c734d4e7551f3fb",
     "concepts.js": "a0125a7fbfbf1ffe7e8d147d96e594161a5b88bc139f537af632c1e75c5172c8",
-    "kubiki/app.js": "6dd8772754e612554a24cefda5b0b35744f20768c2d7d24e76d6f8b648239bdc",
+    "kubiki/app.js": "6a73582b7fa342eb9332902da94ed16232cb0e7f7bc89dc212c272ca66ff47aa",
     "kubiki/course.js": "c13d0497e7597ac0b282ef5c4d491ffafe4e92059dcee6c4c2b6628b9dcf9019",
     "kubiki/engine.js": "18fc3d8be232fb5a48286eef31692d9140df60451283b72c36a0785c5d184559",
     "kubiki/recorded-voice.js": "cd5f60cad10d60f99041903ded23afda10c36a36df055343382047152af94173",
@@ -28,8 +28,8 @@
     "learning-journey.js": "20263410a7588aba62bfea161b94f00e0d6d6001c428a9416de8446be639462c",
     "learning-progress.js": "5e68799babe33f4b296c3f3a4ced6b3eda64b55118674929f83bd526ba04f45f",
     "life-quest-data.js": "c6a083bea7a8287b26180e3c53da9f6900fed8b20246279b043cf8669f3a0273",
-    "life-quests.css": "80fd3eeb8dbcb94b3f6e99fc2a5a1ccaccf7fddc22113c8a8ec46879be81fc5b",
-    "life-quests.js": "161e19d5cbc1edf3ac27583edc1d1e15f813e1a8cd6bd40ec880ca5d24cf04e2",
+    "life-quests.css": "a6ff21647fb6147bc57aed4184487d06050745f14fb6f715fdd2449c35c5aa13",
+    "life-quests.js": "305516048b66511a8475808d638148670f51d70d193366c9d1c048b7d25de471",
     "life-school-schedule.js": "23b2185e80b68539d55157ac7f33c2862c0369c843694a0cf68cc82cd3da05b0",
     "life/app.js": "a40f74fc31826e0782e4d70222be21b59436d230e7315db407df5e0085ffae95",
     "life/style.css": "8f3fe3b87246d200de995434557acc02e468963fc4ed6dd5df4ea08a810c44d5",
@@ -37,23 +37,24 @@
     "math-check.js": "57e1e48685ea9c56b9df26e447eb8633404ea673b074d9b6903f6fca445b7516",
     "math-journey.js": "668852334db13b25231a919462d57878d718c0fee21fae4743c286f84f272de0",
     "math-range.js": "d28d7a297b9adffddc5f2a690c051ecbab839556616fa3a16fa946a99ee04efb",
-    "math-workspace.css": "063fec452d72b1afc23f31c8389a078618818f431942325804f202d55927b7f2",
+    "math-workspace.css": "eae95a6b8f24d46dba7478ee1e29d14024c9c5ea7a3a1976e598de8646fab508",
     "math-workspace.js": "f4d4f092d16b03971c568970d3115849f67d491dff9b7e02918c7bfdf8e5ea67",
     "object-art.css": "df2fc071683b50f74e3bbbbaaec3f06379d7f6b89fa0c8eea9d967d316dae219",
     "object-art.js": "32c0dd60665537b0475ac3bd3c1e2d4707105526cb4482e87264d32237a7f3e9",
     "offline-bundle.js": "1c9edd500fd7b1a4d3e8ed8f7c6e51286e4d0d00daf3da8e2ceb24b814471943",
     "place-value-activities.css": "e1e9e551c71fd8ec7fa00bc9661209c71365e0226a69f926663bfd688ecb2e54",
-    "place-value-activities.js": "b302ff223496f1921773caf74537a7db685f9ec797ce5b321f6145c375cf0441",
-    "place-value-motion.js": "07576297e173d83c53f2e569e5abb06f2c89a396260a15f576a02e70aa549113",
-    "place-value.css": "6ab4b3290d6074db9cf114184b7b57ce9cb0193eba2b8847af11889b2e321b55",
+    "place-value-activities.js": "d39d1f1c88f4eb57403d0b5ed4157da290b6c1bd5a1571dbd588843464ba1a44",
+    "place-value-motion.js": "1831f7944f9bd20054722454e397fcdea4c9e8e3f5a58f6f9b210c2bf1354202",
+    "place-value.css": "da51709fa9bd3aa76587f87c1b17d36ea768466b972cd2841370315e0eac77a2",
     "place-value.js": "8e9b59c8d08e9e655522883861e0842553b3c7dba24ff39b6e5c560dcb039b53",
     "practice-hub.css": "7912d72021dd5ea7b0734d98163a04ac529f1e1e195e192e8e87c2047d110e06",
     "practice-hub.js": "be469c8141b55f5e7372513fa2d772979edb9e91a69e1f67147a0b238a72ee3d",
     "room-actor.js": "cbbb5c3fe81db83c7344a0ac4c1bfca0e058ca3d090728512f45a64b40dc62ca",
     "room-adventure.js": "cfc692217a782236cfd6c4cf1ef7c11470d9250307a9ada0274aa604ad64097c",
     "room-game.css": "c94708e524494a594a921775999a6700875d409234ce3c2c5412366bc59f8a4f",
-    "room-game.js": "4c5ed1c734f10e4641cfeaee1394a85ee108f2d43d3452af8fa3188b3a7cbc67",
+    "room-game.js": "827be40aaf892c075e9b0625dbdb47823d40e0d685468aaae28ca320f01f4411",
     "room-input.js": "cdee466b019eb38c2c116066454ef5ad7729c328963f764afa7b76b7fad765b3",
+    "room-pool-art.js": "d7a04a596756915dec0d4519964617d4c7ab1236e0c3103eff8e616c95caa0d3",
     "room-progress.js": "418ff2054b2fa7a0bca74201866d249218b9e5218a7d8c5d7235b6e596821ecd",
     "room-props.js": "15eda60b1cf766025ab67bc159163f16cb5cb33ce47b3062ca4afcb4fc0a9ab3",
     "room-tidy-artwork.js": "b3ea07c3a7152c979c7e58048bae287a599cbe31790c5e6f49ee8a202a025304",
@@ -68,17 +69,17 @@
     "russian-check.js": "bdca0192478029d4b04518faad20ddbfd5f4014847f097c5ffc00709dd14e565",
     "russian-journey.js": "c959c2f907fcfc09faa175542b68d133a488d338a0df4a6ff8e954fc047d9607",
     "school-packing-flow.js": "99a0f56d0ab6245e4da8b1c6bf54114c8dad3f435eff6b2bc528685644a386f6",
-    "slovograd/app.js": "16baff6101e02cbe3b2e1e74348460281b84f6fd167d9cf3c8bc3bfcbe358098",
+    "slovograd/app.js": "7b3f32a6b5959817fe643f3906122f459df50e041f2919fa24cb0af164c9248b",
     "slovograd/core.js": "4195576fdc0bcc20d83a09cbe7ccf28bad276c60a965ca10aa8f1ae929368b61",
     "slovograd/creative.js": "8c71d0de87647cb8c10394bcd34076183e25f8a71af1367f07056e6e8c4a9e34",
     "slovograd/illustrations.js": "e56a7b081a26abd4b4e8cfbc829a7a30ab827566b83e443f6e46e79b61ef19bf",
-    "slovograd/lessons.css": "41343b62ec588e5b4dd6ca270aec678ad3d8f8fad624c467d113144daf557fd2",
+    "slovograd/lessons.css": "76fa78ee4e54e8e94735de30b7efeabe0bbc78c9777f4ff1bec7171c358681e4",
     "slovograd/lessons.js": "83190b3e0a899b6c251974286c3593c6b80bab62996c992593bdb743677be668",
-    "slovograd/recorded-voice.js": "cd5f60cad10d60f99041903ded23afda10c36a36df055343382047152af94173",
+    "slovograd/recorded-voice.js": "c4d577a898d65820263d2bcb57b29ccc207d69f2eb5e60a5c28d56dd3ab11bef",
     "slovograd/sentences.js": "c6736c612a85914dc1795b0d32282e774da03cb39b048db445d7de873f696ca8",
-    "slovograd/style.css": "21aedf8093821f37a8985f519b80620139744479e16f822a9a058de992ca206c",
+    "slovograd/style.css": "98f226d174a6b361efce29af9065435bc1efe81a6fb15111b0fb425c84ff9602",
     "slovograd/voice-manifest.js": "ff68124600ea78d04eda6b181693e3d363b6846585288da734d367fdc6bff686",
-    "slovograd/voice.js": "3010a8c6bfdf98789791230dbd5de15ef5c3d5fa4ea08a5c33e0ee64c640801d",
+    "slovograd/voice.js": "9c8fec03c0808bed013100853e1401be3a9f3406810dcdaa3022bd8f1bfd56df",
     "slovograd/words.js": "e8c9aaefe78468843cad3506f25e0d50a7cd0dcdf1fac1bbbeb3c1490b0e9669",
     "study-clock.js": "34b8003284d520f489b334c74820ad115ea65d683c0baa88d56c2f86f4928ff5",
     "workspace-layout.css": "706102dc108ab138d2ff53a6aae7054c2fb31530b76bddebf4761ca399df927f",
@@ -159,7 +160,7 @@
     "kubiki": {
       "schemaVersion": 1,
       "trainer": "kubiki",
-      "build": "stage1-0353fd61a1da",
+      "build": "stage1-5d6ee6177258",
       "styles": [
         {
           "path": "kubiki/style.css",
@@ -169,9 +170,9 @@
         },
         {
           "path": "place-value.css",
-          "href": "../place-value.css?v=s1-6ab4b3290d60",
-          "hash": "6ab4b3290d6074db9cf114184b7b57ce9cb0193eba2b8847af11889b2e321b55",
-          "checksum": 2653633302
+          "href": "../place-value.css?v=s1-da51709fa9bd",
+          "hash": "da51709fa9bd3aa76587f87c1b17d36ea768466b972cd2841370315e0eac77a2",
+          "checksum": 353253665
         },
         {
           "path": "place-value-activities.css",
@@ -199,9 +200,9 @@
         },
         {
           "path": "active-breaks.css",
-          "href": "../active-breaks.css?v=s1-1322b99e5ffb",
-          "hash": "1322b99e5ffba182fa3e105bd656eb16ffa27088c6341e8f0a5fd1b7e4dc8581",
-          "checksum": 4027800666
+          "href": "../active-breaks.css?v=s1-7de1e74797c3",
+          "hash": "7de1e74797c30242d1699a2965065fbb4ce1fac91449458897a22668725f37a4",
+          "checksum": 2199497151
         },
         {
           "path": "practice-hub.css",
@@ -217,9 +218,9 @@
         },
         {
           "path": "math-workspace.css",
-          "href": "../math-workspace.css?v=s1-063fec452d72",
-          "hash": "063fec452d72b1afc23f31c8389a078618818f431942325804f202d55927b7f2",
-          "checksum": 2719016337
+          "href": "../math-workspace.css?v=s1-eae95a6b8f24",
+          "hash": "eae95a6b8f24d46dba7478ee1e29d14024c9c5ea7a3a1976e598de8646fab508",
+          "checksum": 2275814140
         }
       ],
       "scripts": [
@@ -273,9 +274,9 @@
         },
         {
           "path": "active-breaks.js",
-          "href": "../active-breaks.js?v=s1-c8739f67ecdf",
-          "hash": "c8739f67ecdf446a20356165899696e627a68dac2307949b0675ee923c934e4b",
-          "checksum": 1177751585
+          "href": "../active-breaks.js?v=s1-15a0108c4ce2",
+          "hash": "15a0108c4ce2bdaa476b9df769d6fec40bfe6e0e5b806fa4202423521f70e5ee",
+          "checksum": 2618828889
         },
         {
           "path": "practice-hub.js",
@@ -321,15 +322,15 @@
         },
         {
           "path": "place-value-motion.js",
-          "href": "../place-value-motion.js?v=s1-07576297e173",
-          "hash": "07576297e173d83c53f2e569e5abb06f2c89a396260a15f576a02e70aa549113",
-          "checksum": 2345316646
+          "href": "../place-value-motion.js?v=s1-1831f7944f9b",
+          "hash": "1831f7944f9bd20054722454e397fcdea4c9e8e3f5a58f6f9b210c2bf1354202",
+          "checksum": 928032027
         },
         {
           "path": "place-value-activities.js",
-          "href": "../place-value-activities.js?v=s1-b302ff223496",
-          "hash": "b302ff223496f1921773caf74537a7db685f9ec797ce5b321f6145c375cf0441",
-          "checksum": 3365926627
+          "href": "../place-value-activities.js?v=s1-d39d1f1c88f4",
+          "hash": "d39d1f1c88f4eb57403d0b5ed4157da290b6c1bd5a1571dbd588843464ba1a44",
+          "checksum": 3226675947
         },
         {
           "path": "math-check.js",
@@ -357,9 +358,9 @@
         },
         {
           "path": "kubiki/app.js",
-          "href": "app.js?v=s1-6dd8772754e6",
-          "hash": "6dd8772754e612554a24cefda5b0b35744f20768c2d7d24e76d6f8b648239bdc",
-          "checksum": 1703910513
+          "href": "app.js?v=s1-6a73582b7fa3",
+          "hash": "6a73582b7fa342eb9332902da94ed16232cb0e7f7bc89dc212c272ca66ff47aa",
+          "checksum": 2524608852
         }
       ],
       "media": [
@@ -751,7 +752,7 @@
     "bricks": {
       "schemaVersion": 1,
       "trainer": "bricks",
-      "build": "stage1-0353fd61a1da",
+      "build": "stage1-5d6ee6177258",
       "styles": [
         {
           "path": "bricks/style.css",
@@ -767,9 +768,9 @@
         },
         {
           "path": "place-value.css",
-          "href": "../place-value.css?v=s1-6ab4b3290d60",
-          "hash": "6ab4b3290d6074db9cf114184b7b57ce9cb0193eba2b8847af11889b2e321b55",
-          "checksum": 2653633302
+          "href": "../place-value.css?v=s1-da51709fa9bd",
+          "hash": "da51709fa9bd3aa76587f87c1b17d36ea768466b972cd2841370315e0eac77a2",
+          "checksum": 353253665
         },
         {
           "path": "place-value-activities.css",
@@ -797,9 +798,9 @@
         },
         {
           "path": "active-breaks.css",
-          "href": "../active-breaks.css?v=s1-1322b99e5ffb",
-          "hash": "1322b99e5ffba182fa3e105bd656eb16ffa27088c6341e8f0a5fd1b7e4dc8581",
-          "checksum": 4027800666
+          "href": "../active-breaks.css?v=s1-7de1e74797c3",
+          "hash": "7de1e74797c30242d1699a2965065fbb4ce1fac91449458897a22668725f37a4",
+          "checksum": 2199497151
         },
         {
           "path": "practice-hub.css",
@@ -815,9 +816,9 @@
         },
         {
           "path": "math-workspace.css",
-          "href": "../math-workspace.css?v=s1-063fec452d72",
-          "hash": "063fec452d72b1afc23f31c8389a078618818f431942325804f202d55927b7f2",
-          "checksum": 2719016337
+          "href": "../math-workspace.css?v=s1-eae95a6b8f24",
+          "hash": "eae95a6b8f24d46dba7478ee1e29d14024c9c5ea7a3a1976e598de8646fab508",
+          "checksum": 2275814140
         }
       ],
       "scripts": [
@@ -871,9 +872,9 @@
         },
         {
           "path": "active-breaks.js",
-          "href": "../active-breaks.js?v=s1-c8739f67ecdf",
-          "hash": "c8739f67ecdf446a20356165899696e627a68dac2307949b0675ee923c934e4b",
-          "checksum": 1177751585
+          "href": "../active-breaks.js?v=s1-15a0108c4ce2",
+          "hash": "15a0108c4ce2bdaa476b9df769d6fec40bfe6e0e5b806fa4202423521f70e5ee",
+          "checksum": 2618828889
         },
         {
           "path": "practice-hub.js",
@@ -919,15 +920,15 @@
         },
         {
           "path": "place-value-motion.js",
-          "href": "../place-value-motion.js?v=s1-07576297e173",
-          "hash": "07576297e173d83c53f2e569e5abb06f2c89a396260a15f576a02e70aa549113",
-          "checksum": 2345316646
+          "href": "../place-value-motion.js?v=s1-1831f7944f9b",
+          "hash": "1831f7944f9bd20054722454e397fcdea4c9e8e3f5a58f6f9b210c2bf1354202",
+          "checksum": 928032027
         },
         {
           "path": "place-value-activities.js",
-          "href": "../place-value-activities.js?v=s1-b302ff223496",
-          "hash": "b302ff223496f1921773caf74537a7db685f9ec797ce5b321f6145c375cf0441",
-          "checksum": 3365926627
+          "href": "../place-value-activities.js?v=s1-d39d1f1c88f4",
+          "hash": "d39d1f1c88f4eb57403d0b5ed4157da290b6c1bd5a1571dbd588843464ba1a44",
+          "checksum": 3226675947
         },
         {
           "path": "math-check.js",
@@ -955,9 +956,9 @@
         },
         {
           "path": "bricks/app.js",
-          "href": "app.js?v=s1-3667a9f0d78d",
-          "hash": "3667a9f0d78dde40cdb4f91841c26f57b39351c7b331e6a94b1e80a9fe960186",
-          "checksum": 2137742993
+          "href": "app.js?v=s1-7622ac09142e",
+          "hash": "7622ac09142eaf0cb21ef457485bc2981c9bfdd6c7228f2b1f934401e4494bf6",
+          "checksum": 2766134293
         }
       ],
       "media": [
@@ -1349,19 +1350,19 @@
     "slovograd": {
       "schemaVersion": 1,
       "trainer": "slovograd",
-      "build": "stage1-0353fd61a1da",
+      "build": "stage1-5d6ee6177258",
       "styles": [
         {
           "path": "slovograd/style.css",
-          "href": "style.css?v=s1-21aedf809382",
-          "hash": "21aedf8093821f37a8985f519b80620139744479e16f822a9a058de992ca206c",
-          "checksum": 829471069
+          "href": "style.css?v=s1-98f226d174a6",
+          "hash": "98f226d174a6b361efce29af9065435bc1efe81a6fb15111b0fb425c84ff9602",
+          "checksum": 2383743470
         },
         {
           "path": "slovograd/lessons.css",
-          "href": "lessons.css?v=s1-41343b62ec58",
-          "hash": "41343b62ec588e5b4dd6ca270aec678ad3d8f8fad624c467d113144daf557fd2",
-          "checksum": 1641929296
+          "href": "lessons.css?v=s1-76fa78ee4e54",
+          "hash": "76fa78ee4e54e8e94735de30b7efeabe0bbc78c9777f4ff1bec7171c358681e4",
+          "checksum": 1191079929
         },
         {
           "path": "concepts.css",
@@ -1377,9 +1378,9 @@
         },
         {
           "path": "active-breaks.css",
-          "href": "../active-breaks.css?v=s1-1322b99e5ffb",
-          "hash": "1322b99e5ffba182fa3e105bd656eb16ffa27088c6341e8f0a5fd1b7e4dc8581",
-          "checksum": 4027800666
+          "href": "../active-breaks.css?v=s1-7de1e74797c3",
+          "hash": "7de1e74797c30242d1699a2965065fbb4ce1fac91449458897a22668725f37a4",
+          "checksum": 2199497151
         },
         {
           "path": "practice-hub.css",
@@ -1439,9 +1440,9 @@
         },
         {
           "path": "active-breaks.js",
-          "href": "../active-breaks.js?v=s1-c8739f67ecdf",
-          "hash": "c8739f67ecdf446a20356165899696e627a68dac2307949b0675ee923c934e4b",
-          "checksum": 1177751585
+          "href": "../active-breaks.js?v=s1-15a0108c4ce2",
+          "hash": "15a0108c4ce2bdaa476b9df769d6fec40bfe6e0e5b806fa4202423521f70e5ee",
+          "checksum": 2618828889
         },
         {
           "path": "practice-hub.js",
@@ -1487,15 +1488,15 @@
         },
         {
           "path": "slovograd/recorded-voice.js",
-          "href": "recorded-voice.js?v=s1-cd5f60cad10d",
-          "hash": "cd5f60cad10d60f99041903ded23afda10c36a36df055343382047152af94173",
-          "checksum": 2351575960
+          "href": "recorded-voice.js?v=s1-c4d577a898d6",
+          "hash": "c4d577a898d65820263d2bcb57b29ccc207d69f2eb5e60a5c28d56dd3ab11bef",
+          "checksum": 3631986941
         },
         {
           "path": "slovograd/voice.js",
-          "href": "voice.js?v=s1-3010a8c6bfdf",
-          "hash": "3010a8c6bfdf98789791230dbd5de15ef5c3d5fa4ea08a5c33e0ee64c640801d",
-          "checksum": 1690185687
+          "href": "voice.js?v=s1-9c8fec03c080",
+          "hash": "9c8fec03c0808bed013100853e1401be3a9f3406810dcdaa3022bd8f1bfd56df",
+          "checksum": 2664215968
         },
         {
           "path": "slovograd/lessons.js",
@@ -1529,9 +1530,9 @@
         },
         {
           "path": "slovograd/app.js",
-          "href": "app.js?v=s1-16baff6101e0",
-          "hash": "16baff6101e02cbe3b2e1e74348460281b84f6fd167d9cf3c8bc3bfcbe358098",
-          "checksum": 3014707365
+          "href": "app.js?v=s1-7b3f32a6b595",
+          "hash": "7b3f32a6b5959817fe643f3906122f459df50e041f2919fa24cb0af164c9248b",
+          "checksum": 941156645
         }
       ],
       "media": [
@@ -1923,7 +1924,7 @@
     "life": {
       "schemaVersion": 1,
       "trainer": "life",
-      "build": "stage1-0353fd61a1da",
+      "build": "stage1-5d6ee6177258",
       "styles": [
         {
           "path": "concepts.css",
@@ -1939,15 +1940,15 @@
         },
         {
           "path": "life-quests.css",
-          "href": "../life-quests.css?v=s1-80fd3eeb8dbc",
-          "hash": "80fd3eeb8dbcb94b3f6e99fc2a5a1ccaccf7fddc22113c8a8ec46879be81fc5b",
-          "checksum": 4221054118
+          "href": "../life-quests.css?v=s1-a6ff21647fb6",
+          "hash": "a6ff21647fb6147bc57aed4184487d06050745f14fb6f715fdd2449c35c5aa13",
+          "checksum": 4257700898
         },
         {
           "path": "active-breaks.css",
-          "href": "../active-breaks.css?v=s1-1322b99e5ffb",
-          "hash": "1322b99e5ffba182fa3e105bd656eb16ffa27088c6341e8f0a5fd1b7e4dc8581",
-          "checksum": 4027800666
+          "href": "../active-breaks.css?v=s1-7de1e74797c3",
+          "hash": "7de1e74797c30242d1699a2965065fbb4ce1fac91449458897a22668725f37a4",
+          "checksum": 2199497151
         },
         {
           "path": "practice-hub.css",
@@ -2043,15 +2044,15 @@
         },
         {
           "path": "life-quests.js",
-          "href": "../life-quests.js?v=s1-161e19d5cbc1",
-          "hash": "161e19d5cbc1edf3ac27583edc1d1e15f813e1a8cd6bd40ec880ca5d24cf04e2",
-          "checksum": 242142715
+          "href": "../life-quests.js?v=s1-305516048b66",
+          "hash": "305516048b66511a8475808d638148670f51d70d193366c9d1c048b7d25de471",
+          "checksum": 3572362778
         },
         {
           "path": "active-breaks.js",
-          "href": "../active-breaks.js?v=s1-c8739f67ecdf",
-          "hash": "c8739f67ecdf446a20356165899696e627a68dac2307949b0675ee923c934e4b",
-          "checksum": 1177751585
+          "href": "../active-breaks.js?v=s1-15a0108c4ce2",
+          "hash": "15a0108c4ce2bdaa476b9df769d6fec40bfe6e0e5b806fa4202423521f70e5ee",
+          "checksum": 2618828889
         },
         {
           "path": "practice-hub.js",
@@ -2120,10 +2121,16 @@
           "checksum": 2970869113
         },
         {
+          "path": "room-pool-art.js",
+          "href": "../room-pool-art.js?v=s1-d7a04a596756",
+          "hash": "d7a04a596756915dec0d4519964617d4c7ab1236e0c3103eff8e616c95caa0d3",
+          "checksum": 3096611703
+        },
+        {
           "path": "room-game.js",
-          "href": "../room-game.js?v=s1-4c5ed1c734f1",
-          "hash": "4c5ed1c734f10e4641cfeaee1394a85ee108f2d43d3452af8fa3188b3a7cbc67",
-          "checksum": 3026993757
+          "href": "../room-game.js?v=s1-827be40aaf89",
+          "hash": "827be40aaf892c075e9b0625dbdb47823d40e0d685468aaae28ca320f01f4411",
+          "checksum": 2315770983
         },
         {
           "path": "room-tidy-scene.js",
@@ -2549,8 +2556,8 @@
       ]
     }
   },
-  "coreResources": 163,
-  "coreBytes": 16303636,
+  "coreResources": 164,
+  "coreBytes": 16575225,
   "budgetBytes": 16777216,
   "coachClips": 41,
   "coachBytes": 964180

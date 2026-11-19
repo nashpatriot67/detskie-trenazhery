@@ -294,7 +294,7 @@ function acknowledgeLesson(){
  state.lesson=null;rememberSession();save();
  if(lesson.after==='reveal'){applyWorkedExample();return;}
  if(lesson.reason==='mistake')notify('Вернулись к заданию. Твой ответ сохранён — проверь его по шагам и исправь то, что нужно.');
- render();$('.exercise-card,.task-body')?.scrollIntoView({behavior:'smooth',block:'start'});
+ render();$('.exercise-card,.task-body')?.scrollIntoView({behavior:window.matchMedia(rusMotionPreference).matches?'instant':'smooth',block:'start'});
 }
 function remediationLesson(){
  const t=current();if(state.view==='morphology'&&state.mode.morphology==='parts'){
@@ -323,8 +323,22 @@ function ensureConcepts(){
 }
 function conceptWaiting(){return intro('СНАЧАЛА ПРАВИЛО — ПОТОМ ЗАДАНИЯ','Три маленьких шага по этой теме','Проверим, как пользоваться правилом. Затем вернёмся к этому же заданию.')+`<section class="exercise-card"><p>Твой ответ и место занятия сохранены. Можно остановиться и продолжить позже.</p><button class="btn primary" data-action="concept-resume">Продолжить изучение правила ${ico('arrow')}</button><button class="btn ghost" data-view="home">На главную</button></section>`;}
 
+const GRAMMAR_STROKES={
+ prefix:'M2 4H42V9',
+ root:'M2 10Q22 -4 42 10',
+ suffix:'M2 9 22 2 42 9',
+ subject:'M1 7H43',
+ predicate:'M1 4H43 M1 9H43',
+ attribute:'M1 7q3-5 6 0t6 0 6 0 6 0 6 0 6 0 6 0',
+ object:'M1 7h6 m3 0h6 m3 0h6 m3 0h6 m3 0h6',
+ adverbial:'M1 7h7 m3 0h.2 m3 0h7 m3 0h.2 m3 0h7 m3 0h.2 m3 0h5'
+};
+function grammarStroke(kind){
+ const path=GRAMMAR_STROKES[kind];
+ return path?`<svg class="rus-grammar-stroke" viewBox="0 0 44 12" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="${path}" pathLength="1" vector-effect="non-scaling-stroke"/></svg>`:'';
+}
 const DIAGRAM_LABELS={prefix:'приставка',root:'корень',suffix:'суффикс',ending:'окончание',zero:'нулевое окончание',subject:'подлежащее',predicate:'сказуемое',attribute:'определение',object:'дополнение',adverbial:'обстоятельство',right:'верно',wrong:'так не пишем',rest:'',step:''};
-function diagramView(diagram){return `<figure class="lesson-diagram"><h3>${esc(diagram.title)}</h3>${diagram.rows.map(row=>`<div class="diagram-row">${row.label?`<div class="diagram-label">${esc(row.label)}</div>`:''}<div class="diagram-parts">${row.parts.map(part=>`<span class="diagram-part ${part.kind}"><span>${esc(part.text)}</span>${DIAGRAM_LABELS[part.kind]?`<small>${DIAGRAM_LABELS[part.kind]}</small>`:''}</span>`).join('')}</div>${row.caption?`<p class="diagram-caption">${esc(row.caption)}</p>`:''}</div>`).join('')}${diagram.caption?`<figcaption class="diagram-caption">${esc(diagram.caption)}</figcaption>`:''}</figure>`;}
+function diagramView(diagram){return `<figure class="lesson-diagram"><h3>${esc(diagram.title)}</h3>${diagram.rows.map(row=>`<div class="diagram-row">${row.label?`<div class="diagram-label">${esc(row.label)}</div>`:''}<div class="diagram-parts">${row.parts.map(part=>`<span class="diagram-part ${part.kind}"><span class="rus-diagram-text">${esc(part.text)}${grammarStroke(part.kind)}</span>${DIAGRAM_LABELS[part.kind]?`<small>${DIAGRAM_LABELS[part.kind]}</small>`:''}</span>`).join('')}</div>${row.caption?`<p class="diagram-caption">${esc(row.caption)}</p>`:''}</div>`).join('')}${diagram.caption?`<figcaption class="diagram-caption">${esc(diagram.caption)}</figcaption>`:''}</figure>`;}
 function workedDiagram(){
  const t=current();if(state.view==='morphology'&&state.mode.morphology==='parts')return {title:'Разбираем этот пример по шагам',rows:[{parts:t.parts.map(p=>({text:p.text||'∅',kind:p.text?p.kind:'zero'})),caption:t.explain}],caption:'Основа: '+t.base+'. Это учебный пример, отметку за него не ставим.'};
  if(state.view==='syntax'){
@@ -341,7 +355,7 @@ function lessonTaskFocus(){
 }
 function lessonScreen(){
  const active=state.lesson,unit=L[active.id],retry=active.reason==='mistake',worked=active.reason==='worked',quiz=unit.check,choice=active.quizChoice,correct=choice===quiz.correct;
- return intro(retry?'ОШИБКА ПОДСКАЗАЛА, ЧТО ПОВТОРИТЬ':'СНАЧАЛА ПОЙМЁМ — ПОТОМ ПОПРОБУЕМ',retry?'Давай разберёмся вместе':'Маленькое объяснение перед практикой','Можно прочитать или послушать. Затем вернёмся к заданию.')+`<section class="lesson-screen trainer-workspace" data-workspace-key="${esc(russianWorkspaceKey('lesson:'+unit.id))}" role="region" aria-labelledby="lesson-heading">${learningStages(true)}<article class="lesson-card"><div class="lesson-top"><div><span class="lesson-kicker">${retry?'ПОВТОРИМ СПОСОБ РЕШЕНИЯ':worked?'УЧЕБНЫЙ ПРИМЕР':'РАЗБИРАЕМ ПО ШАГАМ'}</span><h2 class="lesson-title" id="lesson-heading" data-workspace-focus tabindex="-1">${esc(unit.title)}</h2></div><span class="lesson-guide-owl">${window.RUS_ART.owl}</span></div><p class="lesson-lead">${esc(unit.lead)}</p>${retry?`<div class="lesson-context"><b>На что обратим внимание</b><p>${esc(active.feedback)}</p><small>Ответ остаётся в задании. После объяснения можно будет его исправить.</small></div>`:''}<div class="lesson-actions"><button class="btn secondary" data-action="lesson-read">${ico('sound')} Послушать объяснение</button><button class="btn ghost" data-action="lesson-stop">${ico('stop')} Остановить</button></div><div class="lesson-steps">${unit.steps.map((step,i)=>`<section class="lesson-step"><span class="lesson-step-num">${i+1}</span><div class="lesson-step-body"><h3>${esc(step.title)}</h3><p>${esc(step.text)}</p>${step.example?`<div class="lesson-example">${esc(step.example)}</div>`:''}<button class="btn ghost lesson-step-sound" data-action="lesson-read" data-step="${i}" aria-label="Послушать шаг ${i+1}">${ico('sound')} Послушать шаг</button></div></section>`).join('')}</div><div class="lesson-diagrams">${unit.diagrams.map(diagramView).join('')}${worked&&workedDiagram()?diagramView(workedDiagram()):''}</div><section class="lesson-remember"><h3>Возьми с собой в задание</h3><ul>${unit.remember.map(text=>`<li>${esc(text)}</li>`).join('')}</ul></section><div class="lesson-details">${unit.details.map((detail,i)=>`<details data-rule-key="${unit.id}:detail:${i}"><summary>${esc(detail.title)}</summary><p>${esc(detail.text)}</p></details>`).join('')}</div><details class="lesson-check" ${choice!==null?'open':''}><summary>Хочешь проверить себя?</summary><p>${esc(quiz.prompt)}</p><div class="lesson-choices">${quiz.options.map((option,i)=>`<button class="lesson-choice ${choice===i?'chosen '+(correct?'correct':'incorrect'):''}" data-lesson-choice="${i}" aria-pressed="${choice===i}">${esc(option)}</button>`).join('')}</div>${choice!==null?`<p class="lesson-check-feedback">${correct?'Верно! ':'Подумай ещё. '}${esc(quiz.explanation)}</p>`:''}<small>Это небольшая самопроверка, отметка за неё не ставится.</small></details>${state.feedback&&state.feedback.text!==active.feedback?feedbackView():''}${lessonTaskFocus()}<div class="lesson-return workspace-actions"><p>${retry?'Теперь попробуй применить эти шаги к своему ответу.':'Когда будешь готов, переходи к практике.'}</p><button class="btn primary" data-action="lesson-continue">${retry?'Понял — исправлю ответ':worked?'Понял — к учебному примеру':'Понял — к заданию'} ${ico('arrow')}</button></div></article></section>`;
+ return intro(retry?'ОШИБКА ПОДСКАЗАЛА, ЧТО ПОВТОРИТЬ':'СНАЧАЛА ПОЙМЁМ — ПОТОМ ПОПРОБУЕМ',retry?'Давай разберёмся вместе':'Маленькое объяснение перед практикой','Можно прочитать или послушать. Затем вернёмся к заданию.')+`<section class="lesson-screen trainer-workspace" data-workspace-key="${esc(russianWorkspaceKey('lesson:'+unit.id))}" role="region" aria-labelledby="lesson-heading">${learningStages(true)}<article class="lesson-card"><div class="lesson-top"><div><span class="lesson-kicker">${retry?'ПОВТОРИМ СПОСОБ РЕШЕНИЯ':worked?'УЧЕБНЫЙ ПРИМЕР':'РАЗБИРАЕМ ПО ШАГАМ'}</span><h2 class="lesson-title" id="lesson-heading" data-workspace-focus tabindex="-1">${esc(unit.title)}</h2></div><span class="lesson-guide-owl rus-sonya-avatar">${window.RUS_ART.owl}${speechWaves()}</span></div><p class="lesson-lead">${esc(unit.lead)}</p>${retry?`<div class="lesson-context"><b>На что обратим внимание</b><p>${esc(active.feedback)}</p><small>Ответ остаётся в задании. После объяснения можно будет его исправить.</small></div>`:''}<div class="lesson-actions"><button class="btn secondary" data-action="lesson-read">${ico('sound')} Послушать объяснение</button><button class="btn ghost" data-action="lesson-stop">${ico('stop')} Остановить</button></div><div class="lesson-steps">${unit.steps.map((step,i)=>`<section class="lesson-step"><span class="lesson-step-num">${i+1}</span><div class="lesson-step-body"><h3>${esc(step.title)}</h3><p>${esc(step.text)}</p>${step.example?`<div class="lesson-example">${esc(step.example)}</div>`:''}<button class="btn ghost lesson-step-sound" data-action="lesson-read" data-step="${i}" aria-label="Послушать шаг ${i+1}">${ico('sound')} Послушать шаг</button></div></section>`).join('')}</div><div class="lesson-diagrams">${unit.diagrams.map(diagramView).join('')}${worked&&workedDiagram()?diagramView(workedDiagram()):''}</div><section class="lesson-remember"><h3>Возьми с собой в задание</h3><ul>${unit.remember.map(text=>`<li>${esc(text)}</li>`).join('')}</ul></section><div class="lesson-details">${unit.details.map((detail,i)=>`<details data-rule-key="${unit.id}:detail:${i}"><summary>${esc(detail.title)}</summary><p>${esc(detail.text)}</p></details>`).join('')}</div><details class="lesson-check" ${choice!==null?'open':''}><summary>Хочешь проверить себя?</summary><p>${esc(quiz.prompt)}</p><div class="lesson-choices">${quiz.options.map((option,i)=>`<button class="lesson-choice ${choice===i?'chosen '+(correct?'correct':'incorrect'):''}" data-lesson-choice="${i}" aria-pressed="${choice===i}">${esc(option)}</button>`).join('')}</div>${choice!==null?`<p class="lesson-check-feedback">${correct?'Верно! ':'Подумай ещё. '}${esc(quiz.explanation)}</p>`:''}<small>Это небольшая самопроверка, отметка за неё не ставится.</small></details>${state.feedback&&state.feedback.text!==active.feedback?feedbackView():''}${lessonTaskFocus()}<div class="lesson-return workspace-actions"><p>${retry?'Теперь попробуй применить эти шаги к своему ответу.':'Когда будешь готов, переходи к практике.'}</p><button class="btn primary" data-action="lesson-continue">${retry?'Понял — исправлю ответ':worked?'Понял — к учебному примеру':'Понял — к заданию'} ${ico('arrow')}</button></div></article></section>`;
 }
 function inlineLesson(){
  const id=state.view==='morphology'&&state.mode.morphology==='parts'&&PARTS[state.brush]?'morph-'+state.brush:lessonForCurrent(),unit=L[id];if(!unit)return '';
@@ -365,7 +379,7 @@ function prepare(){
  if(state.view==='dialogues')state.chat=[{who:'coach',text:t.intro},{who:'coach',text:t.turns[0].prompt}];
  ensureLesson();
 }
-function go(view){writeIntent=true;rememberSession();rememberCourse();resetVoice();if(META[view])continueSection(view);else{state.view=view;state.review=false;state.reviewLists={};state.category='all';state.topic='all';prepare();}render();window.scrollTo({top:0,behavior:'smooth'});}
+function go(view){writeIntent=true;rememberSession();rememberCourse();resetVoice();if(META[view])continueSection(view);else{state.view=view;state.review=false;state.reviewLists={};state.category='all';state.topic='all';prepare();}render();window.scrollTo({top:0,behavior:window.matchMedia(rusMotionPreference).matches?'instant':'smooth'});}
 function complete(){writeIntent=true;if(!state.revealed){const oldKey=key(),scope=completionKey();progress.done[oldKey]=true;progress.completions[scope]=true;delete progress.mistakes[oldKey];pendingAwards.done[oldKey]=true;pendingAwards.completions[scope]=true;pendingAwards.mistakes[oldKey]=false;if(inSpellingCourse()){const ck=state.grade+':'+state.mode.spelling+':'+current().id;progress.spellingCourse.done[ck]=true;pendingAwards.course[ck]=true;}observeAttempt('correct');save();}state.solved=true;if(state.view==='spelling'&&!state.revealed)state.meaning=makeMeaning();}
 function mistake(){writeIntent=true;markAssistance('error');progress.mistakes[key()]=true;pendingAwards.mistakes[key()]=true;observeAttempt('incorrect');save();}
 // New evidence is additive; historical completion never fabricates independence.
@@ -433,14 +447,30 @@ function exercise(){
 }
 
 function tabs(){if(inSpellingCourse())return '';let pairs=state.view==='spelling'?[['construct','Собери'],['write','Напиши'],['dictation','Диктант']]:state.view==='morphology'?[['parts','Части слова'],['prepositions','Предлог и приставка']]:state.view==='syntax'?[['base','Главные слова'],['full','Весь разбор · сложнее']]:[];return pairs.length?`<div class="mode-tabs" role="tablist">${pairs.map(([id,label])=>`<button class="${state.mode[state.view]===id?'active':''}" role="tab" aria-selected="${state.mode[state.view]===id}" data-mode="${id}">${label}</button>`).join('')}</div>`:'';}
-function spellingView(){const t=current(),mode=state.mode.spelling;return `<h2>${mode==='construct'?'Собери слово по буквам':mode==='write'?'Впиши слово целиком':'Слушай и пиши'}</h2><p class="task-subtitle">${mode==='construct'?'Нажимай на буквы или перетаскивай их. В наборе есть лишние: вспомни правило и выбери верные.':mode==='write'?'Подумай о пропущенной букве. Напиши слово самостоятельно.':'Послушай слово, затем напиши его. Можно прослушать ещё раз.'}</p>${mode==='dictation'&&!state.solved?`<button class="dictation-button" data-action="say-word">${ico('sound')} Послушать слово</button>`:`<div class="big-word">${[...(state.solved?t.word:t.masked)].map(c=>`<span class="letter ${c==='□'?'gap':''}">${c}</span>`).join('')}</div>`}${mode==='construct'?`<div class="word-slots drop-area" data-drop="word" role="group" aria-label="Собираем слово">${Array.from({length:t.word.length},(_,i)=>state.assembled[i]!==undefined?`<button class="slot filled" data-remove="${i}" data-drag="assembled" data-id="${state.assembled[i]}" data-slot="${i}" aria-label="Убрать букву ${state.bank[state.assembled[i]].text}">${state.bank[state.assembled[i]].text}</button>`:`<span class="slot empty" data-slot="${i}">${i+1}</span>`).join('')}</div><div class="letter-bank drop-area" data-drop="bank" aria-label="Буквы для сборки">${state.bank.map(x=>`<button class="letter-tile ${state.assembled.includes(x.id)?'used':''}" data-letter="${x.id}" data-drag="letter" data-id="${x.id}" ${state.assembled.includes(x.id)||state.solved?'disabled':''}>${x.text}</button>`).join('')}</div>`:`<label class="answer-label" for="word-answer">Моё слово<input id="word-answer" class="writing-input answer-input" data-input="draft" value="${esc(state.draft)}" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Пиши здесь…" ${state.solved?'disabled':''}></label>`}${state.solved?`<div class="example-card"><b>${esc(t.word)}</b><p>${esc(t.sentence)}</p><button class="btn ghost" data-action="lesson-open">Почему так пишется?</button></div>${attemptResult()}${meaningInvitation()}`:''}`;}
-function brushes(defs){return `<div class="brushes" role="group" aria-label="Выбери цвет для разбора">${Object.entries(defs).map(([id,x])=>`<button class="brush ${state.brush===id?'active':''} ${id}" data-brush="${id}" aria-pressed="${state.brush===id}"><i style="background:${x.color}"></i>${x.name}</button>`).join('')}<button class="brush ${state.brush===''?'active':''}" data-brush="" aria-label="Ластик">Ластик</button></div>`;}
-function morphologyView(){const t=current();if(state.mode.morphology==='prepositions')return `<h2>Раздельно или слитно?</h2><p class="task-subtitle">Предлог — отдельное слово. Приставка пишется со словом.</p><div class="question-card sentence-context">${esc(t.context)}</div><div class="preposition-pair"><span>${esc(t.left)}</span><span>?</span><span>${esc(t.right)}</span></div><div class="choice-group"><button class="choice-btn ${state.choices[0]==='separate'?'active':''}" data-preposition="separate">${esc(t.left)} ${esc(t.right)}<small>раздельно</small></button><button class="choice-btn ${state.choices[0]==='together'?'active':''}" data-preposition="together">${esc(t.left+t.right)}<small>слитно</small></button></div>${state.solved?`<div class="example-card">${esc(t.explain)}</div>`:''}`;return `<h2>Найди части слова</h2><p class="task-subtitle">${state.topic==='prefix'?'Начни с приставки, затем выдели остальные части слова.':state.topic==='suffix'?'Начни с суффикса, затем выдели остальные части слова.':'Выбери часть слова, затем нажми на её буквы.'} Ластик снимает цвет.</p>${brushes(PARTS)}<div class="rus-word-scroll" data-rus-scroll="morphology-word" tabindex="0" aria-label="Слово для разбора: можно сдвигать по горизонтали"><div class="morpheme-word" role="group" aria-label="Разбери слово ${esc(t.word)}">${[...t.word].map((c,i)=>`<button class="char ${state.marks[i]||''}" data-mark="${i}" aria-label="Буква ${c}${state.marks[i]?', '+PARTS[state.marks[i]].name:''}" ${state.solved?'disabled':''}>${c}</button>`).join('')}</div></div><p class="rus-word-pan-note">Если слово не помещается, сдвинь его в сторону.</p><button class="zero-ending ${state.zero?'active':''}" data-action="zero" aria-pressed="${state.zero}">∅ Нулевое окончание</button><p class="muted task-note">Если окончание есть, выдели его буквы. Если оно нулевое — выбери ∅.</p>${state.solved||state.revealed?`<div class="word-base">Основа: <b>${esc(t.base)}</b></div><div class="example-card">${esc(t.explain)}</div>`:''}<button class="btn ghost reveal-button" data-action="reveal">Показать учебный разбор</button>`;}
-function syntaxView(){const t=current(),full=state.mode.syntax==='full',defs=Object.entries(ROLES).filter(([id])=>full||['subject','predicate'].includes(id)).reduce((defs,[id,role])=>{defs[id]=role;return defs;},{});return `<h2>${full?'У каждого слова своя работа':'Найди главных героев'}</h2><p class="task-subtitle">${full?'Выбери роль, затем выдели слово или всю группу с предлогом.':'Выдели подлежащее и сказуемое. Остальные слова оставь без цвета.'}</p>${brushes(defs)}<div class="syntax-sentence">${t.words.map((w,i)=>`<button class="syntax-token ${state.marks[i]||''}" data-mark="${i}" ${state.solved?'disabled':''}>${esc(w)}</button>`).join('')}<span class="sentence-punct">${esc(t.punct)}</span></div><div class="question-card"><b>Задавай вопросы</b><p>${esc(t.questions.subject)}<br>${esc(t.questions.predicate)}</p></div>${state.solved||state.revealed?`<div class="example-card">${esc(t.explain)}</div>`:''}<button class="btn ghost reveal-button" data-action="reveal">Показать учебный разбор</button>`;}
-function builderView(){const t=current();return `<h2>Построй предложение</h2><p class="task-subtitle">Сегодня строим по этой модели. Нажимай на карточки или перетаскивай их.</p><div class="pattern">${esc(t.pattern)}</div><div class="sentence-slots drop-area" data-drop="sentence"><span class="sr-only">Твоё предложение</span>${state.assembled.length?state.assembled.map((id,i)=>`<button class="sentence-chip ${t.chunks[id].role}" data-remove="${i}" data-drag="assembled" data-id="${id}" data-slot="${i}">${esc(t.chunks[id].text)}</button>`).join(''):'<span class="empty-message">Положи сюда первую карточку</span>'}</div><div class="builder-bank drop-area" data-drop="bank">${state.bank.filter(id=>!state.assembled.includes(id)).map(id=>`<button class="sentence-chip ${t.chunks[id].role}" data-chunk="${id}" data-drag="chunk" data-id="${id}"><small>${ROLES[t.chunks[id].role].question}</small>${esc(t.chunks[id].text)}</button>`).join('')}</div>${state.solved?`<div class="example-card"><b>${esc(K.sentence(t.chunks,state.assembled))}</b><p>${esc(t.explain)}</p><button class="btn ghost" data-action="say-built">${ico('sound')} Послушать</button></div>`:''}`;}
-function voicePanel(){const caps=V.capabilities();return `<details class="rus-voice-tools" data-rule-key="voice:tools:${state.view}" data-workspace-disclosure="rus:voice:${state.view}" ${state.voice.listening||state.voice.recording||state.voice.url?'open':''}><summary>${ico('mic')} Хочу ответить голосом</summary><section class="voice-panel"><div class="voice-panel-heading"><span>${ico('mic')} Можно ответить голосом</span><small>Микрофон включается только по кнопке</small></div><div class="voice-actions">${caps.recognition?`<button class="btn secondary ${state.voice.listening?'recording':''}" data-action="${state.voice.listening?'stop-listening':'listen'}">${ico(state.voice.listening?'stop':'mic')} ${state.voice.listening?'Остановить':'Сказать ответ'}</button>`:`<span class="voice-unsupported">Распознавание в этом браузере недоступно. Можно использовать диктовку клавиатуры.</span>`}${caps.recording?`<button class="btn ghost ${state.voice.recording?'recording':''}" data-action="${state.voice.recording?'stop-recording':'record'}">${ico(state.voice.recording?'stop':'mic')} ${state.voice.recording?'Остановить запись':'Записать и послушать себя'}</button>`:''}</div><div class="voice-status" role="status">${esc(state.voice.status||'Можно говорить, а можно написать — выбирай сам.')}</div>${state.voice.url?`<audio controls src="${esc(state.voice.url)}" aria-label="Послушать свою запись"></audio>`:''}<p class="voice-footnote">Запись остаётся на устройстве. Для распознавания браузер может использовать свою сетевую службу. Не оцениваем произношение по расшифровке.</p></section></details>`;}
-function creativeView(){const t=current();return `<h2>${esc(t.prompt)}</h2><div class="creative-seed"><small>БЫЛО ПРОСТОЕ ПРЕДЛОЖЕНИЕ</small><strong>${esc(t.seed)}</strong></div><p class="task-subtitle">Выбери слова-помощники или напиши свой вариант. Можно сказать его вслух.</p><div class="rus-creative-workbench"><div class="rus-creative-choices">${t.banks.map((bank,i)=>`<div class="choice-group"><h3>${esc(bank.label)}</h3>${bank.options.map((word,j)=>`<button class="choice-btn ${state.choices[i]===j?'active':''}" data-choice="${i}:${j}">${esc(word)}</button>`).join('')}</div>`).join('')}<button class="btn secondary" data-action="assemble-creative">Собрать мой вариант ${ico('magic')}</button></div><div class="rus-creative-editor"><label class="answer-label" for="creative-answer">Моё предложение<textarea id="creative-answer" class="writing-input" data-input="draft" rows="3" placeholder="Моя мысль…">${esc(state.draft)}</textarea></label>${voicePanel()}<div class="plan-check"><h3>Проверяю себя по плану</h3><ul class="checklist">${t.plan.map((x,i)=>`<li class="${state.plan[i]?'done':''}"><label><input type="checkbox" data-plan="${i}" ${state.plan[i]?'checked':''}>${esc(x)}</label></li>`).join('')}</ul><p class="task-note muted">У красивой речи много вариантов. Автопроверка смотрит только на заглавную букву, знак в конце и повтор слова. Смысл проверяем по плану.</p></div></div></div>${state.solved?`<div class="example-card"><small>ЕЩЁ ОДИН ВАРИАНТ</small><p>${esc(t.example)}</p><button class="btn ghost" data-action="say-draft">${ico('sound')} Прочитать моё предложение · голос устройства</button></div>`:''}`;}
-function dialogView(){const t=current(),turn=t.turns[state.turn];return `<h2>${esc(t.title)}</h2><p class="task-subtitle">Учебный диалог по шагам · ${t.turns.length} вопроса</p><details class="rus-dialog-history" data-workspace-disclosure="rus:history:${t.id}" data-rule-key="dialog:history:${t.id}"><summary>Наш разговор · ${state.chat.length} реплик</summary><div class="dialog-chat" aria-live="polite">${state.chat.map(x=>`<div class="chat-message ${x.who}">${x.who==='coach'?`<span class="chat-avatar">${window.RUS_ART.owl}</span>`:''}<div><small>${x.who==='coach'?'Соня':'Твой ответ'}</small><p>${esc(x.text)}</p></div></div>`).join('')}</div></details>${state.dialogDone?`<div class="example-card"><b>Твой рассказ готов!</b><p>${esc(t.wrap)}</p><button class="btn secondary" data-action="say-story">${ico('sound')} Послушать мои ответы · голос устройства</button></div><div class="action-row workspace-actions"><button class="btn primary" data-action="next">Новый разговор ${ico('arrow')}</button><button class="btn ghost" data-action="reset-task">Поговорить ещё раз</button></div>`:`<div class="dialog-form"><span class="step-caption">Вопрос ${state.turn+1} из ${t.turns.length}</span><label class="answer-label" for="dialog-answer">${esc(turn.prompt)}<textarea id="dialog-answer" class="writing-input" data-input="draft" rows="3" placeholder="Я думаю…">${esc(state.draft)}</textarea></label><div class="dialog-hint">${ico('bulb')} ${esc(turn.hint)}</div>${voicePanel()}<div class="action-row workspace-actions"><button class="btn ghost" data-action="read-task">${ico('sound')} Повторить вопрос</button><button class="btn primary" data-action="dialog-send">Ответить Соне ${ico('arrow')}</button></div></div>`}`;}
+function speechWaves(){
+ return '<span class="rus-speech-waves" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>';
+}
+function spellingView(){const t=current(),mode=state.mode.spelling;return `<h2>${mode==='construct'?'Собери слово по буквам':mode==='write'?'Впиши слово целиком':'Слушай и пиши'}</h2><p class="task-subtitle">${mode==='construct'?'Нажимай на буквы или перетаскивай их. В наборе есть лишние: вспомни правило и выбери верные.':mode==='write'?'Подумай о пропущенной букве. Напиши слово самостоятельно.':'Послушай слово, затем напиши его. Можно прослушать ещё раз.'}</p>${mode==='dictation'&&!state.solved?`<button class="dictation-button" data-action="say-word">${ico('sound')} Послушать слово${speechWaves()}</button>`:`<div class="big-word">${[...(state.solved?t.word:t.masked)].map(c=>`<span class="letter ${c==='□'?'gap':''}">${c}</span>`).join('')}</div>`}${mode==='construct'?`<div class="word-slots drop-area" data-drop="word" role="group" aria-label="Собираем слово">${Array.from({length:t.word.length},(_,i)=>state.assembled[i]!==undefined?`<button class="slot filled" data-remove="${i}" data-drag="assembled" data-id="${state.assembled[i]}" data-slot="${i}" aria-label="Убрать букву ${state.bank[state.assembled[i]].text}">${state.bank[state.assembled[i]].text}</button>`:`<span class="slot empty" data-slot="${i}">${i+1}</span>`).join('')}</div><div class="letter-bank drop-area" data-drop="bank" aria-label="Буквы для сборки">${state.bank.map(x=>`<button class="letter-tile ${state.assembled.includes(x.id)?'used':''}" data-letter="${x.id}" data-drag="letter" data-id="${x.id}" ${state.assembled.includes(x.id)||state.solved?'disabled':''}>${x.text}</button>`).join('')}</div>`:`<label class="answer-label" for="word-answer">Моё слово<input id="word-answer" class="writing-input answer-input" data-input="draft" value="${esc(state.draft)}" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Пиши здесь…" ${state.solved?'disabled':''}></label>`}${state.solved?`<div class="example-card"><b>${esc(t.word)}</b><p>${esc(t.sentence)}</p><button class="btn ghost" data-action="lesson-open">Почему так пишется?</button></div>${attemptResult()}${meaningInvitation()}`:''}`;}
+function brushes(defs){return `<div class="brushes" role="group" aria-label="Выбери цвет для разбора">${Object.entries(defs).map(([id,x])=>`<button class="brush ${state.brush===id?'active':''} ${id}" data-brush="${id}" aria-pressed="${state.brush===id}"><i style="background:${x.color}"></i>${x.name}</button>`).join('')}<button class="brush ${state.brush===''?'active':''}" data-brush="" aria-label="Ластик" aria-pressed="${state.brush===''}">Ластик</button></div>`;}
+function morphologyView(){const t=current();if(state.mode.morphology==='prepositions')return `<h2>Раздельно или слитно?</h2><p class="task-subtitle">Предлог — отдельное слово. Приставка пишется со словом.</p><div class="question-card sentence-context">${esc(t.context)}</div><div class="preposition-pair"><span>${esc(t.left)}</span><span>?</span><span>${esc(t.right)}</span></div><div class="choice-group"><button class="choice-btn ${state.choices[0]==='separate'?'active':''}" data-preposition="separate" aria-pressed="${state.choices[0]==='separate'}">${esc(t.left)} ${esc(t.right)}<small>раздельно</small></button><button class="choice-btn ${state.choices[0]==='together'?'active':''}" data-preposition="together" aria-pressed="${state.choices[0]==='together'}">${esc(t.left+t.right)}<small>слитно</small></button></div>${state.solved?`<div class="example-card">${esc(t.explain)}</div>`:''}`;return `<h2>Найди части слова</h2><p class="task-subtitle">${state.topic==='prefix'?'Начни с приставки, затем выдели остальные части слова.':state.topic==='suffix'?'Начни с суффикса, затем выдели остальные части слова.':'Выбери часть слова, затем нажми на её буквы.'} Ластик снимает цвет.</p>${brushes(PARTS)}<div class="rus-word-scroll" data-rus-scroll="morphology-word" tabindex="0" aria-label="Слово для разбора: можно сдвигать по горизонтали"><div class="morpheme-word" role="group" aria-label="Разбери слово ${esc(t.word)}">${[...t.word].map((c,i)=>`<button class="char ${state.marks[i]||''}" data-mark="${i}" aria-label="Буква ${c}${state.marks[i]?', '+PARTS[state.marks[i]].name:''}" ${state.solved?'disabled':''}>${c}</button>`).join('')}</div></div><p class="rus-word-pan-note">Если слово не помещается, сдвинь его в сторону.</p><button class="zero-ending ${state.zero?'active':''}" data-action="zero" aria-pressed="${state.zero}">∅ Нулевое окончание</button><p class="muted task-note">Если окончание есть, выдели его буквы. Если оно нулевое — выбери ∅.</p>${state.solved||state.revealed?`<div class="word-base">Основа: <b>${esc(t.base)}</b></div><div class="example-card">${esc(t.explain)}</div>`:''}<button class="btn ghost reveal-button" data-action="reveal">Показать учебный разбор</button>`;}
+function syntaxView(){const t=current(),full=state.mode.syntax==='full',defs=Object.entries(ROLES).filter(([id])=>full||['subject','predicate'].includes(id)).reduce((defs,[id,role])=>{defs[id]=role;return defs;},{});return `<h2>${full?'У каждого слова своя работа':'Найди главных героев'}</h2><p class="task-subtitle">${full?'Выбери роль, затем выдели слово или всю группу с предлогом.':'Выдели подлежащее и сказуемое. Остальные слова оставь без цвета.'}</p>${brushes(defs)}<div class="syntax-sentence">${t.words.map((w,i)=>`<button class="syntax-token ${state.marks[i]||''}" data-mark="${i}" aria-label="${esc(w+(ROLES[state.marks[i]]?', '+ROLES[state.marks[i]].name:''))}" ${state.solved?'disabled':''}>${esc(w)}${grammarStroke(state.marks[i])}</button>`).join('')}<span class="sentence-punct">${esc(t.punct)}</span></div><div class="question-card"><b>Задавай вопросы</b><p>${esc(t.questions.subject)}<br>${esc(t.questions.predicate)}</p></div>${state.solved||state.revealed?`<div class="example-card">${esc(t.explain)}</div>`:''}<button class="btn ghost reveal-button" data-action="reveal">Показать учебный разбор</button>`;}
+function builderView(){const t=current();return `<h2>Построй предложение</h2><p class="task-subtitle">Сегодня строим по этой модели. Нажимай на карточки или перетаскивай их.</p><div class="pattern">${t.pattern.split('→').map(step=>`<span class="rus-pattern-step">${esc(step.trim())}</span>`).join('<span class="rus-pattern-arrow" aria-hidden="true">→</span>')}</div><div class="sentence-slots drop-area" data-drop="sentence"><span class="sr-only">Твоё предложение</span>${state.assembled.length?state.assembled.map((id,i)=>`<button class="sentence-chip ${t.chunks[id].role}" data-remove="${i}" data-drag="assembled" data-id="${id}" data-slot="${i}">${esc(t.chunks[id].text)}</button>`).join(''):'<span class="empty-message">Положи сюда первую карточку</span>'}</div><div class="builder-bank drop-area" data-drop="bank">${state.bank.filter(id=>!state.assembled.includes(id)).map(id=>`<button class="sentence-chip ${t.chunks[id].role}" data-chunk="${id}" data-drag="chunk" data-id="${id}"><small>${ROLES[t.chunks[id].role].question}</small>${esc(t.chunks[id].text)}</button>`).join('')}</div>${state.solved?`<div class="example-card"><b>${esc(K.sentence(t.chunks,state.assembled))}</b><p>${esc(t.explain)}</p><button class="btn ghost" data-action="say-built">${ico('sound')} Послушать</button></div>`:''}`;}
+function voicePanel(){const caps=V.capabilities();return `<details class="rus-voice-tools" data-rule-key="voice:tools:${state.view}" data-workspace-disclosure="rus:voice:${state.view}" ${state.voice.listening||state.voice.recording||state.voice.url?'open':''}><summary>${ico('mic')} Хочу ответить голосом</summary><section class="voice-panel" ${state.voice.micActive?'data-voice-active':''}><div class="voice-panel-heading"><span>${ico('mic')} Можно ответить голосом</span><small>Микрофон включается только по кнопке</small>${speechWaves()}</div><div class="voice-actions">${caps.recognition?`<button class="btn secondary ${state.voice.listening?'recording':''}" data-action="${state.voice.listening?'stop-listening':'listen'}">${ico(state.voice.listening?'stop':'mic')} ${state.voice.listening?'Остановить':'Сказать ответ'}</button>`:`<span class="voice-unsupported">Распознавание в этом браузере недоступно. Можно использовать диктовку клавиатуры.</span>`}${caps.recording?`<button class="btn ghost ${state.voice.recording?'recording':''}" data-action="${state.voice.recording?'stop-recording':'record'}">${ico(state.voice.recording?'stop':'mic')} ${state.voice.recording?'Остановить запись':'Записать и послушать себя'}</button>`:''}</div><div class="voice-status" role="status">${esc(state.voice.status||'Можно говорить, а можно написать — выбирай сам.')}</div>${state.voice.url?`<audio controls src="${esc(state.voice.url)}" aria-label="Послушать свою запись"></audio>`:''}<p class="voice-footnote">Запись остаётся на устройстве. Для распознавания браузер может использовать свою сетевую службу. Не оцениваем произношение по расшифровке.</p></section></details>`;}
+function creativeView(){const t=current();return `<h2>${esc(t.prompt)}</h2><div class="creative-seed"><small>БЫЛО ПРОСТОЕ ПРЕДЛОЖЕНИЕ</small><strong>${esc(t.seed)}</strong></div><p class="task-subtitle">Выбери слова-помощники или напиши свой вариант. Можно сказать его вслух.</p><div class="rus-creative-workbench"><div class="rus-creative-choices">${t.banks.map((bank,i)=>`<div class="choice-group"><h3>${esc(bank.label)}</h3>${bank.options.map((word,j)=>`<button class="choice-btn ${state.choices[i]===j?'active':''}" data-choice="${i}:${j}" aria-pressed="${state.choices[i]===j}">${esc(word)}</button>`).join('')}</div>`).join('')}<button class="btn secondary" data-action="assemble-creative">Собрать мой вариант ${ico('magic')}</button></div><div class="rus-creative-editor"><label class="answer-label" for="creative-answer">Моё предложение<textarea id="creative-answer" class="writing-input" data-input="draft" rows="3" placeholder="Моя мысль…">${esc(state.draft)}</textarea></label>${voicePanel()}<div class="plan-check"><h3>Проверяю себя по плану</h3><ul class="checklist">${t.plan.map((x,i)=>`<li class="${state.plan[i]?'done':''}"><label><input type="checkbox" data-plan="${i}" ${state.plan[i]?'checked':''}>${esc(x)}</label></li>`).join('')}</ul><p class="task-note muted">У красивой речи много вариантов. Автопроверка смотрит только на заглавную букву, знак в конце и повтор слова. Смысл проверяем по плану.</p></div></div></div>${state.solved?`<div class="example-card"><small>ЕЩЁ ОДИН ВАРИАНТ</small><p>${esc(t.example)}</p><button class="btn ghost" data-action="say-draft">${ico('sound')} Прочитать моё предложение · голос устройства</button></div>`:''}`;}
+function dialogueProgress(count){
+ return `<span class="rus-dialog-progress" aria-hidden="true">${Array.from({length:count},(_,i)=>`<i class="${i<state.turn?'done':i===state.turn?'current':''}"></i>`).join('')}</span>`;
+}
+function sonyaPrompt(text,caption){
+ return `<span class="rus-sonya-card"><span class="rus-sonya-avatar" aria-hidden="true">${window.RUS_ART.owl}${speechWaves()}</span><span class="rus-sonya-message">${caption}<strong>${esc(text)}</strong></span></span>`;
+}
+function dialogView(){
+ const t=current(),turn=t.turns[state.turn];
+ const history=`<details class="rus-dialog-history" data-workspace-disclosure="rus:history:${t.id}" data-rule-key="dialog:history:${t.id}"><summary>Наш разговор · ${state.chat.length} реплик</summary><div class="dialog-chat" aria-live="polite">${state.chat.map(x=>`<div class="chat-message ${x.who}">${x.who==='coach'?`<span class="chat-avatar">${window.RUS_ART.owl}</span>`:''}<div><small>${x.who==='coach'?'Соня':'Твой ответ'}</small><p>${esc(x.text)}</p></div></div>`).join('')}</div></details>`;
+ const progress=dialogueProgress(t.turns.length);
+ const form=state.dialogDone?`<div class="example-card rus-dialog-completed"><h3>Твой рассказ готов!</h3>${sonyaPrompt(t.wrap,progress)}<button class="btn secondary" data-action="say-story">${ico('sound')} Послушать мои ответы · голос устройства</button></div><div class="action-row workspace-actions"><button class="btn primary" data-action="next">Новый разговор ${ico('arrow')}</button><button class="btn ghost" data-action="reset-task">Поговорить ещё раз</button></div>`:
+ `<div class="dialog-form"><label class="answer-label" for="dialog-answer">${sonyaPrompt(turn.prompt,`<span class="step-caption">Соня · вопрос ${state.turn+1} из ${t.turns.length}</span>${progress}`)}<textarea id="dialog-answer" class="writing-input" data-input="draft" rows="3" placeholder="Я думаю…">${esc(state.draft)}</textarea></label><div class="dialog-hint">${ico('bulb')} ${esc(turn.hint)}</div>${voicePanel()}<div class="action-row workspace-actions"><button class="btn ghost" data-action="read-task">${ico('sound')} Повторить вопрос</button><button class="btn primary" data-action="dialog-send">Ответить Соне ${ico('arrow')}</button></div></div>`;
+ return `<h2>${esc(t.title)}</h2>${history}${form}`;
+}
 function feedbackView(){return state.feedback?`<div class="feedback ${state.feedback.type}" role="status">${ico(state.feedback.type==='success'?'check':'bulb')}<div>${esc(state.feedback.text)}</div></div>`:'';}
 function progressView(){return intro('ПОЛУЧАЕТСЯ ВСЁ БОЛЬШЕ','Мои открытия','Здесь хранятся твои маленькие победы. Можно вернуться к тому, что хочется закрепить.')+evidenceSummary()+`<div class="stats-row progress-stats"><div class="stat"><strong>${countAll()}</strong><span>заданий получилось</span></div><div class="stat"><strong>${Object.keys(progress.mistakes).length}</strong><span>нуждаются в повторении</span></div><div class="stat"><strong>${progress.creations.length}</strong><span>маленьких творений</span></div></div><div class="progress-grid">${Object.entries(META).map(([id,m])=>{const n=doneCount(m.data)+(id==='morphology'?doneCount('prepositions'):0),total=D[m.data].length+(id==='morphology'?D.prepositions.length:0);return `<section class="progress-module ${m.color}"><span class="section-icon">${ico(m.icon)}</span><h3>${m.title}</h3><p>${n} / ${total} открытий</p>${progressBar(n,total)}<div class="action-row"><button class="btn secondary" data-view="${id}">Продолжить</button><button class="btn ghost" data-review="${id}">Повторить</button></div></section>`;}).join('')}</div>${progress.creations.length?`<section class="creations"><h2>Мои предложения</h2>${progress.creations.slice(-6).reverse().map(x=>`<blockquote>${esc(x.text)}</blockquote>`).join('')}</section>`:''}<p class="storage-note muted">${memory?'Хранилище недоступно: прогресс сохранится только до закрытия страницы.':'Прогресс и творения хранятся в этом браузере на этом устройстве.'}</p><button class="btn ghost" data-action="reset-progress">Начать заново</button>`;}
 let russianAdvanceTimer=null;
@@ -457,8 +487,121 @@ function scheduleRussianAdvance(){
   next();
  },2400);
 }
+const rusMotionPreference='(prefers-reduced-motion: reduce)';
+const rusSelections='[data-mark],[data-brush],[data-choice],[data-preposition],[data-lesson-choice],[data-action="zero"]';
+const rusTiles=()=>$$('.rus-task-body [data-drag]:not(.used)');
+const rusCanAnimate=()=>typeof window.Element?.prototype.animate==='function'&&!window.matchMedia?.(rusMotionPreference).matches;
+let rusDiagramObserver;
+const visibleRusDiagrams=new Set();
+
+function measureRusMotion(dragged){
+ if(!rusCanAnimate())return null;
+ const tiles=new Map(rusTiles().map(tile=>[tile.dataset.id,tile.getBoundingClientRect()]));
+ if(dragged)tiles.set(dragged.id,dragged.rect);
+ return {
+  tiles,
+  selections:$$(rusSelections).map(control=>control.className),
+  feedback:$('.trainer-workspace .feedback')?.textContent,
+  draft:$('.rus-task-body textarea')?.value
+ };
+}
+function settleRusTile(tile,from){
+ if(!from?.width||!from?.height)return;
+ const to=tile.getBoundingClientRect();
+ const x=from.left+from.width/2-to.left-to.width/2;
+ const y=from.top+from.height/2-to.top-to.height/2;
+ if(!to.width||Math.hypot(x,y)<2)return;
+ const tilt=Math.max(-7,Math.min(7,x/18));
+ const shrink=Math.max(.72,Math.min(1.2,from.width/to.width));
+ tile.classList.add('rus-tile-travel');
+ const travel=tile.animate([
+  {transform:'translate('+x+'px,'+y+'px) rotate('+tilt+'deg) scale('+shrink+',1.04)'},
+  {transform:'translate('+x*.21+'px,'+(y*.19-5)+'px) rotate('+tilt*.25+'deg)',offset:.74},
+  {transform:'translate(0,1px) scale(1.025,.96)',offset:.9},
+  {transform:'none'}
+ ],{duration:Math.min(340,225+Math.hypot(x,y)*.32),easing:'cubic-bezier(.23,.72,.36,1)'});
+ travel.onfinish=travel.oncancel=()=>tile.classList.remove('rus-tile-travel');
+}
+function rusPop(node,distance=5){
+ node?.animate([{transform:'translateY('+distance+'px)',opacity:.65},{transform:'none',opacity:1}],{duration:225,easing:'cubic-bezier(.2,.74,.3,1)'});
+}
+function rusDraw(svg,delay=0){
+ svg?.querySelector('path')?.animate([{strokeDasharray:'1',strokeDashoffset:'1'},{strokeDasharray:'1',strokeDashoffset:'0'}],{duration:260,delay,easing:'ease-out'});
+}
+function showRusDiagrams(previousKey,currentKey){
+ rusDiagramObserver?.disconnect();
+ if(previousKey!==currentKey)visibleRusDiagrams.clear();
+ const diagrams=$$('.lesson-screen .lesson-diagram').filter((figure,index)=>{
+  figure.dataset.motionIndex=index;
+  return !visibleRusDiagrams.has(String(index));
+ });
+ function show(figure){
+  visibleRusDiagrams.add(figure.dataset.motionIndex);
+  [...figure.querySelectorAll('.diagram-part')].forEach((part,index)=>{
+   const delay=Math.min(index,6)*29;
+   part.animate([{transform:'translateY(5px)',opacity:.7},{transform:'none',opacity:1}],{duration:220,delay,easing:'ease-out'});
+   rusDraw(part.querySelector('.rus-grammar-stroke'),delay);
+  });
+ }
+ if(!window.IntersectionObserver){diagrams.forEach(show);return;}
+ rusDiagramObserver??=new window.IntersectionObserver(entries=>{
+  if(!rusCanAnimate()){rusDiagramObserver.disconnect();return;}
+  for(const entry of entries)if(entry.isIntersecting&&entry.target.isConnected){
+   rusDiagramObserver.unobserve(entry.target);
+   show(entry.target);
+  }
+ },{threshold:.1});
+ diagrams.forEach(figure=>rusDiagramObserver.observe(figure));
+}
+function showRusMotion(before,previousKey){
+ if(!before||storageConflict)return;
+ const currentKey=$('.trainer-workspace')?.dataset.workspaceKey;
+ showRusDiagrams(previousKey,currentKey);
+ if(currentKey!==previousKey){
+  rusPop($('.rus-sonya-card')||$('.rus-task-body h2')||$('.lesson-screen .learning-stages .active'));
+  return;
+ }
+ rusTiles().forEach(tile=>settleRusTile(tile,before.tiles.get(tile.dataset.id)));
+ $$(rusSelections).forEach((control,index)=>{
+  if(before.selections[index]===control.className)return;
+  control.animate([{transform:'scale(.96)'},{transform:'scale(1.018)',offset:.65},{transform:'none'}],{duration:195,easing:'ease-out'});
+  rusDraw(control.querySelector('.rus-grammar-stroke'));
+ });
+ const feedback=$('.trainer-workspace .feedback');
+ if(feedback&&before.feedback!==feedback.textContent){
+  rusPop(feedback,8);
+  if(feedback.classList.contains('success'))feedback.querySelector('svg')?.animate(
+   [{transform:'rotate(-13deg) scale(.68)'},{transform:'rotate(4deg) scale(1.1)',offset:.66},{transform:'none'}],
+   {duration:320,easing:'ease-out'}
+  );
+ }
+ const draft=$('.rus-task-body textarea');
+ if(draft&&before.draft!==draft.value&&draft.value)rusPop(draft,3);
+}
 let renderingRussian=false;
-function render(){if(russianBooting&&!LP||renderingRussian)return;renderingRussian=true;try{const focused=document.activeElement?.id;const workspaceKey=$('.trainer-workspace')?.dataset.workspaceKey;const localScroll=$$('[data-rus-scroll]').map(el=>({id:el.dataset.rusScroll,left:el.scrollLeft,top:el.scrollTop}));const openRules=$$('details[data-rule-key][open]').map(el=>el.dataset.ruleKey);const content=shell(state.view==='home'?home():state.view==='progress'?progressView():exercise());$('#app').innerHTML=storageConflict?'<section role="alert" style="padding:20px;background:#fff2d9;color:#70582c"><h2>Занятие изменилось в другой вкладке</h2><p>Открой актуальные результаты, чтобы не потерять ответы. Эта вкладка ничего не перезапишет.</p><button class="btn primary" data-action="reload-progress">Открыть актуальное</button></section><fieldset disabled style="border:0;margin:0;padding:0;min-width:0">'+content+'</fieldset>':content;openRules.forEach(key=>{const el=$(`[data-rule-key="${key}"]`);if(el)el.open=true;});if(workspaceKey===$('.trainer-workspace')?.dataset.workspaceKey)for(const position of localScroll){const el=$('[data-rus-scroll="'+position.id+'"]');if(el){el.scrollLeft=position.left;el.scrollTop=position.top;}}if(focused&&$('#'+focused))$('#'+focused).focus({preventScroll:true});rememberSession();}finally{renderingRussian=false;}scheduleRussianAdvance();}
+function render(dragged){
+ if(russianBooting&&!LP||renderingRussian)return;
+ renderingRussian=true;
+ try{
+  const focused=document.activeElement?.id;
+  const workspaceKey=$('.trainer-workspace')?.dataset.workspaceKey;
+  const motion=measureRusMotion(dragged);
+  const localScroll=$$('[data-rus-scroll]').map(el=>({id:el.dataset.rusScroll,left:el.scrollLeft,top:el.scrollTop}));
+  const openRules=$$('details[data-rule-key][open]').map(el=>el.dataset.ruleKey);
+  const content=shell(state.view==='home'?home():state.view==='progress'?progressView():exercise());
+  $('#app').innerHTML=storageConflict?'<section role="alert" style="padding:20px;background:#fff2d9;color:#70582c"><h2>Занятие изменилось в другой вкладке</h2><p>Открой актуальные результаты, чтобы не потерять ответы. Эта вкладка ничего не перезапишет.</p><button class="btn primary" data-action="reload-progress">Открыть актуальное</button></section><fieldset disabled style="border:0;margin:0;padding:0;min-width:0">'+content+'</fieldset>':content;
+  openRules.forEach(key=>{const el=$(`[data-rule-key="${key}"]`);if(el)el.open=true;});
+  if(workspaceKey===$('.trainer-workspace')?.dataset.workspaceKey)for(const position of localScroll){
+   const el=$('[data-rus-scroll="'+position.id+'"]');
+   if(el){el.scrollLeft=position.left;el.scrollTop=position.top;}
+  }
+  if(focused&&$('#'+focused))$('#'+focused).focus({preventScroll:true});
+  refreshRusSpeech();
+  showRusMotion(motion,workspaceKey);
+  rememberSession();
+ }finally{renderingRussian=false;}
+ scheduleRussianAdvance();
+}
 function check(){
  writeIntent=true;if(ensureLesson()||ensureConcepts()){render();return;}if(state.solved)return;if(state.voice.recording||state.voice.listening)resetVoice();const t=current();if(!t)return;let ok=false,success='';
  if(state.view==='spelling'){
@@ -487,7 +630,7 @@ function check(){
   const previous=progress.creations.find(x=>x.id===t.id&&x.text===state.draft.trim());if(!previous){progress.creations.push({id:t.id,text:state.draft.trim().slice(0,1500)});progress.creations=progress.creations.slice(-30);}
  }
  if(!ok)requireLesson(remediationLesson());
- if(ok){complete();notify(state.revealed?'Это учебный разбор. Теперь попробуй следующее задание самостоятельно.':success,'success');if(!state.revealed)celebrate();}
+ if(ok){complete();notify(state.revealed?'Это учебный разбор. Теперь попробуй следующее задание самостоятельно.':success,'success');}
  render();
 }
 function next(delta=1){
@@ -499,7 +642,7 @@ function next(delta=1){
  if(!state.review&&delta>0&&!repeating){nextIndex=-1;for(let step=1;step<=a.length;step++){const i=(oldIndex+step)%a.length;if(!taskCompleted(a[i])){nextIndex=i;break;}}if(nextIndex<0){state.practiceFinished=true;state.solved=false;state.lesson=null;render();return;}}
  if(repeating&&delta>0&&oldIndex===a.length-1){state.practiceFinished=true;state.repeating=false;render();return;}
  if(state.review&&delta>0){for(let step=1;step<=a.length;step++){const i=(oldIndex+step)%a.length;if(progress.mistakes[data+':'+a[i].id]){nextIndex=i;break;}}}
- state.index[data]=nextIndex;state.nonce++;prepare();state.repeating=repeating||delta<0&&taskCompleted(current());render();$('.exercise-card')?.scrollIntoView({behavior:'smooth',block:'start'});
+ state.index[data]=nextIndex;state.nonce++;prepare();state.repeating=repeating||delta<0&&taskCompleted(current());render();$('.exercise-card')?.scrollIntoView({behavior:window.matchMedia(rusMotionPreference).matches?'instant':'smooth',block:'start'});
 }
 function nextCourse(delta=1,afterPause=false){
  const unit=courseUnit(),stage=unit?.stages.find(stage=>stage.mode===state.mode.spelling);if(!unit||!stage||state.courseFinished)return;
@@ -510,7 +653,7 @@ function nextCourse(delta=1,afterPause=false){
  else{
   if(!afterPause&&window.PracticeHub?.cycleBoundary){const context={trainerId:'slovograd',kind:'course-next',grade:state.grade,section:state.view,mode:exerciseMode(),category:state.category,topic:state.topic,taskId:current()?.id};rememberSession();if(window.PracticeHub.cycleBoundary({id:'rus.cycle.'+state.grade+'.'+SPELL_LESSONS[unit.category]+'.'+stage.mode,context})===true)return;}
   const nextStage=unit.stages.slice(unit.stages.indexOf(stage)+1).find(stage=>!stageDone(stage));if(nextStage)selectCourseStage(unit,nextStage,nextStage.tasks.findIndex(task=>!courseDone(nextStage.mode,task)));else if(state.category==='all')resumeCourse();else state.courseFinished=true;}
- state.nonce++;prepare();render();$('.exercise-card,.course-end')?.scrollIntoView({behavior:'smooth',block:'start'});
+ state.nonce++;prepare();render();$('.exercise-card,.course-end')?.scrollIntoView({behavior:window.matchMedia(rusMotionPreference).matches?'instant':'smooth',block:'start'});
 }
 function spellingCategories(){return [...new Set((inSpellingCourse()?D.spelling.filter(t=>t.level<=state.grade):gradePool('spelling')).map(t=>t.category))];}
 function spellingJourney(){
@@ -529,31 +672,50 @@ function chooseCourseMode(mode){
 function hint(){const t=current();if(!t)return;markAssistance('visual');const text=state.view==='spelling'?t.hint:state.view==='morphology'?state.mode.morphology==='prepositions'?'Попробуй вставить слово между предлогом и следующим словом: «на большом столе». В приставку другое слово не вставить.':`Вспомни родственные слова: ${t.relatives.join(', ')}. Их общая часть — корень. Меняй форму слова, чтобы найти окончание.`:state.view==='syntax'?`${t.questions.subject} ${t.questions.predicate}`:state.view==='builder'?`Собирай по схеме: ${t.pattern}. Одна карточка может содержать несколько слов.`:state.view==='creative'?t.tips.join(' '):t.turns[state.turn]?.hint;notify(text);render();}
 function reveal(){if(ensureLesson()){render();return;}openLesson(lessonForCurrent(),'worked',{after:'reveal'});render();}
 function applyWorkedExample(){const t=current();markAssistance('workedExample');state.revealed=true;if(state.view==='morphology'){state.marks=K.morphemes(t);state.zero=t.parts.some(p=>p.kind==='ending'&&p.text==='');}else{state.marks=t.roles.map(role=>state.mode.syntax==='full'||role==='subject'||role==='predicate'?role:'');}notify('Посмотри на разбор и объяснение. Это учебный пример — отметку за него не ставим.');render();}
+let rusSpeechTarget='';
+function refreshRusSpeech(){
+ const current=$('[data-rus-speaking]');
+ const next=rusSpeechTarget?$(rusSpeechTarget):null;
+ if(current===next)return;
+ current?.removeAttribute('data-rus-speaking');
+ next?.setAttribute('data-rus-speaking','');
+}
 function stopSpeaking(){V.stopSpeech();}
-function speak(text,force=false,device=false){if(!state.sound&&!force)return;$$('audio').forEach(a=>a.pause());if(state.voice.recording||state.voice.listening){resetVoice();render();}V.speak(text,{device,onError:message=>{notify(message,'hint');render();}});}
+function speak(text,force=false,device=false){
+ if(!state.sound&&!force)return;
+ $$('audio').forEach(a=>a.pause());
+ if(state.voice.recording||state.voice.listening){resetVoice();render();}
+ const target=state.lesson?'.lesson-guide-owl':state.view==='dialogues'&&!device?'.rus-sonya-card':state.view==='spelling'&&state.mode.spelling==='dictation'?'.dictation-button':'';
+ const finish=()=>{rusSpeechTarget='';refreshRusSpeech();};
+ V.speak(text,{
+  device,
+  onStart:()=>{rusSpeechTarget=target;refreshRusSpeech();},
+  onEnd:finish,
+  onError:message=>{finish();notify(message,'hint');render();}
+ });
+}
 function taskSpeech(){const t=current();if(!t)return '';if(state.view==='spelling')return `Слово: ${t.word}. Ещё раз: ${t.word}. Собери или напиши слово самостоятельно.`;if(state.view==='dialogues')return state.dialogDone?t.wrap:t.turns[state.turn].prompt;if(state.view==='morphology')return state.mode.morphology==='prepositions'?`Выбери, как писать: ${t.left}, ${t.right}. Слитно или раздельно?`:`Разбери слово ${t.word} на части. ${state.topic==='prefix'?'Начни с приставки.':state.topic==='suffix'?'Начни с суффикса.':'Сначала найди корень.'} Потом выдели остальные части.`;if(state.view==='syntax'){const goal=topicOptions().find(x=>x.id===state.topic);return `${state.mode.syntax==='full'?'Разбери предложение по членам. '+(goal&&state.topic!=='all'?goal.description:'Сначала найди основу, затем второстепенные члены.'):'Найди подлежащее и сказуемое.'} ${t.words.join(' ')}${t.punct}`;}if(state.view==='builder')return `Собери предложение по модели. ${t.pattern.replace(/→/g,', ')}. Карточки: ${t.chunks.map(x=>x.text).join(', ')}.`;return t.prompt+' '+t.seed;}
 function readRule(){markAssistance('explanation');const t=current();if(state.view==='syntax'){const goal=topicOptions().find(x=>x.id===state.topic),active=ROLES[state.brush];speak((goal?goal.description+' ':'')+(active?active.description+' ':'')+'Предлог сам по себе не является членом предложения.',true);return;}const text=state.view==='spelling'?t.rule:state.view==='morphology'?state.mode.morphology==='prepositions'?'Предлог — отдельное слово. Приставка — часть слова. Предлог не входит в состав слова.':'Корень — общая часть родственных слов. Приставка стоит перед корнем. Суффикс — после корня. Окончание меняется при изменении формы слова. Основа — слово без окончания.':state.view==='syntax'?'Подлежащее называет, о ком или о чём говорится, и отвечает на вопрос кто или что. Сказуемое обозначает действие и отвечает на вопрос что делает. Предлог отдельно членом предложения не бывает.':state.view==='builder'?'Начинай предложение с большой буквы. В конце поставь точку, вопросительный или восклицательный знак. Сегодня расставь карточки по заданной модели.':state.view==='creative'?t.plan.join('. '):'Это учебный диалог. Соня задаёт вопросы, а ты говоришь или пишешь свои ответы. Проверь текст после распознавания.';speak(text,true);}
 function startListening(){
  if(ensureLesson()){render();return;}
  $$('audio').forEach(a=>a.pause());
  if(state.voice.recording){notify('Сначала заверши запись, затем можно включить распознавание.');render();return;}
- const view=state.view,id=current()?.id,turn=state.turn,epoch=++voiceEpoch;state.voice.listening=true;state.voice.status='Слушаю… Говори спокойно и отчётливо.';render();
+ const view=state.view,id=current()?.id,turn=state.turn,epoch=++voiceEpoch;state.voice.listening=true;state.voice.micActive=false;state.voice.status='Слушаю… Говори спокойно и отчётливо.';render();
  const active=()=>epoch===voiceEpoch&&state.turn===turn&&state.view===view&&current()?.id===id;
- const result=V.listen({onResult:text=>{if(!active())return;changeDraft((state.draft.trim()?state.draft.trim()+' ':'')+text);state.voice.status='Вот что удалось услышать. Проверь текст и при необходимости исправь.';render();},onStatus:text=>{if(!active())return;state.voice.status=text;render();},onError:text=>{if(!active())return;state.voice.status=text;state.voice.listening=false;render();},onEnd:()=>{if(!active())return;state.voice.listening=false;render();}});
+ const result=V.listen({onStart:()=>{if(!active())return;state.voice.micActive=true;render();},onResult:text=>{if(!active())return;changeDraft((state.draft.trim()?state.draft.trim()+' ':'')+text);state.voice.status='Вот что удалось услышать. Проверь текст и при необходимости исправь.';render();},onStatus:text=>{if(!active())return;state.voice.status=text;render();},onError:text=>{if(!active())return;state.voice.status=text;state.voice.listening=false;state.voice.micActive=false;render();},onEnd:()=>{if(!active())return;state.voice.listening=false;state.voice.micActive=false;render();}});
  if(!result){state.voice.listening=false;state.voice.status='Распознавание не запустилось. Можно написать ответ или воспользоваться диктовкой клавиатуры.';render();}
 }
 async function startRecording(){
  if(ensureLesson()){render();return;}
  $$('audio').forEach(a=>a.pause());
  if(state.voice.listening){V.stopListening();state.voice.listening=false;}
- const view=state.view,id=current()?.id,turn=state.turn,epoch=++voiceEpoch;state.voice.recording=true;state.voice.status='Разреши микрофон, чтобы записать голос.';render();
+ const view=state.view,id=current()?.id,turn=state.turn,epoch=++voiceEpoch;state.voice.recording=true;state.voice.micActive=false;state.voice.status='Разреши микрофон, чтобы записать голос.';render();
  const active=()=>epoch===voiceEpoch&&state.turn===turn&&state.view===view&&current()?.id===id;
- const ok=await V.startRecording({onStatus:text=>{if(!active())return;state.voice.status=text;render();},onReady:result=>{if(!active())return;state.voice.recording=false;state.voice.url=result.url;state.voice.status='Запись готова. Послушай себя и проверь, понятно ли звучит мысль.';render();},onError:text=>{if(!active())return;state.voice.recording=false;state.voice.status=text;render();}});
- if(!ok&&active()){state.voice.recording=false;render();}
+ const ok=await V.startRecording({onStart:()=>{if(!active())return;state.voice.micActive=true;render();},onStatus:text=>{if(!active())return;state.voice.status=text;render();},onReady:result=>{if(!active())return;state.voice.recording=false;state.voice.micActive=false;state.voice.url=result.url;state.voice.status='Запись готова. Послушай себя и проверь, понятно ли звучит мысль.';render();},onError:text=>{if(!active())return;state.voice.recording=false;state.voice.status=text;render();}});
+ if(!ok&&active()){state.voice.recording=false;state.voice.micActive=false;render();}
 }
 function dialogSend(){if(ensureLesson()||ensureConcepts()){render();return;}const t=current(),turn=t.turns[state.turn],text=state.draft.trim();if(K.words(text).length<turn.minWords){notify(`${turn.minWords===1?'Сначала скажи или напиши ответ.':'Попробуй ответить чуть подробнее — полным предложением.'} ${turn.hint}`,'hint');if(text)requireLesson('dialogue');render();return;}resetVoice();state.chat.push({who:'child',text});state.draft='';state.feedback=null;state.turn++;
- if(state.turn>=t.turns.length){state.dialogDone=true;state.chat.push({who:'coach',text:t.wrap});complete();speak(t.wrap);celebrate();}else{const next=t.turns[state.turn],bridge=['Спасибо, я услышала твой ответ.','Теперь давай добавим подробности.','Хорошо, продолжим рассказ.'][Math.min(state.turn-1,2)];state.chat.push({who:'coach',text:bridge+' '+next.prompt});speak(next.prompt);}render();$('.dialog-form,.example-card')?.scrollIntoView({behavior:'smooth',block:'nearest'});}
-function celebrate(){if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;const el=document.createElement('div');el.className='confetti';el.setAttribute('aria-hidden','true');el.innerHTML=Array.from({length:18},(_,i)=>`<i style="left:${Math.random()*100}%;background:${['#8cb9a1','#ebbb62','#e4a08a','#baa6cf'][i%4]};animation-delay:${Math.random()*.25}s"></i>`).join('');document.body.append(el);setTimeout(()=>el.remove(),2000);}
+ if(state.turn>=t.turns.length){state.dialogDone=true;state.chat.push({who:'coach',text:t.wrap});complete();speak(t.wrap);}else{const next=t.turns[state.turn],bridge=['Спасибо, я услышала твой ответ.','Теперь давай добавим подробности.','Хорошо, продолжим рассказ.'][Math.min(state.turn-1,2)];state.chat.push({who:'coach',text:bridge+' '+next.prompt});speak(next.prompt);}render();$('.dialog-form,.example-card')?.scrollIntoView({behavior:window.matchMedia(rusMotionPreference).matches?'instant':'smooth',block:'nearest'});}
 let lastFocus=null;
 function modal(content){if(state.voice.recording||state.voice.listening)resetVoice();lastFocus=document.activeElement;$('#overlay').innerHTML=`<div class="modal-backdrop"><section class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><button class="icon-btn modal-close" data-action="close-modal" aria-label="Закрыть">${ico('close')}</button>${content}</section></div>`;$('.modal-close').focus();}
 function closeModal(){$('#overlay').innerHTML='';lastFocus?.focus();}
@@ -609,7 +771,7 @@ document.addEventListener('click',event=>{
  else if(action==='say-draft')speak(state.draft,true,true);else if(action==='say-story')speak(state.chat.filter(x=>x.who==='child').map(x=>x.text).join('. '),true,true);
  else if(action==='assemble-creative'){const t=current();if(!t.banks.every((_,i)=>Number.isInteger(state.choices[i]))){notify('Выбери по одному варианту в каждой группе или напиши собственную мысль.');render();return;}changeDraft(K.creative(t,state.choices));state.feedback=null;render();}
  else if(action==='listen')startListening();else if(action==='stop-listening'){V.stopListening();state.voice.listening=false;state.voice.status='Голосовой ввод остановлен. Если текст не появился, попробуй ещё раз и сделай паузу в конце ответа.';render();}
- else if(action==='record')startRecording();else if(action==='stop-recording'){V.stopRecording();state.voice.recording=false;render();}
+ else if(action==='record')startRecording();else if(action==='stop-recording'){V.stopRecording();state.voice.recording=false;state.voice.micActive=false;render();}
  else if(action==='dialog-send')dialogSend();else if(action==='download')download();
  else if(action==='reset-progress')modal(`<h2 id="modal-title">Начать с чистого листа?</h2><p>Отметки и сохранённые предложения в этом браузере будут удалены.</p><div class="action-row"><button class="btn secondary" data-action="close-modal">Сохранить открытия</button><button class="btn primary" data-action="confirm-reset">Начать заново</button></div>`);
  else if(action==='confirm-reset'){resumeReady=false;progress={done:{},completions:{},mistakes:{},creations:[],lessonRead:{},lessonReviews:{},spellingCourse:{done:{},cursor:{},lastScope:{}},resume:{version:1,contexts:{},sections:{}},resetEpoch:'reset-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2)};if(LP)progress.learning=LP.empty(progress.resetEpoch);pendingEvents=[];for(const pending of Object.values(pendingAwards))for(const key of Object.keys(pending))delete pending[key];resetting=true;writeIntent=true;state.attempt=null;state.meaning=null;state.courseFinished=true;state.spellingFree=false;state.harder=false;save();closeModal();go('home');resumeReady=true;render();}
@@ -630,8 +792,61 @@ document.addEventListener('keydown',e=>{if(e.key==='Enter'&&!beginIntent()){rend
 $('#overlay').addEventListener('click',e=>{if(e.target.classList.contains('modal-backdrop'))closeModal();});
 let drag=null;
 document.addEventListener('pointerdown',e=>{const el=e.target.closest('[data-drag]');if(!el||el.disabled||state.solved||state.lesson||e.button!==0)return;if(!beginIntent()){render();return;}drag={id:e.pointerId,type:el.dataset.drag,item:+el.dataset.id,x:e.clientX,y:e.clientY,el,active:false};el.setPointerCapture?.(e.pointerId);});
-document.addEventListener('pointermove',e=>{if(!drag||drag.id!==e.pointerId)return;if(!drag.active&&Math.hypot(e.clientX-drag.x,e.clientY-drag.y)>7){drag.active=true;drag.ghost=drag.el.cloneNode(true);drag.ghost.removeAttribute('data-drag');drag.ghost.classList.add('drag-ghost');drag.ghost.setAttribute('aria-hidden','true');document.body.append(drag.ghost);}if(drag.active){e.preventDefault();drag.ghost.style.left=e.clientX+'px';drag.ghost.style.top=e.clientY+'px';$$('.drop-over').forEach(x=>x.classList.remove('drop-over'));document.elementFromPoint(e.clientX,e.clientY)?.closest('[data-drop]')?.classList.add('drop-over');}},{passive:false});
-function finishDrag(e,cancel=false){if(!drag||drag.id!==e.pointerId)return;const d=drag;drag=null;d.ghost?.remove();$$('.drop-over').forEach(x=>x.classList.remove('drop-over'));if(!d.active)return;suppressClick=true;setTimeout(()=>{suppressClick=false;},100);if(cancel||state.lesson)return;if(!beginIntent()){render();return;}const target=document.elementFromPoint(e.clientX,e.clientY),area=target?.closest('[data-drop]');if(!area)return;let ids=[...state.assembled];if(area.dataset.drop==='bank'){if(d.type==='assembled')ids=ids.filter(id=>id!==d.item);}else if(area.dataset.drop==='word'||area.dataset.drop==='sentence'){if(!ids.includes(d.item)&&area.dataset.drop==='word'&&ids.length>=current().word.length)return;ids=ids.filter(id=>id!==d.item);const position=Number(target.closest('[data-slot]')?.dataset.slot??ids.length);ids.splice(Math.min(position,ids.length),0,d.item);}state.assembled=ids;state.feedback=null;render();}
+document.addEventListener('pointermove',e=>{
+ if(!drag||drag.id!==e.pointerId)return;
+ if(!drag.active&&Math.hypot(e.clientX-drag.x,e.clientY-drag.y)>7){
+  drag.active=true;
+  drag.ghost=drag.el.cloneNode(true);
+  drag.ghost.removeAttribute('data-drag');
+  drag.ghost.classList.add('drag-ghost');
+  drag.ghost.setAttribute('aria-hidden','true');
+  drag.ghost.tabIndex=-1;
+  const bounds=drag.el.getBoundingClientRect();
+  drag.ghost.style.width=bounds.width+'px';
+  drag.ghost.style.height=bounds.height+'px';
+  drag.el.classList.add('rus-tile-lifted');
+  document.body.append(drag.ghost);
+ }
+ if(!drag.active)return;
+ e.preventDefault();
+ drag.ghost.style.left=e.clientX+'px';
+ drag.ghost.style.top=e.clientY+'px';
+ const target=document.elementFromPoint(e.clientX,e.clientY)?.closest('[data-drop]');
+ if(target===drag.target)return;
+ drag.target?.classList.remove('drop-over');
+ target?.classList.add('drop-over');
+ drag.target=target;
+},{passive:false});
+function finishDrag(e,cancel=false){
+ if(!drag||drag.id!==e.pointerId)return;
+ const d=drag;
+ drag=null;
+ if(!d.active)return;
+ const origin=rusCanAnimate()?d.ghost.getBoundingClientRect():null;
+ d.ghost.remove();
+ d.el.classList.remove('rus-tile-lifted');
+ d.target?.classList.remove('drop-over');
+ suppressClick=true;
+ setTimeout(()=>{suppressClick=false;},100);
+ if(cancel||state.lesson){settleRusTile(d.el,origin);return;}
+ if(!beginIntent()){render();return;}
+ const target=document.elementFromPoint(e.clientX,e.clientY);
+ const area=target?.closest('[data-drop]');
+ if(!area){settleRusTile(d.el,origin);return;}
+ let ids=[...state.assembled];
+ if(area.dataset.drop==='bank'){
+  if(d.type!=='assembled'){settleRusTile(d.el,origin);return;}
+  ids=ids.filter(id=>id!==d.item);
+ }else if(area.dataset.drop==='word'||area.dataset.drop==='sentence'){
+  if(!ids.includes(d.item)&&area.dataset.drop==='word'&&ids.length>=current().word.length){settleRusTile(d.el,origin);return;}
+  ids=ids.filter(id=>id!==d.item);
+  const position=Number(target.closest('[data-slot]')?.dataset.slot??ids.length);
+  ids.splice(Math.min(position,ids.length),0,d.item);
+ }
+ state.assembled=ids;
+ state.feedback=null;
+ render(origin?{id:String(d.item),rect:origin}:undefined);
+}
 document.addEventListener('pointerup',e=>finishDrag(e));document.addEventListener('pointercancel',e=>finishDrag(e,true));
 if(LP){restoreApplication();resumeReady=true;render();russianBooting=false;writeIntent=false;}else{storageBlocked=true;$('#app').innerHTML='<main style="max-width:36em;margin:12vh auto;padding:24px;font:18px/1.6 sans-serif"><h1>Завершим обновление</h1><p>Подключись к интернету и открой тренажёр ещё раз. Сохранённые результаты останутся на устройстве.</p><a href="../">Все игры</a></main>';}
 

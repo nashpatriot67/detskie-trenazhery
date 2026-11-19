@@ -6,8 +6,14 @@ function makeData(){
  const q=global.LifeQuestData.quests.find(q=>q.id==='life.sport.pool');
  if(!q)throw Error('Missing reviewed pool activity');
  const floor={items:['toy-car','teddy','dirty-shirt'],accepted:{'toy-car':['toybox'],teddy:['toybox'],'dirty-shirt':['laundry']}};
- const data={pool:{required:q.required.slice(),optional:q.optional.slice(),distractors:q.distractors.slice(),why:{...q.why}},floor,items:{},art:{},atlas:ATLAS};
- for(const id of new Set(floor.items.concat(q.required,q.optional,q.distractors))){data.items[id]=global.LifeQuestData.items[id];if(!global.ObjectArt.has(id))throw Error('Missing object illustration: '+id);data.art[id]='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(global.ObjectArt.markup(id,{decorative:true}));}
+ const data={pool:{required:q.required.slice(),optional:q.optional.slice(),distractors:q.distractors.slice(),why:{...q.why}},floor,items:{},art:{},fallbackArt:{},atlas:ATLAS};
+ for(const id of new Set(floor.items.concat(q.required,q.optional,q.distractors))){
+  data.items[id]=global.LifeQuestData.items[id];
+  const body=global.RoomPoolArt?.[id];
+  const fallback='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(global.ObjectArt.markup(id,{decorative:true}));
+  data.fallbackArt[id]=fallback;
+  data.art[id]=body||fallback;
+ }
  return data;
 }
 const mount=(function(host){
@@ -100,6 +106,14 @@ const mount=(function(host){
     if(s.alpha<=0)return;ctx.save();ctx.translate(s.x,s.y);ctx.rotate(s.angle);ctx.scale(s.s,s.s);ctx.globalAlpha=s.alpha;
     if(s.grabbed){ctx.shadowColor='#183e3840';ctx.shadowBlur=15;ctx.shadowOffsetY=8;}
     if(s.id==='pillow')AdventureProps.pillow(ctx,{x:0,y:0,width:s.w,height:s.h,angle:0});
+    else if(images[s.id]&&global.RoomPoolArt?.[s.id]){
+      const art=images[s.id],fit=Math.min(s.w/art.width,s.h/art.height),w=art.width*fit,h=art.height*fit;
+      ctx.save();ctx.translate(2,h*.44);ctx.scale(1,.22);
+      const contact=ctx.createRadialGradient(0,0,0,0,0,w*.65);
+      contact.addColorStop(0,'rgba(33,21,10,.42)');contact.addColorStop(1,'rgba(33,21,10,0)');
+      ctx.fillStyle=contact;ctx.fillRect(-w,-w,w*2,w*2);ctx.restore();
+      ctx.drawImage(art,-w/2,-h/2,w,h);
+    }
     else if(global.RoomToyArt?.legacy(s.id))global.RoomToyArt.drawItem(ctx,global.RoomToyArt.legacy(s.id),{x:0,y:0,size:s.w});
     else if(images[s.id])ctx.drawImage(images[s.id],-s.w/2,-s.h/2,s.w,s.h);
     else{roundRect(-s.w/2,-s.h/2,s.w,s.h,12,'#b7d4c3');}
@@ -130,12 +144,13 @@ const mount=(function(host){
       corners.forEach((p,i)=>{if(game.state.blanket[i])return;ctx.save();ctx.shadowColor='#ffeaaa';ctx.shadowBlur=15;ctx.fillStyle='#f8d876';ctx.beginPath();ctx.arc(p.x,p.y,18,0,TAU);ctx.fill();ctx.lineWidth=3;ctx.strokeStyle='#fff5c7';ctx.stroke();ctx.restore();});
     }
     if(displayStage==='bag'||displayStage==='done'){
-      AdventureProps.bag(ctx,{x:360,y:550,packedImages:game.state.packed.map(id=>images[id]).filter(Boolean),zipProgress,hover:hover==='bag',ready:ready()});
+      const settled=game.state.packed.filter(id=>!sprites.find(sprite=>sprite.id===id)?.flight);
+      AdventureProps.bag(ctx,{x:360,y:550,packedImages:settled.map(id=>images[id]).filter(Boolean),zipProgress,hover:hover==='bag',ready:ready()});
       const count=data.pool.required.filter(id=>game.state.packed.includes(id)).length;for(let i=0;i<5;i++){ctx.fillStyle=i<count?'#d9ffab':'#ffffff45';ctx.beginPath();ctx.arc(310+i*25,658,5.5,0,TAU);ctx.fill();}
       if(displayStage==='bag'&&ready())chip('Потяни молнию →',360,390,true);
     }
     drawTargets();
-    for(const s of sprites){if(displayStage==='bag'||displayStage==='done'){if(game.state.packed.includes(s.id)&&!s.grabbed&&Math.hypot(s.tx-s.x,s.ty-s.y)<3)continue;}if(!s.grabbed)drawSprite(s);}
+    for(const s of sprites){if(displayStage==='bag'||displayStage==='done'){if(game.state.packed.includes(s.id)&&!s.grabbed&&!s.flight&&Math.hypot(s.tx-s.x,s.ty-s.y)<3)continue;}if(!s.grabbed)drawSprite(s);}
     if(displayStage==='done'){
       const glow=ctx.createRadialGradient(687,435,20,687,435,270);glow.addColorStop(0,'#c6f9ef7a');glow.addColorStop(1,'#c6f9ef00');ctx.fillStyle=glow;ctx.fillRect(470,20,250,650);ctx.fillStyle='#d6fff080';ctx.beginPath();ctx.moveTo(664,90);ctx.lineTo(720,40);ctx.lineTo(720,650);ctx.lineTo(664,590);ctx.closePath();ctx.fill();
     }
@@ -148,21 +163,31 @@ const mount=(function(host){
   function choose(id,kind){
     selected={id,kind};feedbackOverride=kind==='corner'?'Выбран уголок. Потяни его к круглой метке или нажми на неё.':kind==='zip'?'Потяни молнию вправо до конца.':kind==='pillow'?'Выбрана подушка. Перенеси её к изголовью кровати.':'Выбрано: '+label(id)+'. Перенеси к подходящему месту или нажми на него.';updateUI();draw();
   }
+  function moveItem(sprite, to, kind='settle'){
+    if(!sprite)return;
+    const from={x:sprite.x,y:sprite.y,scale:sprite.s,angle:sprite.angle};
+    Object.assign(sprite,{tx:to.x,ty:to.y,ts:to.scale,ta:0,grabbed:false,alpha:1});
+    if(!reduced&&global.RoomTidyMotion){
+      sprite.flight={kind,from,to,startedAt:clock,duration:global.RoomTidyMotion.duration(kind)};
+    }
+  }
   function action(type,payload,source){
     if(transition||!started)return {accepted:false};
     const before=game.state,response=game.act(type,payload);selected=null;feedbackOverride=response.message;
     if(response.accepted){
       tone('success');actorReaction='happy';reactionUntil=clock+.8;
       if(type==='dropFloor'){
-        const s=sprites.find(v=>v.id===payload.id),p=floorDestination(payload.id,payload.zone);if(s){Object.assign(s,{tx:p.x,ty:p.y,ts:.55,ta:0,grabbed:false});burst(p.x,p.y);}
+        const s=sprites.find(v=>v.id===payload.id),p=floorDestination(payload.id,payload.zone);
+        moveItem(s,{...p,scale:.55});burst(p.x,p.y);
       }else if(type==='corner'){
         const p=corners[payload.index];p.tx=payload.index?530:200;p.ty=355;burst(p.tx,p.ty);
       }else if(type==='pillow'){
-        const s=sprites.find(v=>v.id==='pillow');if(s)Object.assign(s,{tx:360,ty:334,ta:0,grabbed:false});burst(360,334);
+        const s=sprites.find(v=>v.id==='pillow');moveItem(s,{x:360,y:334,scale:1});burst(360,334);
       }else if(type==='pack'){
-        const s=sprites.find(v=>v.id===payload.id);if(s)Object.assign(s,{tx:360,ty:512,ts:.3,ta:0,grabbed:false});burst(360,512);
+        const s=sprites.find(v=>v.id===payload.id);moveItem(s,{x:360,y:512,scale:.3},'laundry');burst(360,512);
       }else if(type==='unpack'){
-        const s=sprites.find(v=>v.id===payload.id);if(s)Object.assign(s,{x:360,y:512,tx:s.ox,ty:s.oy,ts:1,s:.35,ta:0});
+        const s=sprites.find(v=>v.id===payload.id);
+        if(s){Object.assign(s,{x:360,y:512,s:.35,angle:0});moveItem(s,{x:s.ox,y:s.oy,scale:1});}
       }else if(type==='zip'){zipProgress=1;tone('success');}
       if(response.stageChanged){
         if(game.state.stage==='done'){displayStage='done';actorReaction='celebrate';finishAt=clock+(reduced?.05:6.5);}
@@ -193,7 +218,7 @@ const mount=(function(host){
     const hit=event.target.closest('.rg-hit');if(!hit||transition||!started)return;
     const kind=hit.dataset.rgKind;if(kind==='zone')return;
     event.preventDefault();const id=hit.dataset.rgItem,p=pointerPoint(event);choose(id,kind);drag={id,kind,pointerId:event.pointerId,start:p,point:p,moved:false};
-    const s=sprites.find(v=>v.id===id);if(s){drag.offset={x:s.x-p.x,y:s.y-p.y};s.grabbed=true;s.ts=1.13;}
+    const s=sprites.find(v=>v.id===id);if(s){drag.offset={x:s.x-p.x,y:s.y-p.y};s.grabbed=true;s.ts=1.13;s.flight=null;s.alpha=1;}
     try{scene.setPointerCapture(event.pointerId);}catch(_){}wake();
   });
   scene.addEventListener('pointermove',event=>{
@@ -270,7 +295,18 @@ const mount=(function(host){
   function update(dt){
     clock+=dt;
     if(transition){const progress=(clock-transition.start)/transition.duration;if(progress>=.5&&!transition.changed){transition.changed=true;displayStage=transition.to;setup(displayStage);feedbackOverride=game.state.message;updateUI();}const from=stageIndex[transition.from],to=stageIndex[transition.to],p=Math.max(0,Math.min(1,progress));camera=from+(to-from)*(p*p*(3-2*p));if(progress>=1){transition=null;camera=stageIndex[displayStage];updateUI();}}
-    for(const s of sprites){if(s.grabbed)continue;if(reduced){s.x=s.tx;s.y=s.ty;s.s=s.ts;s.angle=s.ta;}else{const f=1-Math.exp(-10*dt);s.x+=(s.tx-s.x)*f;s.y+=(s.ty-s.y)*f;s.s+=(s.ts-s.s)*f;s.angle+=(s.ta-s.angle)*f;}}
+    for(const s of sprites){
+      if(s.grabbed)continue;
+      if(s.flight){
+        const progress=Math.min(1,(clock-s.flight.startedAt)/s.flight.duration);
+        const pose=global.RoomTidyMotion.sampleFlight(s.flight,progress);
+        Object.assign(s,{x:pose.x,y:pose.y,s:pose.scale,angle:pose.angle,alpha:pose.alpha});
+        if(progress===1)s.flight=null;
+        continue;
+      }
+      if(reduced){s.x=s.tx;s.y=s.ty;s.s=s.ts;s.angle=s.ta;}
+      else{const f=1-Math.exp(-10*dt);s.x+=(s.tx-s.x)*f;s.y+=(s.ty-s.y)*f;s.s+=(s.ts-s.s)*f;s.angle+=(s.ta-s.angle)*f;}
+    }
     for(const p of corners){if(drag?.kind==='corner'&&corners[Number(drag.id.slice(-1))]===p)continue;if(reduced){p.x=p.tx;p.y=p.ty;}else{const f=1-Math.exp(-9*dt);p.x+=(p.tx-p.x)*f;p.y+=(p.ty-p.y)*f;}}
     particles=particles.filter(p=>p.life>0);for(const p of particles){p.life-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=160*dt;}
     const placed=game.state.placements;
@@ -289,7 +325,13 @@ const mount=(function(host){
 
   window.AdventureGame=Object.freeze({snapshot:()=>({state:game.state,displayStage,started,selected:selected?{...selected}:null,actor:{x:actor.x,y:actor.y,time:actor._time,moving:actor.moving},frames,visible,transitioning:!!transition,clock,finished,loaded,reducedMotion:reduced,zipProgress}),regions:()=>Array.from(hits.querySelectorAll('.rg-hit')).map(el=>{const b=el.getBoundingClientRect();return {kind:el.dataset.rgKind,item:el.dataset.rgItem||null,target:el.dataset.rgTarget||null,x:b.x,y:b.y,width:b.width,height:b.height,centerX:b.x+b.width/2,centerY:b.y+b.height/2};})});
   setup(displayStage);resize();updateUI();
-  Promise.all([image(data.atlas).then(img=>atlas=img),...Object.entries(data.art).map(([id,src])=>image(src).then(img=>images[id]=img))]).then(()=>{loaded=!!atlas;updateUI();draw();if(!loaded){startButton.textContent='Комната не загрузилась';feedbackOverride='Изображение комнаты не загрузилось. Попробуй открыть пример ещё раз.';feedback.textContent=feedbackOverride;}});
+  async function loadItemArt(id,src){
+    images[id]=await image(src);
+    if(!images[id]&&src!==data.fallbackArt[id]){
+      data.art[id]=data.fallbackArt[id];images[id]=await image(data.art[id]);
+    }
+  }
+  Promise.all([image(data.atlas).then(img=>atlas=img),...Object.entries(data.art).map(([id,src])=>loadItemArt(id,src))]).then(()=>{loaded=!!atlas;updateUI();draw();if(!loaded){startButton.textContent='Комната не загрузилась';feedbackOverride='Изображение комнаты не загрузилось. Попробуй открыть пример ещё раз.';feedback.textContent=feedbackOverride;}});
 });
 global.RoomGame=Object.freeze({mount,assets:()=>({atlas:ATLAS}),launcher(){return '<a class="room-launch" href="?room=1"><span class="room-launch-picture" aria-hidden="true"><img src="'+ATLAS+'" alt=""></span><span><strong>Приключение с Рэем</strong><small>Наведи порядок, расправь покрывало и собери сумку в бассейн →</small></span></a>';}});
 })(typeof window==='undefined'?globalThis:window);
