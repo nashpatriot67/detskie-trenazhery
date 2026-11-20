@@ -327,9 +327,10 @@ async function offline(browser,base) {
   page.on('pageerror',error => errors.push(error.message));
   try {
     await page.goto(base);
-    await page.waitForFunction(async () => (await navigator.serviceWorker.getRegistration())?.active,{},{timeout:20000});
+    await page.waitForFunction(() => !!navigator.serviceWorker.controller,undefined,{timeout:20000});
     await context.setOffline(true);
-    await page.goto(base+'life/?room=campaign');
+    const response = await page.goto(base+'life/?room=campaign');
+    ok(response?.fromServiceWorker(),'Offline first visit is served by the installed worker');
     await page.locator(map).waitFor({state:'visible'});
     eq(await page.locator('meta[name="trainer-build"]').getAttribute('content'),release.build,'Installed PWA loads expected campaign offline');
     await start(page,'route','mouse');
