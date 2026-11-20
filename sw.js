@@ -4,7 +4,7 @@
  */
 'use strict';
 
-const VERSION = 'stage1-32e214781842';
+const VERSION = 'stage1-03f68100724d';
 const ROOT = new URL('./', self.location.href);
 const CACHE_PREFIX = 'trainers:' + ROOT.pathname + ':core:';
 const CACHE_NAME = CACHE_PREFIX + VERSION;
@@ -153,6 +153,7 @@ const CORE = [
   "room-tidy-game.css?v=s1-be5e04cd16fb",
   "room-levels-view.css?v=s1-31266e1fa721",
   "room-campaign.css?v=s1-cb7602859b58",
+  "room-missions.css?v=s1-e1adbdb43f59",
   "life-quest-data.js?v=s1-c6a083bea7a8",
   "life-school-schedule.js?v=s1-23b2185e80b6",
   "school-packing-flow.js?v=s1-99a0f56d0ab6",
@@ -168,7 +169,7 @@ const CORE = [
   "room-input.js?v=s1-27983b2d2113",
   "room-pool-art.js?v=s1-5c5d9737690d",
   "room-game.js?v=s1-f1db0cddf068",
-  "room-tidy-scene.js?v=s1-173321557a16",
+  "room-tidy-scene.js?v=s1-00365f5524ca",
   "room-tidy-layout.js?v=s1-4fa3ffb02643",
   "room-tidy-artwork.js?v=s1-b3ea07c3a715",
   "room-tidy-motion.js?v=s1-20a2371ab47e",
@@ -177,7 +178,11 @@ const CORE = [
   "room-levels-data.js?v=s1-e4142877a37b",
   "room-levels-logic.js?v=s1-118783f897d8",
   "room-levels-view.js?v=s1-074b8e84c266",
-  "room-campaign.js?v=s1-3c4197b1c290",
+  "room-mission-art.js?v=s1-9d1f95cfe693",
+  "room-mission-route.js?v=s1-c858a688bcf3",
+  "room-mission-build.js?v=s1-0e3d5ca48d95",
+  "room-mission-memory.js?v=s1-98c01be30360",
+  "room-campaign.js?v=s1-46063d663e32",
   "life/app.js?v=s1-de73aa2137df",
   "otkryt-bez-interneta.html"
 ];

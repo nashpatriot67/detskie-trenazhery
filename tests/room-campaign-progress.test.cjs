@@ -14,7 +14,8 @@ const copy = value => JSON.parse(JSON.stringify(value));
 const scripts = [
   'learning-progress.js', 'life-quest-data.js', 'life-school-schedule.js',
   'room-tidy-data.js', 'room-tidy-logic.js', 'room-adventure.js', 'room-progress.js',
-  'room-levels-data.js', 'room-levels-logic.js', 'room-campaign.js'
+  'room-levels-data.js', 'room-levels-logic.js',
+  'room-mission-route.js', 'room-mission-build.js', 'room-mission-memory.js', 'room-campaign.js'
 ].map(filename => new vm.Script(fs.readFileSync(path.join(__dirname, '..', filename), 'utf8'), {filename}));
 
 function fixture(memory = {records: new Map(), writes: []}) {
@@ -42,9 +43,13 @@ function fixture(memory = {records: new Map(), writes: []}) {
     mount: (_, options) => childMount('departure', options)
   };
   window.RoomLevelsView = {mount: (_, options) => childMount(options.levelId, options)};
+  for (const name of ['Route', 'Build', 'Memory']) {
+    const key = 'RoomMission' + name;
+    window[key] = {...window[key], mount: (_, options) => childMount(name.toLowerCase(), options)};
+  }
 
   const warning = {};
-  const heroButton = {focus() {}};
+  const heroButton = {focus() {}, closest: () => ({scrollIntoView() {}})};
   let onClick;
   const map = {
     querySelector(selector) {
@@ -63,7 +68,8 @@ function fixture(memory = {records: new Map(), writes: []}) {
     open: () => window.RoomCampaign.mount(host),
     inspect: () => copy(window.RayCampaign.snapshot()),
     child: () => child,
-    click: id => onClick({target: {closest: () => ({dataset: {rayLevel: id}})}})
+    click: id => onClick({target: {closest: selector => selector === '[data-ray-level]' ? {dataset: {rayLevel: id}} : null}}),
+    clickMission: id => onClick({target: {closest: selector => selector === '[data-ray-mission]' ? {dataset: {rayMission: id}} : null}})
   };
 }
 
@@ -292,4 +298,51 @@ test('the eight-module limit protects other modules and an existing tidy slot ca
   for (const [id, entry] of Object.entries(withTidy.learning.modules)) {
     if (id !== tidyModule) assert.deepEqual(modules[id], entry);
   }
+});
+
+test('optional games resume and replay using the existing progress slot', () => {
+  const env = fixture();
+  const {window} = env;
+  const tidy = tidyGame(window).snapshot();
+  const route = window.RoomMissionRoute.create();
+  const existing = seedRecord(window, {[tidyModule]: wrap(tidy)});
+  env.seed(existing);
+  const active = env.open();
+  env.clickMission('route');
+  assert.equal(env.inspect().mission,'route');
+  assert.equal(env.child().options.store.read().snapshot,null);
+
+  const paths = [
+    [15,10,5,0,1,2,3,4],
+    [23,18,17,16,15,10,5,0],
+    [15,10,5,6,7,12,17,18,19,14,9,4]
+  ];
+  assert.equal(route.choose(paths[0][0]).changed,true);
+  assert.equal(env.child().options.store.save(route.snapshot()),true);
+  active.destroy();
+
+  const next = fixture(env.memory);
+  const resumed = next.open();
+  next.clickMission('route');
+  const child = next.child().options;
+  assert.deepEqual(copy(child.store.read().snapshot),copy(route.snapshot()));
+  for (const [index, path] of paths.entries()) {
+    for (const step of (index ? path : path.slice(1))) assert.equal(route.choose(step).changed,true);
+    assert.equal(route.arrive(),true);
+    if (index < 2) assert.equal(route.next(),true);
+  }
+  assert.equal(child.store.save(route.snapshot()),true);
+  child.onExit();
+  const beforeReplay = next.raw();
+  assert.equal(beforeReplay.learning.modules[tidyModule].state.campaign.missions.route.completed,true);
+  for (const [id, record] of Object.entries(existing.learning.modules)) {
+    if (id !== tidyModule) assert.deepEqual(beforeReplay.learning.modules[id],record);
+  }
+  assert.deepEqual(beforeReplay.learning.modules[tidyModule].state.adventure,copy(tidy));
+  assert.deepEqual(next.inspect().unlocked,['tidy']);
+  next.clickMission('route');
+  assert.equal(next.child().options.store.read().snapshot,null);
+  assert.equal(next.inspect().data.missions.route.completed,true);
+  assert.equal(next.child().options.store.save({version:1}),false);
+  resumed.destroy();
 });
