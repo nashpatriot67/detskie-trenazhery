@@ -35,13 +35,16 @@ function create(options={}){
   if(object(raw.learning?.modules)&&Object.prototype.hasOwnProperty.call(raw.learning.modules,moduleId)&&!wrapper)throw Error('unsupported');
   if(value!==undefined&&value!==null){
    if(!object(value)||value.version!==1||!validSnapshot(value.adventure))throw Error('unsupported');
+   if(tidy&&options.withCampaign&&value.campaign!==undefined&&!root.RoomCampaign?.valid(value.campaign))throw Error('unsupported');
   }
   return {text,raw,generation,learning,wrapper,value};
  }
  function read(){
   try{
    const entry=record();seen=entry.wrapper||null;epoch=entry.generation;initialized=true;blocked=false;message='';
-   return {snapshot:entry.value?JSON.parse(JSON.stringify(entry.value.adventure)):null,sound:entry.value?.sound===true,error:''};
+   const result={snapshot:entry.value?JSON.parse(JSON.stringify(entry.value.adventure)):null,sound:entry.value?.sound===true,error:''};
+   if(tidy&&options.withCampaign)result.campaign=entry.value?.campaign?JSON.parse(JSON.stringify(entry.value.campaign)):null;
+   return result;
   }catch(error){
    initialized=true;blocked=true;message=error.message==='unsupported'?'Это сохранение использует другую версию. Обнови приложение; прежние результаты не изменены.':'Не получилось прочитать сохранение. Можно играть на этой странице; прежние результаты не изменены.';
    return {snapshot:null,sound:false,error:message};
@@ -55,13 +58,21 @@ function create(options={}){
   }
   return entry;
  }
- function save(snapshot,options={}){
+ function save(snapshot,settings={}){
   if(!initialized)read();if(blocked)return false;
   // Only the domain's versioned, small snapshot is eligible for this module.
   if(!object(snapshot)||snapshot.version!==1||snapshot.kind!==kind)return fail('Не получилось сохранить этот шаг. Прежние результаты остаются на месте.');
   if(tidy){try{if(!validSnapshot(snapshot))return fail('Не получилось сохранить этот шаг. Прежние результаты остаются на месте.');}catch(_){return fail('Не получилось сохранить этот шаг. Прежние результаты остаются на месте.');}}
-  let state;try{state=JSON.parse(JSON.stringify({version:1,adventure:snapshot,sound:options.sound===true}));}catch(_){return fail('Не получилось сохранить этот шаг.');}
   const entry=current();if(!entry)return false;
+  let state;try{
+   state={version:1,adventure:snapshot,sound:settings.sound===true};
+   if(tidy){
+    const campaign=settings.campaign===undefined?entry.value?.campaign:settings.campaign;
+    if(settings.campaign!==undefined&&(!options.withCampaign||!root.RoomCampaign?.valid(campaign)))return fail('Не получилось сохранить карту уровней.');
+    if(campaign!==undefined)state.campaign=campaign;
+   }
+   state=JSON.parse(JSON.stringify(state));
+  }catch(_){return fail('Не получилось сохранить этот шаг.');}
   const modules=object(entry.raw.learning?.modules)?entry.raw.learning.modules:{};
   if(!entry.wrapper&&Object.keys(modules).length>=LP.MAX_MODULES)return fail('На устройстве уже сохранено много занятий. Это приключение пока останется на этой странице; прежние результаты не изменены.');
   const next=LP.setModule(entry.learning,moduleId,state,{ownerId:writer,generation:epoch});

@@ -1,0 +1,40 @@
+.ray-levels{box-sizing:border-box;width:100%;max-width:596px;margin:0 auto;padding:0 8px 16px;color:#234139;font:16px/1.42 "Trebuchet MS","Segoe UI",Arial,sans-serif;--ray-level-accent:#176a61;--ray-level-line:#cbdcd2}
+.ray-levels *{box-sizing:border-box}
+.ray-levels [hidden]{display:none!important}
+.ray-levels button,.ray-levels summary{font:inherit;cursor:pointer;touch-action:manipulation}
+.ray-levels button:focus-visible,.ray-levels summary:focus-visible{outline:3px solid #a25216;outline-offset:2px}
+.ray-levels__head{margin:0 0 8px}
+.ray-levels__nav{display:flex;justify-content:space-between;gap:10px;margin-bottom:1px}
+.ray-levels__nav button{color:#235d52;min-height:44px;padding:4px 7px;border:0;background:none;text-decoration:underline;text-underline-offset:.2em;font-size:13px;font-weight:700}
+.ray-levels__head h1{margin:0;font-size:clamp(22px,4.2vw,31px);line-height:1.1;letter-spacing:-.024em}
+.ray-levels__step{margin:5px 0 2px;font-size:13px;font-weight:700;color:#355d51}
+.ray-levels__instructions{margin:0;font-size:14px;line-height:1.35}
+.ray-levels__brief,.ray-levels__contents{margin:6px 0 8px;border:1px solid var(--ray-level-line);border-radius:10px;background:#faf7e9}
+.ray-levels summary{min-height:44px;padding:11px 10px;color:#28584f;font-size:14px;font-weight:700}
+.ray-levels__brief [data-level-schedule],.ray-levels__contents [data-level-placed]{padding:0 10px 10px;font-size:13px}
+.ray-levels__brief p,.ray-levels__days h2{margin:0 0 5px}
+.ray-levels__days{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ray-levels__days h2{font-size:14px}
+.ray-levels__days ol{margin:0;padding-left:18px}
+.ray-levels__scene{position:relative;isolation:isolate;overflow:hidden;aspect-ratio:1;background:#27453c;border-radius:15px;box-shadow:0 6px 15px #27382937;touch-action:pan-y}
+.ray-levels__scene canvas{display:block;width:100%;height:100%;object-fit:contain}
+.ray-levels__hits{position:absolute;inset:0;pointer-events:none}
+.ray-levels .ray-levels__hit{position:absolute;display:grid;place-items:center;pointer-events:auto;min-width:44px;min-height:44px;padding:0;transform:translate(-50%,-50%);touch-action:none;user-select:none;-webkit-user-select:none;border:0;border-radius:7px;background:none;color:#20372f}
+.ray-levels .ray-levels__hit:focus-visible{z-index:2;outline:3px solid #ffd67b;outline-offset:-2px;background:#ffe6a312}
+.ray-levels__hit-label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;pointer-events:none}
+.ray-levels__item--labeled .ray-levels__hit-label{top:54%;left:2px;right:2px;width:auto;height:auto;clip:auto;white-space:normal;padding:2px 1px;border-radius:4px;background:#fff8e8f5;color:#22382c;line-height:1.06;font-size:clamp(9px,2.65vw,11px);font-weight:700;overflow-wrap:break-word}
+.ray-levels__item--packed .ray-levels__hit-label{top:36%;border:1px solid #bad3a4;background:#d7edc9;box-shadow:0 2px 5px #1c302f4a}
+.ray-levels__item--packed .ray-levels__hit-label::before{content:'✓ ';color:#19624c}
+.ray-levels__scene--text .ray-levels__hit-label{position:static;width:auto;height:auto;max-height:100%;clip:auto;white-space:normal;font-size:11px;line-height:1.05}
+.ray-levels__scene--text .ray-levels__hit{background:#fff4d5;color:#21392f;border:1px solid #aebd99}
+.ray-levels__tools{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-top:10px}
+.ray-levels__tools button,.ray-levels__contents button{min-height:44px;padding:5px 10px;border:1px solid var(--ray-level-line);border-radius:8px;background:#fffdf2;color:#24433a;font-size:13px;font-weight:700}
+.ray-levels__tools .ray-levels__primary{flex:1;min-width:85px;background:var(--ray-level-accent);border-color:var(--ray-level-accent);color:#fff}
+.ray-levels__tools button:disabled{opacity:.48;cursor:default}
+.ray-levels__status{min-height:18px;margin:6px 0 0;font-size:14px;font-weight:700}
+.ray-levels__status[data-kind=error],.ray-levels__save{color:#854014}
+.ray-levels__status[data-kind=success]{color:#235e37}
+.ray-levels__contents section+section{margin-top:6px}
+.ray-levels__contents section div{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}
+.ray-levels__save{font-size:13px;margin:6px 0 0}
+@media(max-width:385px){.ray-levels__tools{gap:5px}.ray-levels__tools button{padding-inline:7px}.ray-levels__scene{border-radius:11px}}

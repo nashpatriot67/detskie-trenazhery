@@ -38,7 +38,10 @@ function attach(options){
    drag={id,button,pointerId:event.pointerId,startX:event.clientX,startY:event.clientY,moved:false};
    try{scene.setPointerCapture(event.pointerId);}catch(_){}
    onSelect(id,point(event),event);
-  }else if(event.pointerType==='touch')touch={button,pointerId:event.pointerId,x:event.clientX,y:event.clientY};
+  }else if(event.pointerType==='touch'&&!button.hasAttribute('data-ri-native')){
+   // Navigation can remove this root before a delayed compatibility click.
+   touch={button,pointerId:event.pointerId,x:event.clientX,y:event.clientY};
+  }
  }
  function move(event){
   if(touch&&touch.pointerId===event.pointerId&&Math.hypot(event.clientX-touch.x,event.clientY-touch.y)>5)touch=null;

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "build": "stage1-5d6ee6177258",
+  "build": "stage1-32e214781842",
   "sourceHashes": {
     "active-breaks.css": "7de1e74797c30242d1699a2965065fbb4ce1fac91449458897a22668725f37a4",
     "active-breaks.js": "15a0108c4ce2bdaa476b9df769d6fec40bfe6e0e5b806fa4202423521f70e5ee",
@@ -31,7 +31,7 @@
     "life-quests.css": "a6ff21647fb6147bc57aed4184487d06050745f14fb6f715fdd2449c35c5aa13",
     "life-quests.js": "305516048b66511a8475808d638148670f51d70d193366c9d1c048b7d25de471",
     "life-school-schedule.js": "23b2185e80b68539d55157ac7f33c2862c0369c843694a0cf68cc82cd3da05b0",
-    "life/app.js": "a40f74fc31826e0782e4d70222be21b59436d230e7315db407df5e0085ffae95",
+    "life/app.js": "de73aa2137dfc67a3cfee1da4a21ab8a70130dd41d17c5aeb97c84c631abb4dd",
     "life/style.css": "8f3fe3b87246d200de995434557acc02e468963fc4ed6dd5df4ea08a810c44d5",
     "math-check.css": "aa1b2170257c3de1b629792297908b8e4fd8b493451c081cf7379597f7ccc900",
     "math-check.js": "57e1e48685ea9c56b9df26e447eb8633404ea673b074d9b6903f6fca445b7516",
@@ -51,20 +51,27 @@
     "practice-hub.js": "be469c8141b55f5e7372513fa2d772979edb9e91a69e1f67147a0b238a72ee3d",
     "room-actor.js": "cbbb5c3fe81db83c7344a0ac4c1bfca0e058ca3d090728512f45a64b40dc62ca",
     "room-adventure.js": "cfc692217a782236cfd6c4cf1ef7c11470d9250307a9ada0274aa604ad64097c",
+    "room-campaign-scene.js": "3772899b08ae86e99611edabb9061182211372230d92289f2375d4723c1812c9",
+    "room-campaign.css": "cb7602859b58e63fdad9a116946dcaf24d413153949b31a77065a9325c3913ea",
+    "room-campaign.js": "3c4197b1c2904c4ed72ab6692667c4a7534ec4e2353bace81ae3c221c9494b9e",
     "room-game.css": "c94708e524494a594a921775999a6700875d409234ce3c2c5412366bc59f8a4f",
-    "room-game.js": "827be40aaf892c075e9b0625dbdb47823d40e0d685468aaae28ca320f01f4411",
-    "room-input.js": "cdee466b019eb38c2c116066454ef5ad7729c328963f764afa7b76b7fad765b3",
-    "room-pool-art.js": "d7a04a596756915dec0d4519964617d4c7ab1236e0c3103eff8e616c95caa0d3",
-    "room-progress.js": "418ff2054b2fa7a0bca74201866d249218b9e5218a7d8c5d7235b6e596821ecd",
+    "room-game.js": "f1db0cddf0687667268565671c54d5c0c5d6f93aef4c0651ce159121978afef5",
+    "room-input.js": "27983b2d2113d078ae8753d0ba12d657c23da63bb0a32f1d89c55f77d5c20f48",
+    "room-levels-data.js": "e4142877a37b4ca67ff8147286bf52d6fe8deeb1182ed6501190749f5b8e5ccc",
+    "room-levels-logic.js": "118783f897d8a3ba0605aa37735a0feb7ad30a1cf61b04c1611ad484c2791afc",
+    "room-levels-view.css": "31266e1fa7212f79861b058e733f3601357832244baf64161f3335544d7aab58",
+    "room-levels-view.js": "074b8e84c26632e429178e1bd7e536c09556ea8f00162c7e3a2c4d34fd91080e",
+    "room-pool-art.js": "5c5d9737690de90d4eed83b0e9343ecc5664847e76fb8c2f8e75c6b494dd5323",
+    "room-progress.js": "3b0d14b184fbf365febfab9a5d3057f717b2ae90c4c457f826e3b57b366f132e",
     "room-props.js": "15eda60b1cf766025ab67bc159163f16cb5cb33ce47b3062ca4afcb4fc0a9ab3",
     "room-tidy-artwork.js": "b3ea07c3a7152c979c7e58048bae287a599cbe31790c5e6f49ee8a202a025304",
     "room-tidy-data.js": "4f0f9e23eddfb5ba34fb949aacdb1c78336bd882017af3b410e04ce1ed53f5cb",
     "room-tidy-game.css": "be5e04cd16fbcd2b805f731fe8aa78a3029911710f7449ed07aaa51da856e065",
-    "room-tidy-game.js": "0a93e57f138c3a85277a0c62c12fc3ac81fd6ba6c4dfce9ed70ca15a567a8233",
+    "room-tidy-game.js": "609742ba3106b45d211d7d14e0c688ebc3773eceb32f9eff26ad74156f7f86d3",
     "room-tidy-layout.js": "4fa3ffb02643bb4766d5795d2c2e05138e9c1239bc107fc13f315959493619fb",
     "room-tidy-logic.js": "dab1dc1de37b20f8d25aa8a644be314bbf29cc9ba42d82367ccaae2abbb9ee4d",
     "room-tidy-motion.js": "20a2371ab47eb814fe31481b01c594e84c62399648b963fb6ee3da3b8bb8b1da",
-    "room-tidy-scene.js": "347a8b7597e001d8c3e1ead8b0131879861e62ce3c8e28cc07e1b918efbf555a",
+    "room-tidy-scene.js": "173321557a169b1d49aac01f63c11fad4a4ea3666f53132a1517548c66c171ac",
     "room-toy-art.js": "8b82eeb7d27c8045a608bf12c05afbbb91b37144c3c43425a3e1aa9c26f7e809",
     "russian-check.js": "bdca0192478029d4b04518faad20ddbfd5f4014847f097c5ffc00709dd14e565",
     "russian-journey.js": "c959c2f907fcfc09faa175542b68d133a488d338a0df4a6ff8e954fc047d9607",
@@ -160,7 +167,7 @@
     "kubiki": {
       "schemaVersion": 1,
       "trainer": "kubiki",
-      "build": "stage1-5d6ee6177258",
+      "build": "stage1-32e214781842",
       "styles": [
         {
           "path": "kubiki/style.css",
@@ -752,7 +759,7 @@
     "bricks": {
       "schemaVersion": 1,
       "trainer": "bricks",
-      "build": "stage1-5d6ee6177258",
+      "build": "stage1-32e214781842",
       "styles": [
         {
           "path": "bricks/style.css",
@@ -1350,7 +1357,7 @@
     "slovograd": {
       "schemaVersion": 1,
       "trainer": "slovograd",
-      "build": "stage1-5d6ee6177258",
+      "build": "stage1-32e214781842",
       "styles": [
         {
           "path": "slovograd/style.css",
@@ -1924,7 +1931,7 @@
     "life": {
       "schemaVersion": 1,
       "trainer": "life",
-      "build": "stage1-5d6ee6177258",
+      "build": "stage1-32e214781842",
       "styles": [
         {
           "path": "concepts.css",
@@ -1973,6 +1980,18 @@
           "href": "../room-tidy-game.css?v=s1-be5e04cd16fb",
           "hash": "be5e04cd16fbcd2b805f731fe8aa78a3029911710f7449ed07aaa51da856e065",
           "checksum": 1602831711
+        },
+        {
+          "path": "room-levels-view.css",
+          "href": "../room-levels-view.css?v=s1-31266e1fa721",
+          "hash": "31266e1fa7212f79861b058e733f3601357832244baf64161f3335544d7aab58",
+          "checksum": 2972374921
+        },
+        {
+          "path": "room-campaign.css",
+          "href": "../room-campaign.css?v=s1-cb7602859b58",
+          "hash": "cb7602859b58e63fdad9a116946dcaf24d413153949b31a77065a9325c3913ea",
+          "checksum": 3098300554
         },
         {
           "path": "workspace-layout.css",
@@ -2074,9 +2093,9 @@
         },
         {
           "path": "room-progress.js",
-          "href": "../room-progress.js?v=s1-418ff2054b2f",
-          "hash": "418ff2054b2fa7a0bca74201866d249218b9e5218a7d8c5d7235b6e596821ecd",
-          "checksum": 1069800736
+          "href": "../room-progress.js?v=s1-3b0d14b184fb",
+          "hash": "3b0d14b184fbf365febfab9a5d3057f717b2ae90c4c457f826e3b57b366f132e",
+          "checksum": 3872119438
         },
         {
           "path": "room-tidy-data.js",
@@ -2116,27 +2135,27 @@
         },
         {
           "path": "room-input.js",
-          "href": "../room-input.js?v=s1-cdee466b019e",
-          "hash": "cdee466b019eb38c2c116066454ef5ad7729c328963f764afa7b76b7fad765b3",
-          "checksum": 2970869113
+          "href": "../room-input.js?v=s1-27983b2d2113",
+          "hash": "27983b2d2113d078ae8753d0ba12d657c23da63bb0a32f1d89c55f77d5c20f48",
+          "checksum": 4153965511
         },
         {
           "path": "room-pool-art.js",
-          "href": "../room-pool-art.js?v=s1-d7a04a596756",
-          "hash": "d7a04a596756915dec0d4519964617d4c7ab1236e0c3103eff8e616c95caa0d3",
-          "checksum": 3096611703
+          "href": "../room-pool-art.js?v=s1-5c5d9737690d",
+          "hash": "5c5d9737690de90d4eed83b0e9343ecc5664847e76fb8c2f8e75c6b494dd5323",
+          "checksum": 3567342751
         },
         {
           "path": "room-game.js",
-          "href": "../room-game.js?v=s1-827be40aaf89",
-          "hash": "827be40aaf892c075e9b0625dbdb47823d40e0d685468aaae28ca320f01f4411",
-          "checksum": 2315770983
+          "href": "../room-game.js?v=s1-f1db0cddf068",
+          "hash": "f1db0cddf0687667268565671c54d5c0c5d6f93aef4c0651ce159121978afef5",
+          "checksum": 3863087763
         },
         {
           "path": "room-tidy-scene.js",
-          "href": "../room-tidy-scene.js?v=s1-347a8b7597e0",
-          "hash": "347a8b7597e001d8c3e1ead8b0131879861e62ce3c8e28cc07e1b918efbf555a",
-          "checksum": 2027063250
+          "href": "../room-tidy-scene.js?v=s1-173321557a16",
+          "hash": "173321557a169b1d49aac01f63c11fad4a4ea3666f53132a1517548c66c171ac",
+          "checksum": 2911564907
         },
         {
           "path": "room-tidy-layout.js",
@@ -2158,15 +2177,45 @@
         },
         {
           "path": "room-tidy-game.js",
-          "href": "../room-tidy-game.js?v=s1-0a93e57f138c",
-          "hash": "0a93e57f138c3a85277a0c62c12fc3ac81fd6ba6c4dfce9ed70ca15a567a8233",
-          "checksum": 3402535755
+          "href": "../room-tidy-game.js?v=s1-609742ba3106",
+          "hash": "609742ba3106b45d211d7d14e0c688ebc3773eceb32f9eff26ad74156f7f86d3",
+          "checksum": 1609289046
+        },
+        {
+          "path": "room-campaign-scene.js",
+          "href": "../room-campaign-scene.js?v=s1-3772899b08ae",
+          "hash": "3772899b08ae86e99611edabb9061182211372230d92289f2375d4723c1812c9",
+          "checksum": 725452533
+        },
+        {
+          "path": "room-levels-data.js",
+          "href": "../room-levels-data.js?v=s1-e4142877a37b",
+          "hash": "e4142877a37b4ca67ff8147286bf52d6fe8deeb1182ed6501190749f5b8e5ccc",
+          "checksum": 2411347736
+        },
+        {
+          "path": "room-levels-logic.js",
+          "href": "../room-levels-logic.js?v=s1-118783f897d8",
+          "hash": "118783f897d8a3ba0605aa37735a0feb7ad30a1cf61b04c1611ad484c2791afc",
+          "checksum": 2112480388
+        },
+        {
+          "path": "room-levels-view.js",
+          "href": "../room-levels-view.js?v=s1-074b8e84c266",
+          "hash": "074b8e84c26632e429178e1bd7e536c09556ea8f00162c7e3a2c4d34fd91080e",
+          "checksum": 1404844172
+        },
+        {
+          "path": "room-campaign.js",
+          "href": "../room-campaign.js?v=s1-3c4197b1c290",
+          "hash": "3c4197b1c2904c4ed72ab6692667c4a7534ec4e2353bace81ae3c221c9494b9e",
+          "checksum": 1676234859
         },
         {
           "path": "life/app.js",
-          "href": "app.js?v=s1-a40f74fc3182",
-          "hash": "a40f74fc31826e0782e4d70222be21b59436d230e7315db407df5e0085ffae95",
-          "checksum": 4157272354
+          "href": "app.js?v=s1-de73aa2137df",
+          "hash": "de73aa2137dfc67a3cfee1da4a21ab8a70130dd41d17c5aeb97c84c631abb4dd",
+          "checksum": 1879165084
         }
       ],
       "media": [
@@ -2556,8 +2605,8 @@
       ]
     }
   },
-  "coreResources": 164,
-  "coreBytes": 16575225,
+  "coreResources": 171,
+  "coreBytes": 16616907,
   "budgetBytes": 16777216,
   "coachClips": 41,
   "coachBytes": 964180

@@ -16,6 +16,11 @@ const missions=[
 const esc=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const brand='<svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><rect width="64" height="64" rx="17" fill="#387d70"/><path d="M22 22v-5a10 10 0 0 1 20 0v5" stroke="#fff9e9" stroke-width="5"/><rect x="15" y="19" width="34" height="36" rx="10" fill="#fff9e9"/><rect x="21" y="33" width="22" height="15" rx="5" fill="#b8d7bd"/><path d="m27 40 4 4 7-8" stroke="#387d70" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const roomEpisode=root.location&&typeof root.URLSearchParams==='function'?new root.URLSearchParams(root.location.search).get('room'):null;
+if(roomEpisode==='campaign'){
+ if(root.RoomCampaign&&root.RoomLevelsView&&root.RoomGame&&root.RoomTidyGame){root.RoomCampaign.mount(app);root.LifeTrainer=Object.freeze({title:TITLE,storageKey:OWNER,moduleId:'life-room-tidy',missions:missions.map(m=>m.id)});}
+ else app.innerHTML='<main class="life-update"><h1>Завершим обновление</h1><p>Подключись к интернету и открой игру ещё раз.</p><a href="./">Все приключения</a></main>';
+ return;
+}
 if(roomEpisode==='tidy'){
  if(root.RoomTidyGame&&root.RoomProgress){root.RoomTidyGame.mount(app);root.LifeTrainer=Object.freeze({title:TITLE,storageKey:OWNER,moduleId:'life-room-tidy',missions:missions.map(m=>m.id)});}
  else app.innerHTML='<main class="life-update"><h1>Завершим обновление</h1><p>Подключись к интернету и открой приключение ещё раз. Прежние результаты останутся на устройстве.</p><a href="./">Все приключения</a></main>';
@@ -33,9 +38,8 @@ if(!root.LearningProgress||!root.LifeQuestData||!root.LifeQuests||!root.Practice
 const available=new Set(root.LifeQuestData.quests.map(q=>q.id));
 app.innerHTML='<div class="life-app-shell"><header class="life-topbar"><a class="life-brand" href="../" aria-label="На главную со всеми тренажёрами">'+brand+'<span>'+TITLE+'<small>Учимся заботиться о своих делах</small></span></a><a class="life-home" href="../"><span aria-hidden="true">←</span> Все игры</a></header><section class="life-today" id="life-today" aria-labelledby="life-today-title"><div class="life-today-heading"><span class="life-eyebrow">ОДНО НЕБОЛЬШОЕ ДЕЛО</span><h1 id="life-today-title">С чего сегодня начнём?</h1><p>Выбери приключение. Сначала попробуем в игре, а потом — в жизни. Можно остановиться и продолжить позже.</p></div><div class="life-missions">'+missions.filter(m=>available.has(m.id)).map(m=>'<button type="button" class="life-mission" data-life-start="'+esc(m.id)+'"><span class="life-mission-icon" aria-hidden="true">'+m.icon+'</span><span><strong>'+esc(m.title)+'</strong><small>'+esc(m.text)+'</small></span><span class="life-mission-arrow" aria-hidden="true">→</span></button>').join('')+'</div></section><main id="life-stage" class="life-stage" aria-label="Жизненные приключения"></main><footer class="life-footer"><p>В игре можно ошибаться, пробовать и исправлять. Настоящее дело отмечаем отдельно.</p><a href="../">Выбрать другой тренажёр</a></footer></div>';
 
-if(root.RoomGame){
- doc.getElementById('life-today').insertAdjacentHTML('beforebegin',root.RoomGame.launcher());
- if(root.RoomTidyGame)doc.getElementById('life-today').insertAdjacentHTML('beforebegin','<a class="room-launch" href="?room=tidy"><span style="font-size:56px;text-align:center" aria-hidden="true">🏎️</span><span><strong>Большая уборка с Рэем</strong><small>Найди машинку, заполни гараж и разбери LEGO и одежду →</small></span></a>');
+if(root.RoomCampaign){
+ doc.getElementById('life-today').insertAdjacentHTML('beforebegin',root.RoomCampaign.launcher());
 }
 
 root.PracticeHub.mount({

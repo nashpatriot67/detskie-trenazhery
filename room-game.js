@@ -6,38 +6,73 @@ function makeData(){
  const q=global.LifeQuestData.quests.find(q=>q.id==='life.sport.pool');
  if(!q)throw Error('Missing reviewed pool activity');
  const floor={items:['toy-car','teddy','dirty-shirt'],accepted:{'toy-car':['toybox'],teddy:['toybox'],'dirty-shirt':['laundry']}};
+ const floorArt={'toy-car':'race-green',teddy:'teddy','dirty-shirt':'dirty-shirt'};
  const data={pool:{required:q.required.slice(),optional:q.optional.slice(),distractors:q.distractors.slice(),why:{...q.why}},floor,items:{},art:{},fallbackArt:{},atlas:ATLAS};
  for(const id of new Set(floor.items.concat(q.required,q.optional,q.distractors))){
   data.items[id]=global.LifeQuestData.items[id];
-  const body=global.RoomPoolArt?.[id];
+  const body=global.RoomPoolArt?.[id]||global.RoomTidyScene?.sprites?.[floorArt[id]];
   const fallback='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(global.ObjectArt.markup(id,{decorative:true}));
   data.fallbackArt[id]=fallback;
   data.art[id]=body||fallback;
  }
  return data;
 }
-const mount=(function(host){
-  'use strict';
+const mount=(function(host,options={}){
   host.innerHTML=MARKUP;
-  const store=window.RoomProgress.create();
-  const root=document.getElementById('room-mission-play'),data=makeData();
+  const campaign=options.campaign===true,skipFloor=campaign&&options.skipFloor===true&&!!options.store;
+  const store=options.store||window.RoomProgress.create();
+  const root=host.firstElementChild,data=makeData(),controls=new AbortController();
+  const on=(element,type,listener,eventOptions)=>element.addEventListener(type,listener,{...eventOptions,signal:controls.signal});
   const canvas=root.querySelector('[data-rg-canvas]'),ctx=canvas.getContext('2d'),scene=root.querySelector('[data-rg-scene]'),hits=root.querySelector('[data-rg-hits]'),intro=root.querySelector('[data-rg-intro]'),startButton=root.querySelector('[data-rg-start]'),ending=root.querySelector('[data-rg-ending]'),feedback=root.querySelector('[data-rg-feedback]'),heading=root.querySelector('[data-rg-title]'),drawer=root.querySelector('[data-rg-drawer]');
+  const replay=root.querySelector('[data-rg-replay]');
   const W=720,TAU=Math.PI*2,stageIndex={floor:0,bed:1,bag:2,done:2};
   const titles={floor:'Освободи проход',bed:'Заправь постель',bag:'Собери сумку в бассейн',done:'Теперь можно отправляться'};
   const instructions={floor:'Игрушки — в ящик. Футболку после спорта — в корзину для белья. Можно перетаскивать или выбирать нажатием.',bed:'Расправь покрывало за два уголка и положи подушку. Метки покажут подходящее место.',bag:'Найди вещи по памятке бассейна. В конце застегни молнию на сумке.',done:'Все три дела закончены. Настоящее дело можно попробовать повторить дома.'};
   let started=false,loaded=false,visible=!document.hidden,intersecting=true,raf=0,last=0,clock=0,frames=0,displayStage='floor',camera=0,transition=null,drag=null,selected=null,scale=1,drawers=null,suppressUntil=0,hover=null,soundEnabled=false,audio=null,finished=false,finishAt=0;
   let sprites=[],corners=[],zipProgress=0,particles=[],feedbackOverride='',regionList=[],suppressDropClick=false;
+  let completed=false,destroyed=false;
   const actor=AdventureActor.create({x:80,y:694,scale:1.45}),images={};
   const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches===true;
   const game=RoomAdventure.create(data);
   const initialSave=store.read(),prior=initialSave.snapshot;
   if(prior)try{game.restore(prior);}catch(_){}
+  if(skipFloor&&game.state.stage==='floor'){
+    data.floor.items.forEach(id=>{
+      if(!game.state.placements[id])game.act('dropFloor',{id,zone:data.floor.accepted[id][0]});
+    });
+  }
+  if(campaign){
+    const nav=root.querySelector('.rg-page-nav'),back=nav.firstElementChild;
+    nav.lastElementChild.remove();
+    back.href='?room=campaign';
+    back.textContent='← Карта уровней';
+    on(back,'click',event=>{if(options.onExit){event.preventDefault();options.onExit();}});
+    replay.textContent='К карте';
+    if(skipFloor){
+      root.querySelector('.rg-brand').textContent='Приключение с Рэем';
+      root.querySelector('.rg-header h2').textContent='Собираемся в бассейн';
+      root.querySelector('.rg-header p').textContent='Заправь постель и собери сумку для бассейна.';
+      intro.querySelector('h3').textContent='Рэй готовится в бассейн';
+      intro.querySelector('p').textContent='Сначала расправим покрывало и положим подушку. Затем по памятке соберём сумку.';
+      const floorPip=root.querySelector('[data-rg-pip="floor"]');
+      floorPip.nextElementSibling.remove();
+      floorPip.remove();
+      ending.querySelector('p').textContent='Постель аккуратная, сумка собрана.';
+      instructions.done='Постель заправлена, вещи для бассейна в сумке.';
+    }
+    soundEnabled=initialSave.sound===true;
+    if(soundEnabled){
+      const soundButton=root.querySelector('[data-rg-sound]');
+      soundButton.setAttribute('aria-pressed','true');
+      soundButton.textContent='Звук: вкл.';
+    }
+  }
   displayStage=game.state.stage;camera=stageIndex[displayStage];finished=false;
   function saveNotice(){const node=root.querySelector('[data-rg-save]');if(node)node.textContent=store.warning()||'Сохраняем на этом устройстве · можно продолжить позже';}
   function persist(){store.save(game.snapshot(),{sound:soundEnabled});saveNotice();}
   saveNotice();
   function image(src){return new Promise(resolve=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=()=>resolve(null);img.src=src;});}
-  let atlas=null;
+  let atlas=null,bagOpen=null,bagZip=null;
   const ensureAudio=()=>{if(!audio)try{const AC=window.AudioContext||window.webkitAudioContext;if(AC)audio=new AC();}catch(_){}if(audio?.state==='suspended')audio.resume().catch(()=>{});};
   function tone(kind){if(!soundEnabled||!audio||!visible)return;try{const t=audio.currentTime,o=audio.createOscillator(),g=audio.createGain();o.type=kind==='step'?'triangle':'sine';o.frequency.setValueAtTime(kind==='step'?140:kind==='success'?740:440,t);o.frequency.exponentialRampToValueAtTime(kind==='step'?90:kind==='success'?990:390,t+.09);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(kind==='step'?.018:.065,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+.13);o.connect(g);g.connect(audio.destination);o.start(t);o.stop(t+.15);}catch(_){}}
   const label=id=>data.items[id]?.label||id;
@@ -67,9 +102,15 @@ const mount=(function(host){
     root.querySelectorAll('[data-rg-pip]').forEach(el=>{const n=stageIndex[el.dataset.rgPip],active=stageIndex[displayStage];el.classList.toggle('is-current',n===active&&displayStage!=='done');el.classList.toggle('is-complete',n<active||displayStage==='done');});
     root.querySelector('[data-rg-memo]').hidden=displayStage!=='bag'||!started;
     root.querySelector('[data-rg-bag]').hidden=displayStage!=='bag'||!started;
-    ending.hidden=!finished;
+    ending.hidden=!finished||(campaign&&!completed);
     startButton.disabled=!loaded;startButton.textContent=prior?'Продолжить приключение':'Начать приключение';
     rebuildHits();
+  }
+  function reportCompletion(){
+    if(completed||!started||!finished||particles.length)return;
+    completed=true;
+    if(campaign)updateUI();
+    options.onComplete?.();
   }
   function makeRegion(kind,id,x,y,w=90,h=90,target){return {kind,id,item:kind==='zone'?null:id,target:target||null,x,y,w,h};}
   function regions(){
@@ -95,7 +136,7 @@ const mount=(function(host){
     if(focused){const next=Array.from(hits.children).find(el=>el.dataset.rgKind===focused.kind&&(el.dataset.rgItem||el.dataset.rgTarget)===focused.id);next?.focus({preventScroll:true});}
   }
   function resize(){
-    const w=scene.clientWidth;if(!w)return;scale=w/W;const dpr=Math.min(window.devicePixelRatio||1,2.5);canvas.width=Math.round(w*dpr);canvas.height=Math.round(w*dpr);ctx.setTransform(dpr*scale,0,0,dpr*scale,0,0);rebuildHits();draw();
+    const w=scene.clientWidth;if(destroyed||!w)return;scale=w/W;const dpr=Math.min(window.devicePixelRatio||1,2.5);canvas.width=Math.round(w*dpr);canvas.height=Math.round(w*dpr);ctx.setTransform(dpr*scale,0,0,dpr*scale,0,0);rebuildHits();draw();
   }
   const roundRect=(x,y,w,h,r,fill,stroke)=>{ctx.beginPath();if(ctx.roundRect)ctx.roundRect(x,y,w,h,r);else{r=Math.min(r,w/2,h/2);ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}if(fill){ctx.fillStyle=fill;ctx.fill();}if(stroke){ctx.strokeStyle=stroke;ctx.stroke();}};
   function chip(text,x,y,accent=false){
@@ -106,7 +147,7 @@ const mount=(function(host){
     if(s.alpha<=0)return;ctx.save();ctx.translate(s.x,s.y);ctx.rotate(s.angle);ctx.scale(s.s,s.s);ctx.globalAlpha=s.alpha;
     if(s.grabbed){ctx.shadowColor='#183e3840';ctx.shadowBlur=15;ctx.shadowOffsetY=8;}
     if(s.id==='pillow')AdventureProps.pillow(ctx,{x:0,y:0,width:s.w,height:s.h,angle:0});
-    else if(images[s.id]&&global.RoomPoolArt?.[s.id]){
+    else if(images[s.id]&&data.art[s.id]!==data.fallbackArt[s.id]){
       const art=images[s.id],fit=Math.min(s.w/art.width,s.h/art.height),w=art.width*fit,h=art.height*fit;
       ctx.save();ctx.translate(2,h*.44);ctx.scale(1,.22);
       const contact=ctx.createRadialGradient(0,0,0,0,0,w*.65);
@@ -133,6 +174,53 @@ const mount=(function(host){
     }
     ctx.restore();
   }
+  function drawPoolBag(packedImages){
+    const isHovered=hover==='bag',isReady=ready();
+    if(!bagOpen||!bagZip){
+      AdventureProps.bag(ctx,{x:360,y:550,packedImages,zipProgress,hover:isHovered,ready:isReady});
+      return;
+    }
+    const sliderX=250+230*zipProgress;
+    ctx.save();
+    ctx.translate(364,641);ctx.scale(1,.135);
+    const shadow=ctx.createRadialGradient(0,0,0,0,0,156);
+    shadow.addColorStop(0,'#22160d75');shadow.addColorStop(1,'#22160d00');
+    ctx.fillStyle=shadow;ctx.fillRect(-156,-156,312,312);
+    ctx.restore();
+    ctx.drawImage(bagOpen,208,399,304,246);
+
+    ctx.save();
+    ctx.beginPath();ctx.ellipse(360,502,117,18,0,0,TAU);ctx.clip();
+    packedImages.forEach((image,index)=>{
+      const size=Math.min(72,210/packedImages.length+12),factor=size/Math.max(image.width,image.height);
+      const width=image.width*factor,height=image.height*factor;
+      const x=360+(index-(packedImages.length-1)/2)*Math.min(55,185/packedImages.length);
+      ctx.save();ctx.translate(x,503+(index%2)*4);ctx.rotate(index%2?.12:-.12);
+      ctx.drawImage(image,-width/2,-height/2,width,height);ctx.restore();
+    });
+    if(zipProgress>0){
+      ctx.beginPath();ctx.rect(242,482,sliderX-242,40);ctx.clip();
+      ctx.drawImage(bagZip,242,482,236,40);
+    }
+    ctx.restore();
+
+    ctx.save();
+    if(isHovered){
+      ctx.beginPath();ctx.ellipse(360,502,121,20,0,0,TAU);
+      ctx.strokeStyle='#e4ecb8ce';ctx.lineWidth=2.5;ctx.stroke();
+    }
+    if(zipProgress>0){
+      ctx.beginPath();ctx.moveTo(250,500);ctx.lineTo(sliderX,500);
+      ctx.strokeStyle='#266054';ctx.lineWidth=4;ctx.stroke();
+      ctx.strokeStyle='#e4b972';ctx.lineWidth=2;ctx.setLineDash([2,2]);ctx.stroke();ctx.setLineDash([]);
+    }
+    ctx.translate(sliderX,500);
+    ctx.lineWidth=1.2;
+    roundRect(-7,-5,14,10,3,'#e6c18a','#80613b');
+    roundRect(0,4,10,18,4,isReady?'#ffc270':'#efbd77','#9b713f');
+    roundRect(3,8,4,7,1.8,'#376e70');
+    ctx.restore();
+  }
   function draw(){
     if(!ctx)return;frames++;ctx.clearRect(0,0,W,W);
     if(atlas){const sw=atlas.width/3,x=Math.min(atlas.width-sw,Math.max(0,camera*sw));ctx.drawImage(atlas,x,0,sw,atlas.height,0,0,W,W);}else{ctx.fillStyle='#335e53';ctx.fillRect(0,0,W,W);}
@@ -145,7 +233,7 @@ const mount=(function(host){
     }
     if(displayStage==='bag'||displayStage==='done'){
       const settled=game.state.packed.filter(id=>!sprites.find(sprite=>sprite.id===id)?.flight);
-      AdventureProps.bag(ctx,{x:360,y:550,packedImages:settled.map(id=>images[id]).filter(Boolean),zipProgress,hover:hover==='bag',ready:ready()});
+      drawPoolBag(settled.map(id=>images[id]).filter(Boolean));
       const count=data.pool.required.filter(id=>game.state.packed.includes(id)).length;for(let i=0;i<5;i++){ctx.fillStyle=i<count?'#d9ffab':'#ffffff45';ctx.beginPath();ctx.arc(310+i*25,658,5.5,0,TAU);ctx.fill();}
       if(displayStage==='bag'&&ready())chip('Потяни молнию →',360,390,true);
     }
@@ -214,14 +302,14 @@ const mount=(function(host){
     else if(displayStage==='floor')action('dropFloor',{id:current.id,zone:target},current);
     else if(displayStage==='bag')action('pack',{id:current.id},current);
   }
-  scene.addEventListener('pointerdown',event=>{
+  on(scene,'pointerdown',event=>{
     const hit=event.target.closest('.rg-hit');if(!hit||transition||!started)return;
     const kind=hit.dataset.rgKind;if(kind==='zone')return;
     event.preventDefault();const id=hit.dataset.rgItem,p=pointerPoint(event);choose(id,kind);drag={id,kind,pointerId:event.pointerId,start:p,point:p,moved:false};
     const s=sprites.find(v=>v.id===id);if(s){drag.offset={x:s.x-p.x,y:s.y-p.y};s.grabbed=true;s.ts=1.13;s.flight=null;s.alpha=1;}
     try{scene.setPointerCapture(event.pointerId);}catch(_){}wake();
   });
-  scene.addEventListener('pointermove',event=>{
+  on(scene,'pointermove',event=>{
     const p=pointerPoint(event);look={x:p.x,y:p.y};
     if(!drag||drag.pointerId!==event.pointerId)return;
     event.preventDefault();drag.point=p;if(Math.hypot(p.x-drag.start.x,p.y-drag.start.y)*scale>5)drag.moved=true;
@@ -251,46 +339,50 @@ const mount=(function(host){
     }
     hover=null;wake();
   }
-  scene.addEventListener('pointerup',event=>endDrag(event,false));scene.addEventListener('pointercancel',event=>endDrag(event,true));
-  scene.addEventListener('click',event=>{
+  on(scene,'pointerup',event=>endDrag(event,false));on(scene,'pointercancel',event=>endDrag(event,true));
+  on(scene,'click',event=>{
     const hit=event.target.closest('.rg-hit');if(!hit||transition||!started)return;
     if(event.detail!==0&&performance.now()<suppressUntil&&(suppressDropClick||hit.dataset.rgKind!=='zone'))return;
     if(hit.dataset.rgKind==='zone')performSelection(hit.dataset.rgTarget);else choose(hit.dataset.rgItem,hit.dataset.rgKind);
   });
-  scene.addEventListener('dragstart',event=>event.preventDefault());
+  on(scene,'dragstart',event=>event.preventDefault());
   function openDrawer(mode){
     if(displayStage!=='bag'||transition)return;drawers=mode;drawer.hidden=false;root.querySelector('[data-rg-drawer-title]').textContent=mode==='memo'?'Памятка бассейна':'Приготовленные вещи';
     const ids=mode==='memo'?data.pool.required:game.state.packed;
     const content='<div class="rg-drawer-grid">'+ids.map(id=>'<'+(mode==='bag'?'button type="button" data-rg-unpack="'+id+'"':'div')+' class="rg-item-chip'+(mode==='bag'?' cursor-interaction':'')+'"><img src="'+data.art[id]+'" alt=""><span>'+esc(label(id))+'</span></'+(mode==='bag'?'button':'div')+'>').join('')+'</div>';
     root.querySelector('[data-rg-drawer-body]').innerHTML=content+'<p class="rg-drawer-note">'+(mode==='memo'?'Очки и воду можно взять дополнительно.':'Нажми на вещь, если хочешь вернуть её на полку.')+'</p>';
   }
-  root.querySelector('[data-rg-memo]').addEventListener('click',()=>openDrawer('memo'));
-  root.querySelector('[data-rg-bag]').addEventListener('click',()=>openDrawer('bag'));
-  root.querySelector('[data-rg-close]').addEventListener('click',()=>{drawer.hidden=true;drawers=null;});
-  drawer.addEventListener('click',event=>{const button=event.target.closest('[data-rg-unpack]');if(!button)return;action('unpack',{id:button.dataset.rgUnpack});openDrawer('bag');});
-  root.querySelector('[data-rg-sound]').addEventListener('click',event=>{soundEnabled=!soundEnabled;event.currentTarget.setAttribute('aria-pressed',String(soundEnabled));event.currentTarget.textContent=soundEnabled?'Звук: вкл.':'Звук: выкл.';if(soundEnabled){ensureAudio();tone('success');}persist();});
-  startButton.addEventListener('click',()=>{if(!loaded)return;started=true;intro.hidden=true;if(soundEnabled)ensureAudio();feedbackOverride='';if(game.state.stage==='done'){displayStage='done';finished=true;}setup(displayStage);updateUI();wake();});
-  root.querySelector('[data-rg-replay]').addEventListener('click',()=>{game.reset();displayStage='floor';camera=0;transition=null;finished=false;feedbackOverride='';setup('floor');updateUI();persist();wake();});
+  on(root.querySelector('[data-rg-memo]'),'click',()=>openDrawer('memo'));
+  on(root.querySelector('[data-rg-bag]'),'click',()=>openDrawer('bag'));
+  on(root.querySelector('[data-rg-close]'),'click',()=>{drawer.hidden=true;drawers=null;});
+  on(drawer,'click',event=>{const button=event.target.closest('[data-rg-unpack]');if(!button)return;action('unpack',{id:button.dataset.rgUnpack});openDrawer('bag');});
+  on(root.querySelector('[data-rg-sound]'),'click',event=>{soundEnabled=!soundEnabled;event.currentTarget.setAttribute('aria-pressed',String(soundEnabled));event.currentTarget.textContent=soundEnabled?'Звук: вкл.':'Звук: выкл.';if(soundEnabled){ensureAudio();tone('success');}persist();});
+  on(startButton,'click',()=>{if(!loaded)return;started=true;intro.hidden=true;if(soundEnabled)ensureAudio();feedbackOverride='';if(game.state.stage==='done'){displayStage='done';finished=true;}setup(displayStage);updateUI();wake();reportCompletion();});
+  on(replay,'click',()=>{
+    if(campaign){root.querySelector('.rg-page-nav a').click();return;}
+    game.reset();displayStage='floor';camera=0;transition=null;finished=false;feedbackOverride='';setup('floor');updateUI();persist();wake();
+  });
   // Some touch browsers suppress compatibility clicks after a captured drag.
   // Activate a genuine, stationary control tap on pointerup, deduplicating any
   // later native click. Drag sources keep their separate adapter; destination
   // buttons support the same stationary tap fallback as other controls.
   let controlTouch=null,lastControlTouch=null;
-  root.addEventListener('pointerdown',event=>{
+  on(root,'pointerdown',event=>{
     lastControlTouch=null;
     if(event.pointerType!=='touch'||event.isPrimary===false)return;
     const button=event.target.closest('button');
+    if(campaign&&button===replay){controlTouch=null;return;}
     controlTouch=button&&!button.disabled&&(!button.classList.contains('rg-hit')||button.dataset.rgKind==='zone')?{button,id:event.pointerId,x:event.clientX,y:event.clientY}:null;
   });
-  root.addEventListener('pointercancel',()=>{controlTouch=null;});
-  root.addEventListener('pointerup',event=>{
+  on(root,'pointercancel',()=>{controlTouch=null;});
+  on(root,'pointerup',event=>{
     const tap=controlTouch;controlTouch=null;
     if(!tap||event.pointerType!=='touch'||tap.id!==event.pointerId||event.target.closest('button')!==tap.button||Math.hypot(event.clientX-tap.x,event.clientY-tap.y)>10||tap.button.disabled)return;
     event.preventDefault();lastControlTouch={button:tap.button,at:performance.now()};tap.button.click();
   });
-  root.addEventListener('click',event=>{
+  on(root,'click',event=>{
     if(event.detail>0&&lastControlTouch&&performance.now()-lastControlTouch.at<700){event.preventDefault();event.stopImmediatePropagation();}
-  },true);
+  },{capture:true});
   let actorReaction='idle',reactionUntil=0,look={x:360,y:400},lastStep=0;
   function update(dt){
     clock+=dt;
@@ -315,15 +407,25 @@ const mount=(function(host){
     if(actor.moving&&clock-lastStep>.28){tone('step');lastStep=clock;}
     if(displayStage==='done'&&!finished&&(reduced||clock>=finishAt&&Math.abs(actor.x-678)<8)){finished=true;feedbackOverride=instructions.done;burst(650,560);updateUI();}
   }
-  function tick(timestamp){raf=0;if(!started||!visible||!root.isConnected)return;const dt=last?Math.min(.045,(timestamp-last)/1000):0;last=timestamp;update(dt);draw();raf=requestAnimationFrame(tick);}
-  function wake(){if(started&&visible&&!raf){last=0;raf=requestAnimationFrame(tick);}else if(!started)draw();}
-  function visibility(){visible=intersecting&&!document.hidden;if(!visible){if(raf)cancelAnimationFrame(raf);raf=0;last=0;audio?.suspend?.().catch(()=>{});}else{if(soundEnabled&&audio?.state==='suspended')audio.resume().catch(()=>{});wake();}}
-  document.addEventListener('visibilitychange',visibility);window.addEventListener('pagehide',()=>{intersecting=false;visibility();});
-  if(window.IntersectionObserver)new IntersectionObserver(entries=>{intersecting=entries[0]?.isIntersecting!==false;visibility();},{threshold:0}).observe(canvas);
-  if(window.ResizeObserver)new ResizeObserver(resize).observe(scene);else window.addEventListener('resize',resize);
-  store.subscribe(()=>{saveNotice();});
+  function tick(timestamp){
+    raf=0;
+    if(destroyed||!started||!visible||!root.isConnected)return;
+    const dt=last?Math.min(.045,(timestamp-last)/1000):0;
+    last=timestamp;update(dt);draw();reportCompletion();
+    if(!destroyed)raf=requestAnimationFrame(tick);
+  }
+  function wake(){if(destroyed)return;if(started&&visible&&!raf){last=0;raf=requestAnimationFrame(tick);}else if(!started)draw();}
+  function visibility(){if(destroyed)return;visible=intersecting&&!document.hidden;if(!visible){if(raf)cancelAnimationFrame(raf);raf=0;last=0;audio?.suspend?.().catch(()=>{});}else{if(soundEnabled&&audio?.state==='suspended')audio.resume().catch(()=>{});wake();}}
+  on(document,'visibilitychange',visibility);
+  on(window,'pagehide',()=>{intersecting=false;visibility();});
+  const observer=window.IntersectionObserver?new IntersectionObserver(entries=>{intersecting=entries[0]?.isIntersecting!==false;visibility();},{threshold:0}):null;
+  observer?.observe(canvas);
+  const resizer=window.ResizeObserver?new ResizeObserver(resize):null;
+  if(resizer)resizer.observe(scene);else on(window,'resize',resize);
+  const unsubscribe=store.subscribe?.(saveNotice);
 
-  window.AdventureGame=Object.freeze({snapshot:()=>({state:game.state,displayStage,started,selected:selected?{...selected}:null,actor:{x:actor.x,y:actor.y,time:actor._time,moving:actor.moving},frames,visible,transitioning:!!transition,clock,finished,loaded,reducedMotion:reduced,zipProgress}),regions:()=>Array.from(hits.querySelectorAll('.rg-hit')).map(el=>{const b=el.getBoundingClientRect();return {kind:el.dataset.rgKind,item:el.dataset.rgItem||null,target:el.dataset.rgTarget||null,x:b.x,y:b.y,width:b.width,height:b.height,centerX:b.x+b.width/2,centerY:b.y+b.height/2};})});
+  const debug=Object.freeze({snapshot:()=>({state:game.state,displayStage,started,selected:selected?{...selected}:null,actor:{x:actor.x,y:actor.y,time:actor._time,moving:actor.moving},frames,visible,transitioning:!!transition,clock,finished,loaded,reducedMotion:reduced,zipProgress}),regions:()=>Array.from(hits.querySelectorAll('.rg-hit')).map(el=>{const b=el.getBoundingClientRect();return {kind:el.dataset.rgKind,item:el.dataset.rgItem||null,target:el.dataset.rgTarget||null,x:b.x,y:b.y,width:b.width,height:b.height,centerX:b.x+b.width/2,centerY:b.y+b.height/2};})});
+  window.AdventureGame=debug;
   setup(displayStage);resize();updateUI();
   async function loadItemArt(id,src){
     images[id]=await image(src);
@@ -331,7 +433,23 @@ const mount=(function(host){
       data.art[id]=data.fallbackArt[id];images[id]=await image(data.art[id]);
     }
   }
-  Promise.all([image(data.atlas).then(img=>atlas=img),...Object.entries(data.art).map(([id,src])=>loadItemArt(id,src))]).then(()=>{loaded=!!atlas;updateUI();draw();if(!loaded){startButton.textContent='Комната не загрузилась';feedbackOverride='Изображение комнаты не загрузилось. Попробуй открыть пример ещё раз.';feedback.textContent=feedbackOverride;}});
+  async function loadBagArt(){
+    const art=global.RoomPoolArt?.bag;
+    if(art?.open&&art?.zip)[bagOpen,bagZip]=await Promise.all([image(art.open),image(art.zip)]);
+  }
+  Promise.all([image(data.atlas).then(img=>atlas=img),loadBagArt(),...Object.entries(data.art).map(([id,src])=>loadItemArt(id,src))]).then(()=>{if(destroyed||!root.isConnected)return;loaded=!!atlas;updateUI();draw();if(!loaded){startButton.textContent='Комната не загрузилась';feedbackOverride='Изображение комнаты не загрузилось. Попробуй открыть пример ещё раз.';feedback.textContent=feedbackOverride;}});
+  return {destroy(){
+    if(destroyed)return;
+    destroyed=true;
+    controls.abort();
+    if(drag)endDrag({pointerId:drag.pointerId},true);
+    unsubscribe?.();
+    if(!options.store)store.destroy?.();
+    observer?.disconnect();resizer?.disconnect();
+    if(raf)cancelAnimationFrame(raf);
+    audio?.close().catch(()=>{});
+    if(window.AdventureGame===debug)delete window.AdventureGame;
+  }};
 });
 global.RoomGame=Object.freeze({mount,assets:()=>({atlas:ATLAS}),launcher(){return '<a class="room-launch" href="?room=1"><span class="room-launch-picture" aria-hidden="true"><img src="'+ATLAS+'" alt=""></span><span><strong>Приключение с Рэем</strong><small>Наведи порядок, расправь покрывало и собери сумку в бассейн →</small></span></a>';}});
 })(typeof window==='undefined'?globalThis:window);

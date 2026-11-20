@@ -4,7 +4,7 @@
  */
 'use strict';
 
-const VERSION = 'stage1-5d6ee6177258';
+const VERSION = 'stage1-32e214781842';
 const ROOT = new URL('./', self.location.href);
 const CACHE_PREFIX = 'trainers:' + ROOT.pathname + ':core:';
 const CACHE_NAME = CACHE_PREFIX + VERSION;
@@ -151,27 +151,34 @@ const CORE = [
   "life/style.css?v=s1-8f3fe3b87246",
   "room-game.css?v=s1-c94708e52449",
   "room-tidy-game.css?v=s1-be5e04cd16fb",
+  "room-levels-view.css?v=s1-31266e1fa721",
+  "room-campaign.css?v=s1-cb7602859b58",
   "life-quest-data.js?v=s1-c6a083bea7a8",
   "life-school-schedule.js?v=s1-23b2185e80b6",
   "school-packing-flow.js?v=s1-99a0f56d0ab6",
   "object-art.js?v=s1-32c0dd606655",
   "life-quests.js?v=s1-305516048b66",
-  "room-progress.js?v=s1-418ff2054b2f",
+  "room-progress.js?v=s1-3b0d14b184fb",
   "room-tidy-data.js?v=s1-4f0f9e23eddf",
   "room-tidy-logic.js?v=s1-dab1dc1de37b",
   "room-adventure.js?v=s1-cfc692217a78",
   "room-actor.js?v=s1-cbbb5c3fe81d",
   "room-props.js?v=s1-15eda60b1cf7",
   "room-toy-art.js?v=s1-8b82eeb7d27c",
-  "room-input.js?v=s1-cdee466b019e",
-  "room-pool-art.js?v=s1-d7a04a596756",
-  "room-game.js?v=s1-827be40aaf89",
-  "room-tidy-scene.js?v=s1-347a8b7597e0",
+  "room-input.js?v=s1-27983b2d2113",
+  "room-pool-art.js?v=s1-5c5d9737690d",
+  "room-game.js?v=s1-f1db0cddf068",
+  "room-tidy-scene.js?v=s1-173321557a16",
   "room-tidy-layout.js?v=s1-4fa3ffb02643",
   "room-tidy-artwork.js?v=s1-b3ea07c3a715",
   "room-tidy-motion.js?v=s1-20a2371ab47e",
-  "room-tidy-game.js?v=s1-0a93e57f138c",
-  "life/app.js?v=s1-a40f74fc3182",
+  "room-tidy-game.js?v=s1-609742ba3106",
+  "room-campaign-scene.js?v=s1-3772899b08ae",
+  "room-levels-data.js?v=s1-e4142877a37b",
+  "room-levels-logic.js?v=s1-118783f897d8",
+  "room-levels-view.js?v=s1-074b8e84c266",
+  "room-campaign.js?v=s1-3c4197b1c290",
+  "life/app.js?v=s1-de73aa2137df",
   "otkryt-bez-interneta.html"
 ];
 const CORE_URLS = CORE.map(path => new URL(path, ROOT).href);

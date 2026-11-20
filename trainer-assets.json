@@ -127,6 +127,8 @@
         "life/style.css",
         "room-game.css",
         "room-tidy-game.css",
+        "room-levels-view.css",
+        "room-campaign.css",
         "workspace-layout.css"
       ],
       "scripts": [
@@ -160,6 +162,11 @@
         "room-tidy-artwork.js",
         "room-tidy-motion.js",
         "room-tidy-game.js",
+        "room-campaign-scene.js",
+        "room-levels-data.js",
+        "room-levels-logic.js",
+        "room-levels-view.js",
+        "room-campaign.js",
         "life/app.js"
       ]
     }
